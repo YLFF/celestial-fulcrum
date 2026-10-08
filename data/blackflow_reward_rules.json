@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "nodes": {
+    "node_type_002": {"componentGroups": [{"observationContextId": "node_battle_elite_scrap", "candidateCount": 2, "takeCount": 1}], "guaranteed": true},
+    "node_type_003": {"componentGroups": [{"observationContextId": "node_battle_boss_scrap", "candidateCount": 2, "takeCount": 1}], "relicCount": 1, "ticketCount": 1, "floors": [3, 5], "requiresSixthFloor": false, "ingotsPolicy": "regional_battle_table"},
+    "node_type_008": {"exchangeCountMin": 1, "exchangeCountMax": 2, "sameItemKind": true, "reuseNewItem": true, "inputCountPerExchange": 1, "outputCountPerExchange": 1},
+    "node_type_009": {"componentContextId": "pool_scrap_3", "componentCount": 1, "hope": 2},
+    "node_type_012": {"fakeNode": {"relicContextId": "node_story_curiosity_and_death", "relicCount": 1, "repeatRelicReward": false, "repeatable": false, "consumedAfterCompletion": true, "canLeave": true, "markCashCost": 50, "markConditions": ["true_node_not_marked", "one_sandbox_at_entry"]}, "trueNode": {"repeatable": true, "choices": ["leave_without_battle", "fight_ending_2_boss"], "consumedByLeaving": false}},
+    "node_type_019": {"componentGroups": [{"observationContextId": "node_battle_savage_scrap_left", "candidateCount": 2, "takeCount": 1}, {"observationContextId": "node_battle_savage_scrap_right", "candidateCount": 2, "takeCount": 1}], "componentCount": 2, "relicCount": 1, "ticketCount": 1}
+  },
+  "events": {
+    "encounter_009": {"controllerItemId": "component_012", "controllerConsumed": false, "fixedRelicId": "relic_209"},
+    "encounter_010": {"controllerItemId": "component_012", "controllerConsumed": false, "qualificationPersistsAfterControllerLoss": true, "relatedComponentContextIds": ["hopeful_fruits", "node_battle_savage_scrap_right"]},
+    "encounter_012": {"controllerItemId": "component_012", "controllerConsumed": false},
+    "encounter_013": {"relicContextId": "node_hidden_collectible", "stageId": "ro6_t_1", "eventRelicCount": 1},
+    "encounter_014": {"relicContextId": "node_hidden_collectible", "stageId": "ro6_t_2", "eventRelicCount": 3},
+    "encounter_015": {"relicContextId": "node_hidden_collectible", "ordinary": {"stageId": "ro6_t_3", "eventRelicCount": 2}, "emergency": {"stageId": "ro6_e_t_3", "cashThreshold": 0, "thresholdProvisional": true, "eventRelicCount": 3, "addEmergencyBaseRelic": false}},
+    "encounter_016": {"relicContextId": "node_hidden_collectible", "ordinary": {"stageId": "ro6_t_4", "eventRelicCount": 3}, "emergency": {"stageId": "ro6_e_t_4", "cashThreshold": 50, "cashCost": 0, "eventRelicCount": 4, "addEmergencyBaseRelic": false}},
+    "encounter_017": {"relicContextId": "node_incident_lake_fairy", "paidBranch": {"cashThreshold": 3, "paymentCount": 3, "cashPerPayment": 1, "results": [{"kind": "battle", "stageId": "ro6_e_t_5", "probability": 0.8}, {"kind": "directRelic", "relicCount": 1, "probability": 0.2, "battleTriggered": false}]}, "ordinaryBattle": {"stageId": "ro6_t_5", "relicRewardProbabilitySource": "battleRewardObservations"}, "directRelicProbabilityStatus": "confirmed_for_paid_branch"},
+    "encounter_018": {"results": [{"kind": "cash", "amount": 5, "terminates": false, "probability": 0.25}, {"kind": "none", "terminates": false, "probability": 0.25}, {"kind": "relic", "amount": 1, "terminates": true, "probability": 0.25}, {"kind": "next_floor_normal_battle", "terminates": true, "probability": 0.25}], "repeatUntilTerminalResult": true, "probabilityBasis": "temporary_uniform_assumption"},
+    "encounter_021": {"relicId": "relic_207", "relicCount": 1, "freeTravelTargetCategoryId": "node_type_017", "freeTravelRequiresUncompletedTarget": true, "targetCompletedStillGrantsRelic": true}
+  },
+  "battles": {
+    "invalid_autopsy": {"stageName": "无效验尸", "baseExperience": 36, "fullTechnologyExperience": 47, "ingots": 5, "relicCount": 1, "componentCount": 1, "ticketCount": 1, "rewardReference": "III_boss", "provisional": true},
+    "optional_boxes": {"battleModes": ["normal", "emergency"], "resourceKinds": ["component", "originiumIngot"], "requiresInBattleConditions": true, "probabilitySource": "battleRewardObservations", "additionalIngotProbability": null, "enabledForScoring": false, "phasePolicy": "existing_main_rewards_only"}
+  },
+  "ending2": {
+    "sandboxRelicIds": ["relic_225", "relic_226"],
+    "conditionTiming": "enter_floor_V",
+    "shopSellsSandboxOnFloorV": false,
+    "informantFloors": [2, 3, 4],
+    "truthMarkFloor": 5,
+    "entryStates": [
+      {"sandboxCount": 0, "fateNodeCount": 0, "endingAvailable": false, "autoRevealFateNodes": false, "autoMarkTrueNode": false, "paidMarkAllowed": false},
+      {"sandboxCount": 1, "fateNodeCount": 3, "endingAvailable": true, "autoRevealFateNodes": true, "autoMarkTrueNode": false, "paidMarkAllowed": true, "markByEnteringTrueNodeAndLeaving": true},
+      {"sandboxCount": 2, "fateNodeCount": 3, "endingAvailable": true, "autoRevealFateNodes": true, "autoMarkTrueNode": true, "paidMarkAllowed": false}
+    ]
+  }
+}

@@ -1,0 +1,686 @@
+{
+  "schemaVersion": 2,
+  "source": {
+    "name": "PRTS 沉沦者的黑流树海/事件一览",
+    "url": "https://prts.wiki/w/沉沦者的黑流树海/事件一览",
+    "extractedAt": "2026-09-28T14:18:31.399428+00:00",
+    "qqDocsStatus": "未能读取事件页签单元格；本版以 PRTS 结构化事件页为准"
+  },
+  "notes": [
+    "openingChoices 仅表示事件起始场景的选项和简述；多阶段后续分支未完全整理。",
+    "常规可重复经历事件只有色味不同源、敲动杠杆、货从口出；洞中宝在同一局主层/树洞内各可经历一次。",
+    "树洞内不期而遇按进入的母层刷新；此规则来自用户补充。",
+    "特殊标记与节点类型分别记录；探明标记后可识别线人或泪之聚落。"
+  ],
+  "eventPool": [
+    {
+      "id": "encounter_001",
+      "name": "桑尼的邀请",
+      "floors": [
+        "I",
+        "II"
+      ],
+      "openingChoices": [
+        {
+          "label": "帮它梳理绒毛",
+          "effect": "获得3希望"
+        },
+        {
+          "label": "唱一首摇篮曲",
+          "effect": "获得10源石锭"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_002",
+      "name": "色味不同源",
+      "floors": [
+        "I",
+        "II"
+      ],
+      "openingChoices": [
+        {
+          "label": "拿走看上去像是苹果的食物",
+          "effect": "获得3目标生命值上限"
+        },
+        {
+          "label": "拿走看上去像是鱼的食物",
+          "effect": "获得5护盾"
+        },
+        {
+          "label": "我不饿",
+          "effect": "离开"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "same_run_possible",
+      "repeatNote": "本事件有概率在同一局探索中重复出现。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_003",
+      "name": "货从口出",
+      "floors": [
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI"
+      ],
+      "openingChoices": [
+        {
+          "label": "想要一个能节省力气的",
+          "effect": "消耗4源石锭，获得1件随机加工品"
+        },
+        {
+          "label": "想要一个可以保值的",
+          "effect": "消耗4源石锭，获得1件随机概念体"
+        },
+        {
+          "label": "想要一个树海特色纪念品",
+          "effect": "消耗4源石锭，获得1件随机自然物"
+        },
+        {
+          "label": "没什么想买的",
+          "effect": "离开"
+        }
+      ],
+      "sceneCount": 5,
+      "repeatability": "same_run_possible",
+      "repeatNote": "本事件有概率在同一局探索中重复出现。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_004",
+      "name": "沉重的契约",
+      "floors": [
+        "II",
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "上去帮个小忙",
+          "effect": "获得2行动力"
+        },
+        {
+          "label": "推翻石磨",
+          "effect": "消耗一半目标生命值，获得5行动力"
+        },
+        {
+          "label": "不关我的事",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_005",
+      "name": "敲动杠杆",
+      "floors": [
+        "I",
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI"
+      ],
+      "openingChoices": [
+        {
+          "label": "敲一次",
+          "effect": "消耗4源石锭，获得1件随机收藏品"
+        },
+        {
+          "label": "敲三次",
+          "effect": "消耗10源石锭，获得3件随机收藏品"
+        },
+        {
+          "label": "不感兴趣",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "same_run_possible",
+      "repeatNote": "本事件有概率在同一局探索中重复出现。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_006",
+      "name": "血衣之下",
+      "floors": [
+        "II",
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "拽出衣服寻找可用物资",
+          "effect": "获得收藏品他缚（所有干员部署费用-50%，部署后损失70%的当前生命（退场前仅生效一次））"
+        },
+        {
+          "label": "割下怪花",
+          "effect": "获得收藏品“剑锤”（所有干员的部署费用+3，但攻击力、防御力和生命+50%）"
+        },
+        {
+          "label": "砍断藤蔓",
+          "effect": "获得收藏品一串钱伥（所有干员的部署费用-1，战斗开始时，打乱所有干员的部署费用）"
+        },
+        {
+          "label": "离开",
+          "effect": "获得2目标生命值上限"
+        }
+      ],
+      "sceneCount": 5,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_007",
+      "name": "擒与缚",
+      "floors": [
+        "III",
+        "IV",
+        "V",
+        "VI"
+      ],
+      "openingChoices": [
+        {
+          "label": "帮助蛇",
+          "effect": "获得收藏品翱翼（我方每有1个起飞的单位，所有起飞的单位攻击力+25%）"
+        },
+        {
+          "label": "帮助鹰",
+          "effect": "获得收藏品虬蜕（我方每有1个未起飞的单位，所有单位的防御力+10%）"
+        },
+        {
+          "label": "不关我的事",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_008",
+      "name": "沉寂之屋",
+      "floors": [
+        "I",
+        "II",
+        "III"
+      ],
+      "openingChoices": [
+        {
+          "label": "清理门上的人形藤蔓",
+          "effect": "消耗2目标生命值，获得零件笼控器（在不期而遇中存在特殊作用）"
+        },
+        {
+          "label": "试图和人形藤蔓交流",
+          "effect": "消耗8源石锭，获得零件笼控器（在不期而遇中存在特殊作用）"
+        },
+        {
+          "label": "离开",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_009",
+      "name": "黑诞",
+      "floors": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "掏出笼控器控制猎狗",
+          "effect": "持有笼控器即可获得猎印，不消耗笼控器"
+        },
+        {
+          "label": "和猎狗战斗到底",
+          "effect": "遭遇一场艰难的特殊作战；胜利后的藏品固定为猎印"
+        },
+        {
+          "label": "落荒而逃",
+          "effect": "消耗3目标生命值（至少保留1目标生命值）"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_010",
+      "name": "呼吸的红苔",
+      "floors": [
+        "II",
+        "III",
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "尝试驱赶猎狗",
+          "effect": "持有笼控器即可获得30源石锭，并在下一区域生成希望的沃土；不消耗笼控器"
+        },
+        {
+          "label": "将种子埋在此处",
+          "effect": "种下1枚种子，在下一区域生成“希望的沃土”"
+        },
+        {
+          "label": "快逃",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [
+        {
+          "source": "user",
+          "condition": "本局经历沉寂之屋并取得过笼控器，之后卖掉笼控器不影响出现资格"
+        }
+      ],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_011",
+      "name": "被歌颂的影子",
+      "floors": [
+        "II",
+        "III",
+        "IV",
+        "V",
+        "VI"
+      ],
+      "openingChoices": [
+        {
+          "label": "加入它们",
+          "effect": "消耗1目标生命值"
+        },
+        {
+          "label": "我不会跳舞",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 20,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_012",
+      "name": "愈创之心",
+      "floors": [
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "紧紧拥抱愈创木",
+          "effect": "消耗3行动力，获得收藏品追忆（进入下一区域时，变为重新进入本区域，之后该收藏品失效）"
+        },
+        {
+          "label": "让这里有一个秋千",
+          "effect": "消耗随机2件加工品，获得收藏品追忆（进入下一区域时，变为重新进入本区域，之后该收藏品失效）"
+        },
+        {
+          "label": "比对像素小猫和树干刻痕",
+          "effect": "消耗源私钥，获得收藏品追忆（进入下一区域时，变为重新进入本区域，之后该收藏品失效）"
+        },
+        {
+          "label": "检测此地有无危险",
+          "effect": "持有笼控器即可获得5行动力，不消耗笼控器"
+        },
+        {
+          "label": "闭上眼感受宁静",
+          "effect": "获得1行动力"
+        }
+      ],
+      "sceneCount": 6,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_013",
+      "name": "思乡心切",
+      "floors": [
+        "I",
+        "II"
+      ],
+      "openingChoices": [
+        {
+          "label": "赶跑它",
+          "effect": "我也迷路了！管不了你！"
+        },
+        {
+          "label": "安慰它",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_014",
+      "name": "划算买卖",
+      "floors": [
+        "II",
+        "III"
+      ],
+      "openingChoices": [
+        {
+          "label": "让它闭嘴",
+          "effect": "晦气！我看走不出树海的是你！"
+        },
+        {
+          "label": "装没听到",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_015",
+      "name": "鸭托邦",
+      "floors": [
+        "III",
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "呛一句",
+          "effect": "普通开业剪彩，完美胜利获取对应经验/钱及2藏品"
+        },
+        {
+          "label": "故意挑事",
+          "effect": "暂定现金≥0可选，紧急开业剪彩经验/钱及3藏品，不额外叠加通用紧急藏品；真实门槛待校准"
+        },
+        {
+          "label": "兴趣缺缺",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_016",
+      "name": "传奇团伙",
+      "floors": [
+        "IV",
+        "V",
+        "VI"
+      ],
+      "openingChoices": [
+        {
+          "label": "凭什么？",
+          "effect": "原地坐下触发普通合伙人会议，经验/钱及3藏品"
+        },
+        {
+          "label": "扎穿货车车胎",
+          "effect": "现金≥50（不计估价，不消耗50钱）可选，紧急合伙人会议经验/钱及4藏品，不额外叠加通用紧急藏品"
+        },
+        {
+          "label": "果断求饶",
+          "effect": "消耗一半的源石锭逃跑"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_017",
+      "name": "湖中仙女",
+      "floors": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "上前看看",
+          "effect": "连续三次各支付1钱，共消耗3源石锭，80%紧急湖中魇、20%不作战直接获得同池1藏品；普通战斗也可能获得同池1藏品，出现率见战斗统计"
+        },
+        {
+          "label": "不理会她",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 11,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_018",
+      "name": "洞中宝",
+      "floors": [
+        "III",
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "树洞里肯定有好东西",
+          "effect": "每轮随机获得5源石锭、无奖励、获得1藏品并终止、或触发下一层普通作战并终止；5钱与无奖励后可以继续；本阶段四种结果暂各25%，不是实测概率"
+        },
+        {
+          "label": "离开",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 10,
+      "repeatability": "inside_and_outside_once",
+      "repeatNote": "本事件有概率在同一局探索中于【误入奇境】内、外各出现一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_019",
+      "name": "临时中介所",
+      "floors": [
+        "II",
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "合格的帮手应当仔细挑选",
+          "effect": "随机获得一名6星临时招募干员"
+        },
+        {
+          "label": "可靠的中介值得信任",
+          "effect": "获得2希望，招募1名直升的5星及以下??或??干员"
+        },
+        {
+          "label": "前行的速度更重要",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_020",
+      "name": "和平守卫者",
+      "floors": [
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "加入队伍，接取悬赏",
+          "effect": "获得收藏品厄运火杆（与“居民”作战时，敌人生命-40%，且作战胜利后所有干员的攻击速度永久+10）"
+        },
+        {
+          "label": "离开队伍",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [
+        {
+          "source": "user",
+          "condition": "当前层存在居民据点节点"
+        }
+      ],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_021",
+      "name": "独活",
+      "floors": [
+        "II",
+        "III",
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "去看看小狗",
+          "effect": "获得同行者后可免费前往本层未完成的应急助力；已经完成并消失的助力不能再前往，但仍获得同行者"
+        },
+        {
+          "label": "小心为上",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "本局最多实际经历一次。",
+      "appearanceConditions": [
+        {
+          "source": "user",
+          "condition": "当前层存在应急助力节点"
+        }
+      ],
+      "specialMarkId": null,
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_022",
+      "name": "线人",
+      "floors": [
+        "II",
+        "III",
+        "IV"
+      ],
+      "openingChoices": [
+        {
+          "label": "我受雇于梅兰德",
+          "effect": "获得收藏品沙盘α（我方单位部署费用+2，让探索开启不同的方向，同时持有【沙盘β】可以揭示源阶方的所在位置）"
+        },
+        {
+          "label": "我是一名独立探险家",
+          "effect": "获得1件珍贵的加工品"
+        },
+        {
+          "label": "我是联合政府派来的",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 4,
+      "repeatability": "once_per_run",
+      "repeatNote": "未实际经历时可跨层再现；本局实际经历后不再出现。",
+      "appearanceConditions": [
+        {
+          "source": "user",
+          "condition": "若上一层未进入该事件，下一层仍可出现"
+        }
+      ],
+      "specialMarkId": "node_mark_002",
+      "detailStatus": "opening_choices_only"
+    },
+    {
+      "id": "encounter_023",
+      "name": "泪之聚落",
+      "floors": [
+        "III",
+        "IV",
+        "V"
+      ],
+      "openingChoices": [
+        {
+          "label": "倾囊资助",
+          "effect": "消耗全部源石锭，获得收藏品击坠“神明”（可以在特殊节点中，使“玻利瓦尔，症结之核”首次释放“灾厄之口”时不摧毁“危朽”）"
+        },
+        {
+          "label": "无能为力",
+          "effect": "多一事不如少一事"
+        }
+      ],
+      "sceneCount": 3,
+      "repeatability": "once_per_run",
+      "repeatNote": "未实际经历时可跨层再现；本局实际经历后不再出现。",
+      "appearanceConditions": [],
+      "specialMarkId": "node_mark_005",
+      "detailStatus": "opening_choices_only"
+    }
+  ]
+}

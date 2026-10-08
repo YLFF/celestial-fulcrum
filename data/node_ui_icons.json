@@ -1,0 +1,234 @@
+{
+  "source": "https://www.lubiao.wiki/nodes/rogue_6",
+  "fetchedAt": "2026-10-06T22:59:40.875Z",
+  "icons": {
+    "node_type_001": {
+      "name": "作战",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        2,
+        2,
+        260,
+        260
+      ],
+      "id": "node_type_001",
+      "imagePath": "assets/ui/nodes/node_type_001.png"
+    },
+    "node_type_002": {
+      "name": "紧急作战",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        788,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_002",
+      "imagePath": "assets/ui/nodes/node_type_002.png"
+    },
+    "node_type_003": {
+      "name": "险路恶敌",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        2,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_003",
+      "imagePath": "assets/ui/nodes/node_type_003.png"
+    },
+    "node_type_004": {
+      "name": "诡意行商",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        788,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_004",
+      "imagePath": "assets/ui/nodes/node_type_004.png"
+    },
+    "node_type_005": {
+      "name": "安全的角落",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1050,
+        526,
+        256,
+        256
+      ],
+      "id": "node_type_005",
+      "imagePath": "assets/ui/nodes/node_type_005.png"
+    },
+    "node_type_006": {
+      "name": "不期而遇",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1050,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_006",
+      "imagePath": "assets/ui/nodes/node_type_006.png"
+    },
+    "node_type_007": {
+      "name": "得偿所愿",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        788,
+        788,
+        260,
+        260
+      ],
+      "id": "node_type_007",
+      "imagePath": "assets/ui/nodes/node_type_007.png"
+    },
+    "node_type_008": {
+      "name": "失与得",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        2,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_008",
+      "imagePath": "assets/ui/nodes/node_type_008.png"
+    },
+    "node_type_009": {
+      "name": "先行一步",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1574,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_009",
+      "imagePath": "assets/ui/nodes/node_type_009.png"
+    },
+    "node_type_010": {
+      "name": "误入奇境",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1050,
+        788,
+        260,
+        260
+      ],
+      "id": "node_type_010",
+      "imagePath": "assets/ui/nodes/node_type_010.png"
+    },
+    "node_type_011": {
+      "name": "狭路相逢",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        264,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_011",
+      "imagePath": "assets/ui/nodes/node_type_011.png"
+    },
+    "node_type_012": {
+      "name": "命运所指",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1312,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_012",
+      "imagePath": "assets/ui/nodes/node_type_012.png"
+    },
+    "node_type_013": {
+      "name": "秘境行商",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1308,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_013",
+      "imagePath": "assets/ui/nodes/node_type_013.png"
+    },
+    "node_type_014": {
+      "name": "曲折密道",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        526,
+        788,
+        260,
+        260
+      ],
+      "id": "node_type_014",
+      "imagePath": "assets/ui/nodes/node_type_014.png"
+    },
+    "node_type_015": {
+      "name": "险路尽头",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        264,
+        2,
+        260,
+        260
+      ],
+      "id": "node_type_015",
+      "imagePath": "assets/ui/nodes/node_type_015.png"
+    },
+    "node_type_016": {
+      "name": "险路小径",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        264,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_016",
+      "imagePath": "assets/ui/nodes/node_type_016.png"
+    },
+    "node_type_017": {
+      "name": "应急助力",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        526,
+        264,
+        260,
+        260
+      ],
+      "id": "node_type_017",
+      "imagePath": "assets/ui/nodes/node_type_017.png"
+    },
+    "node_type_018": {
+      "name": "羽瞰点",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        526,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_018",
+      "imagePath": "assets/ui/nodes/node_type_018.png"
+    },
+    "node_type_019": {
+      "name": "“居民”据点",
+      "url": "https://assets.lubiao.wiki/lubiao-wiki/assets/20260921021806/themes/blackstream/atlases/nodes.avif?response-policy=corp-v1",
+      "box": [
+        1570,
+        526,
+        260,
+        260
+      ],
+      "id": "node_type_019",
+      "imagePath": "assets/ui/nodes/node_type_019.png"
+    }
+  }
+}

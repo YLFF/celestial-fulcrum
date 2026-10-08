@@ -1,0 +1,674 @@
+{
+  "schemaVersion": 1,
+  "source": "https://www.lubiao.wiki/tools/blackstream-route",
+  "checkedAt": "2026-10-02T20:26:15.858149+00:00",
+  "meaning": "relative statistical encounter weights; normalize after eligibility filtering",
+  "areas": {
+    "I": {
+      "encounter_013": {
+        "weight": 2.41999796,
+        "observedCount": 121,
+        "sourceSceneId": "rogue_6:scene_ro6_bat1",
+        "status": "estimated"
+      },
+      "encounter_008": {
+        "weight": 3.14001678,
+        "observedCount": 157,
+        "sourceSceneId": "rogue_6:scene_ro6_normal1",
+        "status": "estimated"
+      },
+      "encounter_001": {
+        "weight": 1.47999161,
+        "observedCount": 74,
+        "sourceSceneId": "rogue_6:scene_ro6_res1",
+        "status": "estimated"
+      },
+      "encounter_002": {
+        "weight": 0.72000069,
+        "observedCount": 36,
+        "sourceSceneId": "rogue_6:scene_ro6_res2",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 50,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      }
+    },
+    "II": {
+      "encounter_013": {
+        "weight": 0.39952897,
+        "observedCount": 25,
+        "sourceSceneId": "rogue_6:scene_ro6_bat1",
+        "status": "estimated"
+      },
+      "encounter_014": {
+        "weight": 0.95317647,
+        "observedCount": 76,
+        "sourceSceneId": "rogue_6:scene_ro6_bat2",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 0.79013337,
+        "observedCount": 63,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "estimated"
+      },
+      "encounter_008": {
+        "weight": 1.26988664,
+        "observedCount": 71,
+        "sourceSceneId": "rogue_6:scene_ro6_normal1",
+        "status": "estimated"
+      },
+      "encounter_010": {
+        "weight": 0.12702105,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_normal3",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 1.405e-05,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "zero_count_regularized"
+      },
+      "encounter_006": {
+        "weight": 0.40133859,
+        "observedCount": 32,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "estimated"
+      },
+      "encounter_001": {
+        "weight": 0.4506539,
+        "observedCount": 32,
+        "sourceSceneId": "rogue_6:scene_ro6_res1",
+        "status": "estimated"
+      },
+      "encounter_002": {
+        "weight": 0.112879,
+        "observedCount": 9,
+        "sourceSceneId": "rogue_6:scene_ro6_res2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 1.405e-05,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "zero_count_regularized"
+      },
+      "encounter_004": {
+        "weight": 0.4264221,
+        "observedCount": 34,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 72,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_021": {
+        "weight": 0.37706988,
+        "observedCount": 30,
+        "sourceSceneId": "rogue_6:scene_ro6_task2",
+        "status": "estimated"
+      }
+    },
+    "III": {
+      "encounter_014": {
+        "weight": 0.51895505,
+        "observedCount": 40,
+        "sourceSceneId": "rogue_6:scene_ro6_bat2",
+        "status": "estimated"
+      },
+      "encounter_015": {
+        "weight": 1.04872632,
+        "observedCount": 89,
+        "sourceSceneId": "rogue_6:scene_ro6_bat3",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 0.4636167,
+        "observedCount": 41,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_018": {
+        "weight": 0.91532155,
+        "observedCount": 83,
+        "sourceSceneId": "rogue_6:scene_ro6_bat6",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 1.1623551,
+        "observedCount": 87,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "estimated"
+      },
+      "encounter_008": {
+        "weight": 2.24744825,
+        "observedCount": 110,
+        "sourceSceneId": "rogue_6:scene_ro6_normal1",
+        "status": "estimated"
+      },
+      "encounter_009": {
+        "weight": 1.249e-05,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "zero_count_regularized"
+      },
+      "encounter_010": {
+        "weight": 2.06310796,
+        "observedCount": 75,
+        "sourceSceneId": "rogue_6:scene_ro6_normal3",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 0.88737455,
+        "observedCount": 76,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 0.61409492,
+        "observedCount": 51,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "estimated"
+      },
+      "encounter_007": {
+        "weight": 0.34689049,
+        "observedCount": 31,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 1.08073748,
+        "observedCount": 98,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 1.14363547,
+        "observedCount": 88,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 67,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_021": {
+        "weight": 0.40803576,
+        "observedCount": 34,
+        "sourceSceneId": "rogue_6:scene_ro6_task2",
+        "status": "estimated"
+      }
+    },
+    "III-treehole": {
+      "encounter_014": {
+        "weight": 0.60648365,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_bat2",
+        "status": "estimated"
+      },
+      "encounter_015": {
+        "weight": 0.22583637,
+        "observedCount": 1,
+        "sourceSceneId": "rogue_6:scene_ro6_bat3",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 0.26245709,
+        "observedCount": 1,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_018": {
+        "weight": 0.42486641,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_bat6",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 0.33528632,
+        "observedCount": 1,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "estimated"
+      },
+      "encounter_008": {
+        "weight": 1.85200114,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_normal1",
+        "status": "estimated"
+      },
+      "encounter_009": {
+        "weight": 0.00018454,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "zero_count_regularized"
+      },
+      "encounter_010": {
+        "weight": 1.41765926,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_normal3",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 0.65781084,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 0.7612687,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "estimated"
+      },
+      "encounter_007": {
+        "weight": 0.2205722,
+        "observedCount": 1,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 0.63729119,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 0.7136941,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_020": {
+        "weight": 0.46436242,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_task1",
+        "status": "estimated"
+      },
+      "encounter_021": {
+        "weight": 0.00020953,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_task2",
+        "status": "zero_count_regularized"
+      }
+    },
+    "IV": {
+      "encounter_015": {
+        "weight": 0.44095671,
+        "observedCount": 20,
+        "sourceSceneId": "rogue_6:scene_ro6_bat3",
+        "status": "estimated"
+      },
+      "encounter_016": {
+        "weight": 0.80023155,
+        "observedCount": 44,
+        "sourceSceneId": "rogue_6:scene_ro6_bat4",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 1.44849861,
+        "observedCount": 71,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_018": {
+        "weight": 0.66987628,
+        "observedCount": 38,
+        "sourceSceneId": "rogue_6:scene_ro6_bat6",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 0.55536454,
+        "observedCount": 22,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "estimated"
+      },
+      "encounter_009": {
+        "weight": 1.85326624,
+        "observedCount": 93,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "estimated"
+      },
+      "encounter_010": {
+        "weight": 4.77835958,
+        "observedCount": 81,
+        "sourceSceneId": "rogue_6:scene_ro6_normal3",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 1.18899357,
+        "observedCount": 55,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_012": {
+        "weight": 1.03710624,
+        "observedCount": 51,
+        "sourceSceneId": "rogue_6:scene_ro6_normal5",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 0.56782182,
+        "observedCount": 26,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "estimated"
+      },
+      "encounter_007": {
+        "weight": 0.47645564,
+        "observedCount": 25,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 0.28205415,
+        "observedCount": 16,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 1.01434027,
+        "observedCount": 42,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 33,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_020": {
+        "weight": 0.74613961,
+        "observedCount": 41,
+        "sourceSceneId": "rogue_6:scene_ro6_task1",
+        "status": "estimated"
+      },
+      "encounter_021": {
+        "weight": 0.32387839,
+        "observedCount": 16,
+        "sourceSceneId": "rogue_6:scene_ro6_task2",
+        "status": "estimated"
+      }
+    },
+    "IV-treehole": {
+      "encounter_015": {
+        "weight": 0.60762128,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_bat3",
+        "status": "estimated"
+      },
+      "encounter_016": {
+        "weight": 0.94547942,
+        "observedCount": 4,
+        "sourceSceneId": "rogue_6:scene_ro6_bat4",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 1.08599977,
+        "observedCount": 4,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_018": {
+        "weight": 1.63156573,
+        "observedCount": 7,
+        "sourceSceneId": "rogue_6:scene_ro6_bat6",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 1.2511064,
+        "observedCount": 4,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "estimated"
+      },
+      "encounter_009": {
+        "weight": 2.83627367,
+        "observedCount": 8,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "estimated"
+      },
+      "encounter_010": {
+        "weight": 20.9168571,
+        "observedCount": 5,
+        "sourceSceneId": "rogue_6:scene_ro6_normal3",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 0.7116829,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_012": {
+        "weight": 0.9573428,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_normal5",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 0.98165808,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "estimated"
+      },
+      "encounter_007": {
+        "weight": 1.4496426,
+        "observedCount": 5,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 0.69924945,
+        "observedCount": 3,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 0.50268125,
+        "observedCount": 1,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_020": {
+        "weight": 0.48365567,
+        "observedCount": 2,
+        "sourceSceneId": "rogue_6:scene_ro6_task1",
+        "status": "estimated"
+      },
+      "encounter_021": {
+        "weight": 0.00022134,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_task2",
+        "status": "zero_count_regularized"
+      }
+    },
+    "V": {
+      "encounter_016": {
+        "weight": 0.9725112,
+        "observedCount": 138,
+        "sourceSceneId": "rogue_6:scene_ro6_bat4",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 0.82710185,
+        "observedCount": 102,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 9.12e-06,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "zero_count_regularized"
+      },
+      "encounter_009": {
+        "weight": 0.8575583,
+        "observedCount": 109,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 0.85461349,
+        "observedCount": 100,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 7.79e-06,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "zero_count_regularized"
+      },
+      "encounter_007": {
+        "weight": 0.26842728,
+        "observedCount": 44,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 0.12008737,
+        "observedCount": 23,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 0.89636428,
+        "observedCount": 93,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 88,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_020": {
+        "weight": 0.58036388,
+        "observedCount": 89,
+        "sourceSceneId": "rogue_6:scene_ro6_task1",
+        "status": "estimated"
+      }
+    },
+    "V-treehole": {
+      "encounter_016": {
+        "weight": 0.99298824,
+        "observedCount": 15,
+        "sourceSceneId": "rogue_6:scene_ro6_bat4",
+        "status": "estimated"
+      },
+      "encounter_017": {
+        "weight": 1.32789785,
+        "observedCount": 16,
+        "sourceSceneId": "rogue_6:scene_ro6_bat5",
+        "status": "estimated"
+      },
+      "encounter_019": {
+        "weight": 4.423e-05,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_hire1",
+        "status": "zero_count_regularized"
+      },
+      "encounter_009": {
+        "weight": 2.63406694,
+        "observedCount": 18,
+        "sourceSceneId": "rogue_6:scene_ro6_normal2",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 2.11803804,
+        "observedCount": 13,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_006": {
+        "weight": 4.241e-05,
+        "observedCount": 0,
+        "sourceSceneId": "rogue_6:scene_ro6_relic1",
+        "status": "zero_count_regularized"
+      },
+      "encounter_007": {
+        "weight": 0.31578093,
+        "observedCount": 7,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 0.24296725,
+        "observedCount": 8,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_004": {
+        "weight": 0.88356539,
+        "observedCount": 6,
+        "sourceSceneId": "rogue_6:scene_ro6_res4",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 7,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      },
+      "encounter_020": {
+        "weight": 0.39669397,
+        "observedCount": 10,
+        "sourceSceneId": "rogue_6:scene_ro6_task1",
+        "status": "estimated"
+      }
+    },
+    "VI": {
+      "encounter_016": {
+        "weight": 0.55805616,
+        "observedCount": 31,
+        "sourceSceneId": "rogue_6:scene_ro6_bat4",
+        "status": "estimated"
+      },
+      "encounter_011": {
+        "weight": 1.16600697,
+        "observedCount": 52,
+        "sourceSceneId": "rogue_6:scene_ro6_normal4",
+        "status": "estimated"
+      },
+      "encounter_007": {
+        "weight": 0.43379981,
+        "observedCount": 35,
+        "sourceSceneId": "rogue_6:scene_ro6_relic2",
+        "status": "estimated"
+      },
+      "encounter_003": {
+        "weight": 1.36428051,
+        "observedCount": 187,
+        "sourceSceneId": "rogue_6:scene_ro6_res3",
+        "status": "estimated"
+      },
+      "encounter_005": {
+        "weight": 1,
+        "observedCount": 32,
+        "sourceSceneId": "rogue_6:scene_ro6_res5",
+        "status": "estimated"
+      }
+    }
+  }
+}

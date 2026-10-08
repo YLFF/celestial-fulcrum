@@ -1,0 +1,37 @@
+# Local runtimes, caches and generated bundles
+.venv/
+.pnpm-store/
+node_modules/
+frontend/dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+
+# Live player snapshots, captures and test outputs
+work/
+.codex-remote-attachments/
+.venv-build/
+runs/*
+!runs/true-run-001/
+
+# Downloaded inspection caches, not active game data
+data/arkrog_auth/
+data/arkrog_blackflowmap/
+data/arkrog_inspection/
+data/lubiao_all_chunks/
+data/lubiao_dynamic/
+
+# Machine-local settings and credentials
+.env
+.env.*
+*.local
+*.log
+*.sqlite*
+*.db
+**/storage-state*.json
+**/cookies*.json
+.DS_Store
+Thumbs.db

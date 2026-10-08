@@ -1,0 +1,86 @@
+:root { color-scheme: light; }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  color: #e0e3e1;
+  background: #151716;
+  --surface: #202321;
+  --surface-soft: #1b1e1c;
+  --surface-raised: #292d2a;
+  --border: #3c423e;
+  --text: #e0e3e1;
+  --muted: #a9b3ab;
+  --accent: #7bcdb0;
+  --danger: #efaaa4;
+}
+
+:where([data-theme="dark"]) button { color: var(--text); background: var(--surface-raised); border-color: var(--border); }
+:where([data-theme="dark"]) button:hover:not(:disabled) { background: #343b36; border-color: #748c7d; }
+:where([data-theme="dark"]) button.primary { background: #237f64; border-color: #237f64; color: #fff; }
+:where([data-theme="dark"]) button.primary:hover:not(:disabled) { background: #2d9575; }
+:where([data-theme="dark"]) input,
+:where([data-theme="dark"]) select,
+:where([data-theme="dark"]) textarea { color: var(--text); background: #191c1a; border-color: #49524b; }
+:where([data-theme="dark"]) input[type="checkbox"] { accent-color: #43ac85; }
+:where([data-theme="dark"]) a { color: var(--accent); }
+:where([data-theme="dark"]) .icon-button { background: transparent; border-color: transparent; }
+:where([data-theme="dark"]) .app-header,
+:where([data-theme="dark"]) .map-header,
+:where([data-theme="dark"]) .route-section { background: var(--surface); border-color: var(--border); }
+:where([data-theme="dark"]) .resource-strip,
+:where([data-theme="dark"]) .inventory-band,
+:where([data-theme="dark"]) .playtime-sidebar,
+:where([data-theme="dark"]) .app-footer { background: var(--surface-soft); border-color: var(--border); }
+:where([data-theme="dark"]) .run-select { background: var(--surface-raised); }
+:where([data-theme="dark"]) .brand { color: #ace1c8; }
+:where([data-theme="dark"]) .run-badges span:first-child { color: #e5ac92; }
+:where([data-theme="dark"]) .green-text { color: var(--accent); }
+:where([data-theme="dark"]) .gold-text { color: #e8c568; }
+:where([data-theme="dark"]) .negative,
+:where([data-theme="dark"]) .red { color: var(--danger); }
+:where([data-theme="dark"]) .score-part strong.negative { color: var(--danger); }
+
+:where([data-theme="dark"]) :is(.quiet, .brand small, .run-badges, .resource small, .revision,
+  .inventory-section > header > span, .operator-strip small, .ending-chips, .goal-check > small,
+  .section-heading > span, .pool-row > span:last-child, .encounter-row small, .memo-text,
+  .route-controls > label, .route-empty, .search-summary, .route-choice > span, .route-choice small,
+  .route-step small, .route-step > span, .route-result, .route-result small, .step-totals,
+  .app-footer, .field > span, .item-title small, .box-header, .editor-toolbar > span,
+  .node-popover header small, .hover-sheet > b span, .hover-score small, .hover-foot, legend,
+  .tabs button, .score-total > span, .classification-table h4, summary, .score-part strong,
+  .recognition-summary, .pending, pre) { color: var(--muted); }
+:where([data-theme="dark"]) .encounter-row.unavailable { color: #8c968e; }
+:where([data-theme="dark"]) :is(.inventory-section, .sidebar-heading, .sidebar-section,
+  .operator-strip button, .route-empty, .route-list, .route-row, .step-breakdown,
+  .modal, .modal > header, .modal > footer, .node-popover, .node-popover > header,
+  .node-popover > footer, .tabs, fieldset, .score-total, .classification-table, details,
+  .score-details.compact, .merchant-summary, .relic-edit-row, .component-edit-row,
+  .operator-edit-row, .goal-edit-list > div, .ticket-list > div, .consent, .hover-foot) { border-color: var(--border); }
+:where([data-theme="dark"]) .inventory-token { background: transparent; }
+:where([data-theme="dark"]) .inventory-token > span { background: #364d3e; color: #d2e8d8; }
+:where([data-theme="dark"]) .operator-strip button { background: transparent; }
+:where([data-theme="dark"]) .segmented { background: #141815; }
+:where([data-theme="dark"]) .segmented button { background: transparent; }
+:where([data-theme="dark"]) .segmented button.active { color: #b7ebd4; background: #34463a; }
+:where([data-theme="dark"]) .route-row.selected { background: #283a30; }
+:where([data-theme="dark"]) :is(.route-choice, .route-step) { background: transparent; border-color: transparent; }
+:where([data-theme="dark"]) .route-step.active { background: #344e3e; border-color: #6b9278; }
+:where([data-theme="dark"]) :is(.route-choice b, .hover-score, .score-total > b, .tabs button.active,
+  .recognition-summary > b, .task-status) { color: var(--accent); }
+:where([data-theme="dark"]) .step-arrow { color: #82968a; }
+
+:where([data-theme="dark"]) :is(.modal, .node-popover, .hover-sheet) { background: var(--surface); color: var(--text); }
+:where([data-theme="dark"]) .hover-sheet { border-color: #71897a; box-shadow: 0 8px 20px #0006; }
+:where([data-theme="dark"]) .tabs button { background: transparent; }
+:where([data-theme="dark"]) .tabs button.active { background: #283a30; border-bottom-color: #70ba96; }
+:where([data-theme="dark"]) .modal-backdrop { background: #0009; }
+:where([data-theme="dark"]) .toast { color: #d3ebd8; background: #2b4031; border-color: #668f71; }
+:where([data-theme="dark"]) .toast.error,
+:where([data-theme="dark"]) .form-error { color: var(--danger); background: #3b2926; border-color: #ad7167; }
+:where([data-theme="dark"]) :is(.toast button, .task-status button) { background: transparent; }
+:where([data-theme="dark"]) .drop-overlay { color: #bde8cc; background: #19281ff0; border-color: #88b59b; }
+:where([data-theme="dark"]) .candidate-status { color: #a0c7ad; }
+:where([data-theme="dark"]) :is(.score-warnings, .candidate-status.review) { color: #dfbd85; }
+:where([data-theme="dark"]) .loading-page { background: var(--surface-soft); }
+:where([data-theme="dark"]) .tree-confirmation { background: var(--surface); color: var(--text); border-color: var(--border); }
+:where([data-theme="dark"]) .tree-break-button { color: var(--danger); }
+:where([data-theme="dark"]) :is(.team-threshold thead, .component-inventory-row > small) { color: var(--muted); }

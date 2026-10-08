@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "defaultPoints": 100,
+  "poolPoints": {
+    "node_battle_normal": 100,
+    "node_battle_elite": 125,
+    "pool_boss": 200,
+    "node_battle_savage": 150,
+    "node_wandering_resident_relic": 100,
+    "node_wandering_resident_convergence_relic": 100,
+    "node_battle_normal_invalid_autopsy": 150,
+    "node_incident_lake_fairy": 225,
+    "node_duel_right": 125,
+    "node_incident_cave_treasure": 100,
+    "node_wish_relic": 100,
+    "node_wish_relic_advanced": 150,
+    "node_story_curiosity_and_death": 150,
+    "node_hidden_collectible": 100
+  },
+  "contextPoints": {},
+  "fixedRelicPoints": {}
+}

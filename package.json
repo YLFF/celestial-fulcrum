@@ -1,0 +1,9 @@
+{
+  "name": "celestial-fulcrum-local-ocr",
+  "description": "Offline OCR runtime for Celestial Fulcrum",
+  "private": true,
+  "version": "0.1.0",
+  "dependencies": {
+    "tesseract.js": "7.0.0"
+  }
+}

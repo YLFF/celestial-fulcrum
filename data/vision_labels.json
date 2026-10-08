@@ -1,0 +1,37 @@
+{
+  "nodeTypes": {
+    "node_type_001": "作战",
+    "node_type_002": "紧急作战",
+    "node_type_003": "险路恶敌",
+    "node_type_004": "诡意行商",
+    "node_type_005": "安全的角落",
+    "node_type_006": "不期而遇",
+    "node_type_007": "得偿所愿",
+    "node_type_008": "失与得",
+    "node_type_009": "先行一步",
+    "node_type_010": "误入奇境",
+    "node_type_011": "狭路相逢",
+    "node_type_012": "命运所指",
+    "node_type_013": "秘境行商",
+    "node_type_014": "曲折密道",
+    "node_type_015": "险路尽头",
+    "node_type_016": "险路小径",
+    "node_type_017": "应急助力",
+    "node_type_018": "羽瞰点",
+    "node_type_019": "“居民”据点",
+    "node_type_020": "林间空地",
+    "node_type_021": "流窜的“居民”",
+    "unknown_mystery": "未知的诡秘",
+    "unknown_ferocity": "未知的凶戾",
+    "start": "起点"
+  },
+  "nodeMarks": {
+    "node_mark_001": "流窜“居民”",
+    "node_mark_002": "线人与线索",
+    "node_mark_003": "谜题与谜底",
+    "node_mark_004": "光明之末",
+    "node_mark_005": "神明之殇",
+    "node_mark_006": "文明之烬",
+    "node_mark_007": "藏果地"
+  }
+}

@@ -1,0 +1,3 @@
+# Install after requirements-desktop.txt with --no-deps. The capture library's
+# NumPy/OpenCV imports are supplied by the existing headless vision runtime.
+windows-capture==2.0.1

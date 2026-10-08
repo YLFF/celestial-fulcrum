@@ -1,0 +1,129 @@
+name: Desktop release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: Private preview release tag (new tag only)
+        required: true
+        default: v0.1.0-preview.1
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: desktop-release
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.platform }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - platform: win-x64
+            runner: windows-2022
+            python_arch: x64
+            requirements: requirements-desktop.txt
+            script: scripts/build_desktop.py
+          - platform: mac-arm64
+            runner: macos-15
+            python_arch: arm64
+            requirements: requirements-desktop-macos.txt
+            script: scripts/build_macos.py
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 35
+    env:
+      PYTHONUTF8: "1"
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.11"
+          architecture: ${{ matrix.python_arch }}
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "24"
+      - name: Install build dependencies
+        run: |
+          python -m pip install -r ${{ matrix.requirements }}
+          npm install --global pnpm@11.0.0
+      - name: Install Windows capture without a second OpenCV package
+        if: runner.os == 'Windows'
+        run: python -m pip install --no-deps -r requirements-desktop-windows.txt
+      - name: Verify native architecture
+        run: |
+          python -c "import platform; print(platform.platform(), platform.machine())"
+          node -p "process.platform + '/' + process.arch"
+      - name: Test core rules and packaging inputs
+        run: >-
+          python -m unittest tests.test_lookout_visibility tests.test_opening_technology
+          tests.test_ending_prediction tests.test_node_prediction_beta tests.test_desktop
+          tests.test_macos_packaging tests.test_release_publication
+      - name: Test frontend
+        run: |
+          pnpm --dir frontend install --frozen-lockfile
+          pnpm --dir frontend test
+      - name: Build and verify offline desktop package
+        run: python ${{ matrix.script }}
+      - name: Upload release packages
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: CelestialFulcrum-${{ matrix.platform }}
+          path: |
+            dist/CelestialFulcrum-*-${{ matrix.platform }}.zip
+            dist/CelestialFulcrum-*-${{ matrix.platform }}.zip.sha256
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 7
+      - name: Upload build diagnostics
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: diagnostics-${{ matrix.platform }}
+          path: |
+            build/desktop-self-test.json
+            build/macos-self-test.json
+            build/pyinstaller/**/warn-*.txt
+            build/pyinstaller/**/xref-*.html
+          if-no-files-found: ignore
+          retention-days: 7
+
+  publish:
+    name: Publish private preview
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          pattern: CelestialFulcrum-*
+          path: packages
+          merge-multiple: true
+      - name: Verify checksums and publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+          SOURCE_REVISION: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]] || { echo 'Invalid release tag'; exit 1; }
+          cd packages
+          sha256sum --check ./*.zip.sha256
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo 'Release already exists; choose a new tag.'
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" ./*.zip ./*.zip.sha256 \
+            --target "$SOURCE_REVISION" --prerelease \
+            --title "Celestial Fulcrum $RELEASE_TAG" \
+            --notes "Private test build. Windows x64 and Apple Silicon macOS arm64. Both packages passed offline OCR, catalog image and map asset checks. Unsigned Windows build; ad-hoc signed, non-notarized Mac app. Source: $SOURCE_REVISION."

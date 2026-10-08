@@ -1,0 +1,616 @@
+{
+  "schemaVersion": 1,
+  "sourceUrl": "https://prts.wiki/w/%E6%B2%89%E6%B2%A6%E8%80%85%E7%9A%84%E9%BB%91%E6%B5%81%E6%A0%91%E6%B5%B7",
+  "regionRewards": {
+    "I": {
+      "normal": {
+        "experience": {
+          "base": 10,
+          "fullTechnology": 13
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 1
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 12,
+          "fullTechnology": 15
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "boss": null,
+      "bossPursuit": null
+    },
+    "II": {
+      "normal": {
+        "experience": {
+          "base": 12,
+          "fullTechnology": 15
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 18,
+          "fullTechnology": 23
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "boss": null,
+      "bossPursuit": null
+    },
+    "III": {
+      "normal": {
+        "experience": {
+          "base": 13,
+          "fullTechnology": 17
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 25,
+          "fullTechnology": 33
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 3
+        }
+      },
+      "boss": {
+        "experience": {
+          "base": 32,
+          "fullTechnology": 42
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 5
+        }
+      },
+      "bossPursuit": {
+        "experience": {
+          "base": 32,
+          "fullTechnology": 42
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 5
+        }
+      }
+    },
+    "IV": {
+      "normal": {
+        "experience": {
+          "base": 15,
+          "fullTechnology": 19
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 30,
+          "fullTechnology": 39
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 3
+        }
+      },
+      "boss": null,
+      "bossPursuit": null
+    },
+    "V": {
+      "normal": {
+        "experience": {
+          "base": 20,
+          "fullTechnology": 26
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 2
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 36,
+          "fullTechnology": 47
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 5
+        }
+      },
+      "boss": {
+        "experience": {
+          "base": 50,
+          "fullTechnology": 66
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 8
+        }
+      },
+      "bossPursuit": {
+        "experience": {
+          "base": 50,
+          "fullTechnology": 66
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 8
+        }
+      }
+    },
+    "VI": {
+      "normal": {
+        "experience": {
+          "base": 20,
+          "fullTechnology": 26
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 5
+        }
+      },
+      "emergency": {
+        "experience": {
+          "base": 36,
+          "fullTechnology": 47
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 5
+        }
+      },
+      "boss": {
+        "experience": {
+          "base": 70,
+          "fullTechnology": 93
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 8
+        }
+      },
+      "bossPursuit": {
+        "experience": {
+          "base": 70,
+          "fullTechnology": 93
+        },
+        "originiumIngot": {
+          "kind": "fixed",
+          "value": 8
+        }
+      }
+    }
+  },
+  "specialBattles": [
+    {
+      "stages": [
+        "陌生旅伴"
+      ],
+      "context": "不期而遇 思乡心切 陌生旅伴",
+      "variant": "normal",
+      "experience": {
+        "base": 10,
+        "fullTechnology": 13
+      },
+      "originiumIngot": {
+        "kind": "range",
+        "min": 2,
+        "max": 3,
+        "probabilities": null
+      }
+    },
+    {
+      "stages": [
+        "安保措施"
+      ],
+      "context": "不期而遇 划算买卖 安保措施",
+      "variant": "normal",
+      "experience": {
+        "base": 12,
+        "fullTechnology": 15
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 2
+      }
+    },
+    {
+      "stages": [
+        "开业剪彩"
+      ],
+      "context": "不期而遇 鸭托邦 开业剪彩",
+      "variant": "normal",
+      "experience": {
+        "base": 13,
+        "fullTechnology": 17
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 2
+      }
+    },
+    {
+      "stages": [
+        "开业剪彩"
+      ],
+      "context": "不期而遇 鸭托邦 开业剪彩",
+      "variant": "emergency",
+      "experience": {
+        "base": 24,
+        "fullTechnology": 31
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "合伙人会议"
+      ],
+      "context": "不期而遇 传奇团伙 合伙人会议",
+      "variant": "normal",
+      "experience": {
+        "base": 25,
+        "fullTechnology": 33
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "合伙人会议"
+      ],
+      "context": "不期而遇 传奇团伙 合伙人会议",
+      "variant": "emergency",
+      "experience": {
+        "base": 36,
+        "fullTechnology": 47
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "搏杀"
+      ],
+      "context": "狭路相逢 原始娱乐 搏杀",
+      "variant": "normal",
+      "experience": {
+        "base": 13,
+        "fullTechnology": 17
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "共斗"
+      ],
+      "context": "狭路相逢 掠夺成性 共斗",
+      "variant": "normal",
+      "experience": {
+        "base": 18,
+        "fullTechnology": 23
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "死箱"
+      ],
+      "context": "商店战斗 死箱",
+      "variant": "normal",
+      "experience": {
+        "base": 10,
+        "fullTechnology": 13
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 4
+      }
+    },
+    {
+      "stages": [
+        "活木"
+      ],
+      "context": "商店战斗 活木",
+      "variant": "normal",
+      "experience": {
+        "base": 15,
+        "fullTechnology": 19
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 5
+      }
+    },
+    {
+      "stages": [
+        "无效验尸"
+      ],
+      "context": "特殊挑战 无效验尸",
+      "variant": "normal",
+      "experience": {
+        "base": 36,
+        "fullTechnology": 47
+      },
+      "originiumIngot": {
+        "kind": "unknown",
+        "value": null
+      }
+    },
+    {
+      "stages": [
+        "湖中魇"
+      ],
+      "context": "不期而遇 湖中仙女 湖中魇",
+      "variant": "normal",
+      "experience": {
+        "base": 25,
+        "fullTechnology": 33
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 4
+      }
+    },
+    {
+      "stages": [
+        "湖中魇"
+      ],
+      "context": "不期而遇 湖中仙女 湖中魇",
+      "variant": "emergency",
+      "experience": {
+        "base": 36,
+        "fullTechnology": 47
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 8
+      }
+    },
+    {
+      "stages": [
+        "强买强卖"
+      ],
+      "context": "流窜居民 强买强卖",
+      "variant": "normal",
+      "experience": {
+        "base": 15,
+        "fullTechnology": 19
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    },
+    {
+      "stages": [
+        "进退趋同"
+      ],
+      "context": "流窜居民 进退趋同",
+      "variant": "normal",
+      "experience": {
+        "base": 18,
+        "fullTechnology": 23
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 5
+      }
+    },
+    {
+      "stages": [
+        "枯枝"
+      ],
+      "context": "居民据点 枯枝",
+      "variant": "normal",
+      "experience": {
+        "base": 25,
+        "fullTechnology": 33
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 5
+      }
+    },
+    {
+      "stages": [
+        "败叶"
+      ],
+      "context": "居民据点 败叶",
+      "variant": "normal",
+      "experience": {
+        "base": 30,
+        "fullTechnology": 39
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 5
+      }
+    },
+    {
+      "stages": [
+        "“闹乐”",
+        "“纵怒”",
+        "“灭身”"
+      ],
+      "context": "不期而遇 黑诞 “闹乐” / “纵怒” / “灭身”",
+      "variant": "normal",
+      "experience": {
+        "base": 30,
+        "fullTechnology": 39
+      },
+      "originiumIngot": {
+        "kind": "fixed",
+        "value": 3
+      }
+    }
+  ],
+  "stageRegions": {
+    "急不可耐": "I",
+    "灌水贤者": "I",
+    "猎犬病原": "I",
+    "遗忘时间": "I",
+    "无主地": "II",
+    "本性难移": "II",
+    "虫虫游戏厅": "II",
+    "枝头陷阱": "II",
+    "远北猎场": "II",
+    "生存习性": "III",
+    "辟路行进": "III",
+    "预算否决": "III",
+    "焦土之家": "III",
+    "趁火打劫": "III",
+    "黑色逆流": "III",
+    "未来见闻": "IV",
+    "种植园惊魂": "IV",
+    "诞生礼": "IV",
+    "选边站": "IV",
+    "侵占家园": "IV",
+    "暴力押运": "IV",
+    "长刀寒夜": "IV",
+    "一步之遥": "V",
+    "恶意讨薪": "V",
+    "物欲遮天": "V",
+    "送别仪式": "V",
+    "丛林法则": "V",
+    "彼处水如酒": "V",
+    "过度繁殖": "V",
+    "同域共存": "VI",
+    "命运共享": "VI"
+  },
+  "stageGroups": {
+    "ISW-NO 一般作战 & 紧急作战": [
+      "一步之遥",
+      "丛林法则",
+      "侵占家园",
+      "同域共存",
+      "命运共享",
+      "彼处水如酒",
+      "急不可耐",
+      "恶意讨薪",
+      "无主地",
+      "暴力押运",
+      "未来见闻",
+      "本性难移",
+      "枝头陷阱",
+      "灌水贤者",
+      "焦土之家",
+      "物欲遮天",
+      "猎犬病原",
+      "生存习性",
+      "种植园惊魂",
+      "虫虫游戏厅",
+      "诞生礼",
+      "趁火打劫",
+      "辟路行进",
+      "过度繁殖",
+      "远北猎场",
+      "送别仪式",
+      "选边站",
+      "遗忘时间",
+      "长刀寒夜",
+      "预算否决",
+      "黑色逆流"
+    ],
+    "ISW-NO & ISW-DF 险路恶敌": [
+      "光荣远征",
+      "冰冷流亡",
+      "哀悼铁腕",
+      "永无安宁",
+      "混沌源阶理论",
+      "狂热敬虔",
+      "畸症",
+      "痛苦将息",
+      "赤金厄运",
+      "铁腕迷思"
+    ],
+    "ISW-NO 鸭爵与雇员": [
+      "合伙人会议",
+      "安保措施",
+      "开业剪彩",
+      "陌生旅伴"
+    ],
+    "ISW-NO 狭路相逢": [
+      "共斗",
+      "搏杀"
+    ],
+    "ISW-NO & ISW-DF 追猎": [
+      "“灭身”",
+      "“纵怒”",
+      "“闹乐”",
+      "一视同仁",
+      "咩的朋友",
+      "在劫难逃",
+      "外显尖牙",
+      "毛绒游戏",
+      "血夜回魂"
+    ],
+    "ISW-NO 特殊挑战": [
+      "无效验尸",
+      "湖中魇"
+    ],
+    "ISW-NO 流窜“居民” & “居民”据点": [
+      "强买强卖",
+      "枯枝",
+      "败叶",
+      "进退趋同"
+    ],
+    "ISW-NO 坎诺特的挑战": [
+      "死箱",
+      "活木"
+    ]
+  },
+  "experienceCalculation": {
+    "fullTechnologyMultipliers": [
+      "1.1",
+      "1.1",
+      "1.1"
+    ],
+    "rounding": "floor_after_all_multipliers"
+  },
+  "ordinaryPursuit": {
+    "experience": {
+      "base": 0,
+      "fullTechnology": 0
+    },
+    "originiumIngot": {
+      "kind": "fixed",
+      "value": 0
+    }
+  },
+  "treeholeRewardPolicy": "resolve_actual_stage_region_or_special_battle_context",
+  "remembranceRewardPolicy": "use_IV_unless_an_explicit_reward_override_is_supplied",
+  "extractedAt": "2026-10-04T12:20:32.155880+00:00"
+}

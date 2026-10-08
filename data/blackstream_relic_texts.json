@@ -1,0 +1,2692 @@
+{
+  "schemaVersion": 1,
+  "sources": {
+    "prts": "https://prts.wiki/w/沉沦者的黑流树海/拟造物质编目",
+    "lubiao": "https://www.lubiao.wiki/archives/blackstream"
+  },
+  "generatedAt": "2026-09-28T12:20:56.625757+00:00",
+  "relics": [
+    {
+      "name": "精选兽肉罐头",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 1,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+1，所有我方单位每秒回复3点生命\n【半结构化】可携带干员+1，所有我方单位每秒回复5点生命\n【非结构化】可携带干员+1，所有我方单位每秒回复8点生命\n【混沌化】可携带干员+1，所有我方单位每秒回复10点生命",
+      "lubiao_effects": [
+        "【结构化】可携带干员+1，所有我方单位每秒回复3点生命；【半结构化】可携带干员+1，所有我方单位每秒回复5点生命；【非结构化】可携带干员+1，所有我方单位每秒回复8点生命；【混沌化】可携带干员+1，所有我方单位每秒回复10点生命"
+      ]
+    },
+    {
+      "name": "凉拌海草",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 2,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+1，所有我方单位的攻击速度+1\n【半结构化】可携带干员+1，所有我方单位的攻击速度+3\n【非结构化】可携带干员+1，所有我方单位的攻击速度+5\n【混沌化】可携带干员+1，所有我方单位的攻击速度+7",
+      "lubiao_effects": [
+        "【结构化】可携带干员+1，所有我方单位的攻击速度+1；【半结构化】可携带干员+1，所有我方单位的攻击速度+3；【非结构化】可携带干员+1，所有我方单位的攻击速度+5；【混沌化】可携带干员+1，所有我方单位的攻击速度+7"
+      ]
+    },
+    {
+      "name": "橙味风暴",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 3,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+1，所有我方单位的攻击力+1%\n【半结构化】可携带干员+1，所有我方单位的攻击力+3%\n【非结构化】可携带干员+1，所有我方单位的攻击力+5%\n【混沌化】可携带干员+1，所有我方单位的攻击力+7%",
+      "lubiao_effects": [
+        "【结构化】可携带干员+1，所有我方单位的攻击力+1%；【半结构化】可携带干员+1，所有我方单位的攻击力+3%；【非结构化】可携带干员+1，所有我方单位的攻击力+5%；【混沌化】可携带干员+1，所有我方单位的攻击力+7%"
+      ]
+    },
+    {
+      "name": "尖叫樱桃",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 4,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+2，所有我方单位的攻击力+2%\n【半结构化】可携带干员+2，所有我方单位的攻击力+4%\n【非结构化】可携带干员+2，所有我方单位的攻击力+6%\n【混沌化】可携带干员+2，所有我方单位的攻击力+8%",
+      "lubiao_effects": [
+        "【结构化】可携带干员+2，所有我方单位的攻击力+2%；【半结构化】可携带干员+2，所有我方单位的攻击力+4%；【非结构化】可携带干员+2，所有我方单位的攻击力+6%；【混沌化】可携带干员+2，所有我方单位的攻击力+8%"
+      ]
+    },
+    {
+      "name": "咖啡平原咖啡糖",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 5,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+2，所有我方单位的攻击速度+2\n【半结构化】可携带干员+2，所有我方单位的攻击速度+4\n【非结构化】可携带干员+2，所有我方单位的攻击速度+6\n【混沌化】可携带干员+2，所有我方单位的攻击速度+8",
+      "lubiao_effects": [
+        "【结构化】可携带干员+2，所有我方单位的攻击速度+2；【半结构化】可携带干员+2，所有我方单位的攻击速度+4；【非结构化】可携带干员+2，所有我方单位的攻击速度+6；【混沌化】可携带干员+2，所有我方单位的攻击速度+8"
+      ]
+    },
+    {
+      "name": "皮特水果什锦",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 6,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+3%\n【半结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+4%\n【非结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+5%\n【混沌化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+7%",
+      "lubiao_effects": [
+        "【结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+3%；【半结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+4%；【非结构化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+5%；【混沌化】可携带干员+3，所有我方单位的攻击力、防御力和生命值+7%"
+      ]
+    },
+    {
+      "name": "地形图",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 7,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可同时部署人数+1，所有我方单位的防御力+4%\n【半结构化】可同时部署人数+1，所有我方单位的防御力+5%\n【非结构化】可同时部署人数+1，所有我方单位的防御力+6%\n【混沌化】可同时部署人数+1，所有我方单位的防御力+8%",
+      "lubiao_effects": [
+        "【结构化】可同时部署人数+1，所有我方单位的防御力+4%；【半结构化】可同时部署人数+1，所有我方单位的防御力+5%；【非结构化】可同时部署人数+1，所有我方单位的防御力+6%；【混沌化】可同时部署人数+1，所有我方单位的防御力+8%"
+      ]
+    },
+    {
+      "name": "神音海螺",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 8,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可同时部署人数+1，所有我方单位的生命值+4%\n【半结构化】可同时部署人数+1，所有我方单位的生命值+5%\n【非结构化】可同时部署人数+1，所有我方单位的生命值+6%\n【混沌化】可同时部署人数+1，所有我方单位的生命值+8%",
+      "lubiao_effects": [
+        "【结构化】可同时部署人数+1，所有我方单位的生命值+4%；【半结构化】可同时部署人数+1，所有我方单位的生命值+5%；【非结构化】可同时部署人数+1，所有我方单位的生命值+6%；【混沌化】可同时部署人数+1，所有我方单位的生命值+8%"
+      ]
+    },
+    {
+      "name": "林间夜话",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 9,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可同时部署人数+2，所有我方单位的防御力+6%\n【半结构化】可同时部署人数+2，所有我方单位的防御力+7%\n【非结构化】可同时部署人数+2，所有我方单位的防御力+8%\n【混沌化】可同时部署人数+2，所有我方单位的防御力+10%",
+      "lubiao_effects": [
+        "【结构化】可同时部署人数+2，所有我方单位的防御力+6%；【半结构化】可同时部署人数+2，所有我方单位的防御力+7%；【非结构化】可同时部署人数+2，所有我方单位的防御力+8%；【混沌化】可同时部署人数+2，所有我方单位的防御力+10%"
+      ]
+    },
+    {
+      "name": "教堂救济餐券",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 10,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】可同时部署人数+2，所有我方单位的生命值+6%\n【半结构化】可同时部署人数+2，所有我方单位的生命值+7%\n【非结构化】可同时部署人数+2，所有我方单位的生命值+8%\n【混沌化】可同时部署人数+2，所有我方单位的生命值+10%",
+      "lubiao_effects": [
+        "【结构化】可同时部署人数+2，所有我方单位的生命值+6%；【半结构化】可同时部署人数+2，所有我方单位的生命值+7%；【非结构化】可同时部署人数+2，所有我方单位的生命值+8%；【混沌化】可同时部署人数+2，所有我方单位的生命值+10%"
+      ]
+    },
+    {
+      "name": "古旧乐谱残章",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 11,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】希望+4\n【半结构化】希望+4，所有我方单位的攻击速度+4\n【非结构化】希望+4，所有我方单位的攻击速度+5\n【混沌化】希望+4，所有我方单位的攻击速度+6",
+      "lubiao_effects": [
+        "【结构化】希望+4；【半结构化】希望+4，所有我方单位的攻击速度+4；【非结构化】希望+4，所有我方单位的攻击速度+5；【混沌化】希望+4，所有我方单位的攻击速度+6"
+      ]
+    },
+    {
+      "name": "解约协议",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 12,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】希望+4\n【半结构化】希望+4，所有我方单位的攻击力+3%\n【非结构化】希望+4，所有我方单位的攻击力+5%\n【混沌化】希望+4，所有我方单位的攻击力+7%",
+      "lubiao_effects": [
+        "【结构化】希望+4；【半结构化】希望+4，所有我方单位的攻击力+3%；【非结构化】希望+4，所有我方单位的攻击力+5%；【混沌化】希望+4，所有我方单位的攻击力+7%"
+      ]
+    },
+    {
+      "name": "女妖之吻",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 13,
+      "prts_category": "多元奇物",
+      "prts_effect": "【结构化】希望+8\n【半结构化】希望+9\n【非结构化】希望+10\n【混沌化】希望+12",
+      "lubiao_effects": [
+        "【结构化】希望+8；【半结构化】希望+9；【非结构化】希望+10；【混沌化】希望+12"
+      ]
+    },
+    {
+      "name": "热水壶",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 14,
+      "prts_category": "生存助力",
+      "prts_effect": "目标生命上限+2，希望+2",
+      "lubiao_effects": [
+        "目标生命上限+2，希望+2"
+      ]
+    },
+    {
+      "name": "特级馥郁咖啡豆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 15,
+      "prts_category": "生存助力",
+      "prts_effect": "可携带干员+1，可同时部署人数+1，护盾值+1",
+      "lubiao_effects": [
+        "可携带干员+1，可同时部署人数+1，护盾值+1"
+      ]
+    },
+    {
+      "name": "蓝色丝巾",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 16,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+2，可携带干员+1",
+      "lubiao_effects": [
+        "希望+2，可携带干员+1"
+      ]
+    },
+    {
+      "name": "红色蝴蝶结",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 17,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+2，可同时部署人数+1",
+      "lubiao_effects": [
+        "希望+2，可同时部署人数+1"
+      ]
+    },
+    {
+      "name": "独奏八音盒",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 18,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+4，可同时部署人数+1",
+      "lubiao_effects": [
+        "希望+4，可同时部署人数+1"
+      ]
+    },
+    {
+      "name": "源石鸢尾花",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 19,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+6，可携带干员+2",
+      "lubiao_effects": [
+        "希望+6，可携带干员+2"
+      ]
+    },
+    {
+      "name": "古怪的长笛",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 20,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+4，可携带干员+1",
+      "lubiao_effects": [
+        "希望+4，可携带干员+1"
+      ]
+    },
+    {
+      "name": "玻璃小鸟",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 21,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+4，可携带干员+1",
+      "lubiao_effects": [
+        "希望+4，可携带干员+1"
+      ]
+    },
+    {
+      "name": "赤金的远征",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 22,
+      "prts_category": "生存助力",
+      "prts_effect": "希望+4，可携带干员+1，可同时部署人数+1",
+      "lubiao_effects": [
+        "希望+4，可携带干员+1，可同时部署人数+1"
+      ]
+    },
+    {
+      "name": "《杜林地上环游记》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 23,
+      "prts_category": "生存助力",
+      "prts_effect": "护盾值+4",
+      "lubiao_effects": [
+        "护盾值+4"
+      ]
+    },
+    {
+      "name": "《旧高卢地名源流考》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 24,
+      "prts_category": "生存助力",
+      "prts_effect": "护盾值+6",
+      "lubiao_effects": [
+        "护盾值+6"
+      ]
+    },
+    {
+      "name": "至宝指环",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 25,
+      "prts_category": "生存助力",
+      "prts_effect": "战斗掉落的源石锭+50%",
+      "lubiao_effects": [
+        "战斗掉落的源石锭+50%"
+      ]
+    },
+    {
+      "name": "维多利亚“废铁”勋章",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 26,
+      "prts_category": "生存助力",
+      "prts_effect": "战斗获得的指挥经验+20%",
+      "lubiao_effects": [
+        "战斗获得的指挥经验+20%"
+      ]
+    },
+    {
+      "name": "失落之钥",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 27,
+      "prts_category": "生存助力",
+      "prts_effect": "战斗获得的指挥经验+30%，指挥等级到达10级时，立刻获得50源石锭",
+      "lubiao_effects": [
+        "战斗获得的指挥经验+30%，指挥等级到达10级时，立刻获得50源石锭"
+      ]
+    },
+    {
+      "name": "特殊抑制器",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 28,
+      "prts_category": "生存助力",
+      "prts_effect": "目标生命上限+2，回复2目标生命",
+      "lubiao_effects": [
+        "目标生命上限+2，回复2目标生命"
+      ]
+    },
+    {
+      "name": "阿卡胡拉饭碗",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 29,
+      "prts_category": "生存助力",
+      "prts_effect": "回复4目标生命，护盾值+2",
+      "lubiao_effects": [
+        "回复4目标生命，护盾值+2"
+      ]
+    },
+    {
+      "name": "血魔的寝床",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 30,
+      "prts_category": "生存助力",
+      "prts_effect": "目标生命上限+4",
+      "lubiao_effects": [
+        "目标生命上限+4"
+      ]
+    },
+    {
+      "name": "长生者之证",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 31,
+      "prts_category": "生存助力",
+      "prts_effect": "目标生命上限+6",
+      "lubiao_effects": [
+        "目标生命上限+6"
+      ]
+    },
+    {
+      "name": "襁褓天马",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 32,
+      "prts_category": "生存助力",
+      "prts_effect": "每次进入新区域时，初始行动力+1",
+      "lubiao_effects": [
+        "每次进入新区域时，初始行动力+1"
+      ]
+    },
+    {
+      "name": "襁褓骏鹰",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 33,
+      "prts_category": "生存助力",
+      "prts_effect": "初始希望+1，初始揭示前两个探索区域中所有节点的信息",
+      "lubiao_effects": [
+        "初始希望+1，初始揭示前两个探索区域中所有节点的信息"
+      ]
+    },
+    {
+      "name": "襁褓巨龙",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 34,
+      "prts_category": "生存助力",
+      "prts_effect": "前两个探索区域的战斗中，所有敌人的最大生命-50%",
+      "lubiao_effects": [
+        "前两个探索区域的战斗中，所有敌人的最大生命-50%"
+      ]
+    },
+    {
+      "name": "襁褓九头蛇",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 35,
+      "prts_category": "生存助力",
+      "prts_effect": "所有敌人的攻击和生命+30%，每进入新区域时我方攻击力和生命+10%",
+      "lubiao_effects": [
+        "所有敌人的攻击和生命+30%，每进入新区域时我方攻击力和生命+10%"
+      ]
+    },
+    {
+      "name": "襁褓白泽",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 36,
+      "prts_category": "生存助力",
+      "prts_effect": "干员招募时，出现临时招募的概率提升",
+      "lubiao_effects": [
+        "干员招募时，出现临时招募的概率提升"
+      ]
+    },
+    {
+      "name": "襁褓金乌",
+      "status": "deferred_inherited",
+      "coverage": "both",
+      "prts_number": 37,
+      "prts_category": "生存助力",
+      "prts_effect": "进入区域Ⅲ血色空脉时，获得3个随机收藏品",
+      "lubiao_effects": [
+        "进入区域Ⅲ血色空脉时，获得3个随机收藏品"
+      ]
+    },
+    {
+      "name": "香草沙士汽水",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 38,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有自然回复技能的技力恢复+0.2/秒",
+      "lubiao_effects": [
+        "所有自然回复技能的技力恢复+0.2/秒"
+      ]
+    },
+    {
+      "name": "羽兽肝酱",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 39,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有自然回复技能的技力恢复+0.35/秒",
+      "lubiao_effects": [
+        "所有自然回复技能的技力恢复+0.35/秒"
+      ]
+    },
+    {
+      "name": "迷梦香精",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 40,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有自然回复技能的技力恢复+0.5/秒",
+      "lubiao_effects": [
+        "所有自然回复技能的技力恢复+0.5/秒"
+      ]
+    },
+    {
+      "name": "锈蚀刀片",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 41,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的物理伤害+15%",
+      "lubiao_effects": [
+        "所有敌方单位受到的物理伤害+15%"
+      ]
+    },
+    {
+      "name": "赶车夫的长鞭",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 42,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的物理伤害+25%",
+      "lubiao_effects": [
+        "所有敌方单位受到的物理伤害+25%"
+      ]
+    },
+    {
+      "name": "“复仇者”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 43,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的物理伤害+35%",
+      "lubiao_effects": [
+        "所有敌方单位受到的物理伤害+35%"
+      ]
+    },
+    {
+      "name": "制式防暴用具",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 44,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的法术伤害+20%",
+      "lubiao_effects": [
+        "所有敌方单位受到的法术伤害+20%"
+      ]
+    },
+    {
+      "name": "皇帝的收藏",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 45,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的法术伤害+30%",
+      "lubiao_effects": [
+        "所有敌方单位受到的法术伤害+30%"
+      ]
+    },
+    {
+      "name": "“璀璨悲泣”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 46,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的法术伤害+40%",
+      "lubiao_effects": [
+        "所有敌方单位受到的法术伤害+40%"
+      ]
+    },
+    {
+      "name": "异铁小圆盾",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 47,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位的防御力+15%",
+      "lubiao_effects": [
+        "所有我方单位的防御力+15%"
+      ]
+    },
+    {
+      "name": "军团护心镜",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 48,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位的防御力+25%",
+      "lubiao_effects": [
+        "所有我方单位的防御力+25%"
+      ]
+    },
+    {
+      "name": "古旧的蒸汽甲胄",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 49,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位的防御力+50%",
+      "lubiao_effects": [
+        "所有我方单位的防御力+50%"
+      ]
+    },
+    {
+      "name": "皇帝的恩宠",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 50,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方近战单位的攻击力+15%",
+      "lubiao_effects": [
+        "所有我方近战单位的攻击力+15%"
+      ]
+    },
+    {
+      "name": "贵族刺剑",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 51,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方近战单位的攻击力+25%",
+      "lubiao_effects": [
+        "所有我方近战单位的攻击力+25%"
+      ]
+    },
+    {
+      "name": "老近卫军之锋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 52,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方近战单位的攻击力+35%",
+      "lubiao_effects": [
+        "所有我方近战单位的攻击力+35%"
+      ]
+    },
+    {
+      "name": "显圣吊坠",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 53,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方远程单位的攻击力+15%",
+      "lubiao_effects": [
+        "所有我方远程单位的攻击力+15%"
+      ]
+    },
+    {
+      "name": "银餐叉",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 54,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方远程单位的攻击力+25%",
+      "lubiao_effects": [
+        "所有我方远程单位的攻击力+25%"
+      ]
+    },
+    {
+      "name": "损坏的左轮弹巢",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 55,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方远程单位的攻击力+35%",
+      "lubiao_effects": [
+        "所有我方远程单位的攻击力+35%"
+      ]
+    },
+    {
+      "name": "人偶之家",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 56,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始部署费用+10",
+      "lubiao_effects": [
+        "初始部署费用+10"
+      ]
+    },
+    {
+      "name": "微缩舞台模型",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 57,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始部署费用+20",
+      "lubiao_effects": [
+        "初始部署费用+20"
+      ]
+    },
+    {
+      "name": "缠梦古堡模型",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 58,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始部署费用+30",
+      "lubiao_effects": [
+        "初始部署费用+30"
+      ]
+    },
+    {
+      "name": "漆黑的舞鞋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 59,
+      "prts_category": "斗争之物",
+      "prts_effect": "可以在高台部署近战位干员",
+      "lubiao_effects": [
+        "可以在高台部署近战位干员"
+      ]
+    },
+    {
+      "name": "洁白的舞鞋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 60,
+      "prts_category": "斗争之物",
+      "prts_effect": "可以在低地部署远程位干员",
+      "lubiao_effects": [
+        "可以在低地部署远程位干员"
+      ]
+    },
+    {
+      "name": "几丁质刺刃",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 61,
+      "prts_category": "斗争之物",
+      "prts_effect": "战斗开始时，使随机一名干员在本局内攻击力+100%，生命+100%",
+      "lubiao_effects": [
+        "战斗开始时，使随机一名干员在本局内攻击力+100%，生命+100%"
+      ]
+    },
+    {
+      "name": "药枚",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 62,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位在部署时获得2层护盾",
+      "lubiao_effects": [
+        "所有我方单位在部署时获得2层护盾"
+      ]
+    },
+    {
+      "name": "凯旋号角",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 63,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人受到的一次性晕眩、寒冷、冻结等异常效果影响时间提高75%",
+      "lubiao_effects": [
+        "敌人受到的一次性晕眩、寒冷、冻结等异常效果影响时间提高75%"
+      ]
+    },
+    {
+      "name": "精神治疗录像带",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 64,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人受到的一次性晕眩、寒冷、冻结等异常效果影响时间提高150%",
+      "lubiao_effects": [
+        "敌人受到的一次性晕眩、寒冷、冻结等异常效果影响时间提高150%"
+      ]
+    },
+    {
+      "name": "重力蔑视机关",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 65,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌人重量-2",
+      "lubiao_effects": [
+        "所有敌人重量-2"
+      ]
+    },
+    {
+      "name": "湖中神盾",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 66,
+      "prts_category": "斗争之物",
+      "prts_effect": "护盾值+1；战斗开始时如果拥有护盾值，所有我方单位的最大生命+60%",
+      "lubiao_effects": [
+        "护盾值+1；战斗开始时如果拥有护盾值，所有我方单位的最大生命+60%"
+      ]
+    },
+    {
+      "name": "绿叶菜罐头",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 67,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员技能触发后1秒内攻击力+60%",
+      "lubiao_effects": [
+        "所有干员技能触发后1秒内攻击力+60%"
+      ]
+    },
+    {
+      "name": "叙拉古人的愤怒",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 68,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员技能触发后1秒内攻击力+100%",
+      "lubiao_effects": [
+        "所有干员技能触发后1秒内攻击力+100%"
+      ]
+    },
+    {
+      "name": "古堡的子嗣",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 69,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员在场上停留80秒后防御力+400，法术抗性+30",
+      "lubiao_effects": [
+        "所有干员在场上停留80秒后防御力+400，法术抗性+30"
+      ]
+    },
+    {
+      "name": "活玫瑰",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 70,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位受到的治疗和生命回复效果+20%",
+      "lubiao_effects": [
+        "所有我方单位受到的治疗和生命回复效果+20%"
+      ]
+    },
+    {
+      "name": "苍白花冠",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 71,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位受到的治疗和生命回复效果+30%",
+      "lubiao_effects": [
+        "所有我方单位受到的治疗和生命回复效果+30%"
+      ]
+    },
+    {
+      "name": "涌动之餐",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 72,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位受到的治疗和生命回复效果+40%，且受到的元素损伤-30%",
+      "lubiao_effects": [
+        "所有我方单位受到的治疗和生命回复效果+40%，且受到的元素损伤-30%"
+      ]
+    },
+    {
+      "name": "残破合影",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 73,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位的生命-5%，防御力-10%",
+      "lubiao_effects": [
+        "所有敌方单位的生命-5%，防御力-10%"
+      ]
+    },
+    {
+      "name": "恐鱼干",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 74,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位的生命-10%，防御力-20%",
+      "lubiao_effects": [
+        "所有敌方单位的生命-10%，防御力-20%"
+      ]
+    },
+    {
+      "name": "迷迭香之拥",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 75,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位的生命-15%，防御力-30%",
+      "lubiao_effects": [
+        "所有敌方单位的生命-15%，防御力-30%"
+      ]
+    },
+    {
+      "name": "“黑夜呢喃”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 76,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位的生命-15%",
+      "lubiao_effects": [
+        "所有敌方单位的生命-15%"
+      ]
+    },
+    {
+      "name": "《大静谧》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 77,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位的生命-30%",
+      "lubiao_effects": [
+        "所有敌方单位的生命-30%"
+      ]
+    },
+    {
+      "name": "急救药箱",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 78,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位的生命+35%",
+      "lubiao_effects": [
+        "所有我方单位的生命+35%"
+      ]
+    },
+    {
+      "name": "未知仪器",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 79,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位的生命+50%",
+      "lubiao_effects": [
+        "所有我方单位的生命+50%"
+      ]
+    },
+    {
+      "name": "演出用香水",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 80,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位每秒回复1%的最大生命值",
+      "lubiao_effects": [
+        "所有我方单位每秒回复1%的最大生命值"
+      ]
+    },
+    {
+      "name": "摩根队长佳酿",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 81,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始技力+2，所有攻击和受击回复的技能每3秒回复1点技力",
+      "lubiao_effects": [
+        "初始技力+2，所有攻击和受击回复的技能每3秒回复1点技力"
+      ]
+    },
+    {
+      "name": "生命之水",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 82,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始技力+3，所有攻击和受击回复的技能每2.5秒回复1点技力",
+      "lubiao_effects": [
+        "初始技力+3，所有攻击和受击回复的技能每2.5秒回复1点技力"
+      ]
+    },
+    {
+      "name": "皇家利口酒",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 83,
+      "prts_category": "斗争之物",
+      "prts_effect": "初始技力+5，所有攻击和受击回复的技能每1.5秒回复1点技力",
+      "lubiao_effects": [
+        "初始技力+5，所有攻击和受击回复的技能每1.5秒回复1点技力"
+      ]
+    },
+    {
+      "name": "高卢银行支票",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 84,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员的初始技力+12",
+      "lubiao_effects": [
+        "所有干员的初始技力+12"
+      ]
+    },
+    {
+      "name": "《第二经济改革法》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 85,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员的初始技力+18",
+      "lubiao_effects": [
+        "所有干员的初始技力+18"
+      ]
+    },
+    {
+      "name": "荣耀绶带",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 86,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位仅阻挡1名敌人时，攻击力+100%",
+      "lubiao_effects": [
+        "所有我方单位仅阻挡1名敌人时，攻击力+100%"
+      ]
+    },
+    {
+      "name": "活木甲",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 87,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方近战单位部署时获得相当于最大生命50%的屏障",
+      "lubiao_effects": [
+        "所有我方近战单位部署时获得相当于最大生命50%的屏障"
+      ]
+    },
+    {
+      "name": "紧急活性剂",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 88,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员生命值越低，攻击速度越快，30%生命值时达到最大可提升攻击速度（+100）",
+      "lubiao_effects": [
+        "干员生命值越低，攻击速度越快，30%生命值时达到最大可提升攻击速度（+100）"
+      ]
+    },
+    {
+      "name": "“阿猛”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 89,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到的元素伤害+100%",
+      "lubiao_effects": [
+        "所有敌方单位受到的元素伤害+100%"
+      ]
+    },
+    {
+      "name": "疗养体验卡",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 90,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员部署后10秒内攻击速度+40",
+      "lubiao_effects": [
+        "所有干员部署后10秒内攻击速度+40"
+      ]
+    },
+    {
+      "name": "疗养特供卡",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 91,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员部署后10秒内攻击速度+70",
+      "lubiao_effects": [
+        "所有干员部署后10秒内攻击速度+70"
+      ]
+    },
+    {
+      "name": "悬丝傀儡",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 92,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人被晕眩、冻结、束缚时，每秒受到1000点法术伤害",
+      "lubiao_effects": [
+        "敌人被晕眩、冻结、束缚时，每秒受到1000点法术伤害"
+      ]
+    },
+    {
+      "name": "“童趣玩偶”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 93,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人被晕眩、冻结、束缚时，每秒受到2000点法术伤害",
+      "lubiao_effects": [
+        "敌人被晕眩、冻结、束缚时，每秒受到2000点法术伤害"
+      ]
+    },
+    {
+      "name": "“绽放”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 94,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员每次受到伤害时回复1点技力，每次受到元素损伤时回复1点技力",
+      "lubiao_effects": [
+        "所有干员每次受到伤害时回复1点技力，每次受到元素损伤时回复1点技力"
+      ]
+    },
+    {
+      "name": "天穹尘埃",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 95,
+      "prts_category": "斗争之物",
+      "prts_effect": "远程干员在手动开启技能时，使攻击范围内的所有敌人浮空5秒",
+      "lubiao_effects": [
+        "远程干员在手动开启技能时，使攻击范围内的所有敌人浮空5秒"
+      ]
+    },
+    {
+      "name": "古老壁画",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 96,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人进入和解除浮空、失重状态时，受到1000点法术伤害，并在10秒内失去特殊能力",
+      "lubiao_effects": [
+        "敌人进入和解除浮空、失重状态时，受到1000点法术伤害，并在10秒内失去特殊能力"
+      ]
+    },
+    {
+      "name": "万星园之辉",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 97,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人进入和解除浮空、失重状态时，受到2000点法术伤害，并在10秒内受到的伤害+30%",
+      "lubiao_effects": [
+        "敌人进入和解除浮空、失重状态时，受到2000点法术伤害，并在10秒内受到的伤害+30%"
+      ]
+    },
+    {
+      "name": "Scout的狙击镜",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 98,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到我方单位伤害时，距离伤害来源越远受到的伤害越高（最高100%）",
+      "lubiao_effects": [
+        "所有敌方单位受到我方单位伤害时，距离伤害来源越远受到的伤害越高（最高100%）"
+      ]
+    },
+    {
+      "name": "Blaze的电锯",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 99,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有敌方单位受到我方单位伤害时，距离伤害来源越近受到的伤害越高（最高100%）",
+      "lubiao_effects": [
+        "所有敌方单位受到我方单位伤害时，距离伤害来源越近受到的伤害越高（最高100%）"
+      ]
+    },
+    {
+      "name": "黑色郁金香",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 100,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方干员技能未开启时60秒内攻击力逐渐提升至最高+60%，每次技能结束时失去该加成",
+      "lubiao_effects": [
+        "所有我方干员技能未开启时60秒内攻击力逐渐提升至最高+60%，每次技能结束时失去该加成"
+      ]
+    },
+    {
+      "name": "《光耀卡西米尔》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 101,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员触发闪避后15秒内攻击速度+70",
+      "lubiao_effects": [
+        "干员触发闪避后15秒内攻击速度+70"
+      ]
+    },
+    {
+      "name": "《归来》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 102,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员触发闪避后15秒内攻击力+130%",
+      "lubiao_effects": [
+        "干员触发闪避后15秒内攻击力+130%"
+      ]
+    },
+    {
+      "name": "设计师量尺",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 103,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位获得15%物理闪避",
+      "lubiao_effects": [
+        "所有我方单位获得15%物理闪避"
+      ]
+    },
+    {
+      "name": "“法术杀手”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 104,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位获得15%法术闪避",
+      "lubiao_effects": [
+        "所有我方单位获得15%法术闪避"
+      ]
+    },
+    {
+      "name": "舞者手链",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 105,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有我方单位获得10%物理与法术闪避",
+      "lubiao_effects": [
+        "所有我方单位获得10%物理与法术闪避"
+      ]
+    },
+    {
+      "name": "岩角号",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 106,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员周围4格每有一名干员，攻击力+20%",
+      "lubiao_effects": [
+        "所有干员周围4格每有一名干员，攻击力+20%"
+      ]
+    },
+    {
+      "name": "散轶诗简",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 107,
+      "prts_category": "斗争之物",
+      "prts_effect": "【召唤物】的部署费用-5、生命值+30%、攻击力+30%，并且不再消耗部署位",
+      "lubiao_effects": [
+        "【召唤物】的部署费用-5、生命值+30%、攻击力+30%，并且不再消耗部署位"
+      ]
+    },
+    {
+      "name": "传芳雕版",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 108,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员开启弹药类技能后，每次造成伤害时，攻击力+2%（最多叠加30层）",
+      "lubiao_effects": [
+        "干员开启弹药类技能后，每次造成伤害时，攻击力+2%（最多叠加30层）"
+      ]
+    },
+    {
+      "name": "三尺万象",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 109,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员开启弹药类技能时，攻击速度+100，持续15秒",
+      "lubiao_effects": [
+        "干员开启弹药类技能时，攻击速度+100，持续15秒"
+      ]
+    },
+    {
+      "name": "《炎国字汇》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 110,
+      "prts_category": "斗争之物",
+      "prts_effect": "弹药类技能每次开启后，首次剩余30%的弹药时，补充最大弹药数量30%的弹药",
+      "lubiao_effects": [
+        "弹药类技能每次开启后，首次剩余30%的弹药时，补充最大弹药数量30%的弹药"
+      ]
+    },
+    {
+      "name": "《雅集》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 111,
+      "prts_category": "斗争之物",
+      "prts_effect": "弹药类技能每次开启后，首次剩余30%的弹药时，补充最大弹药数量50%的弹药",
+      "lubiao_effects": [
+        "弹药类技能每次开启后，首次剩余30%的弹药时，补充最大弹药数量50%的弹药"
+      ]
+    },
+    {
+      "name": "“剑锤”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 112,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员的部署费用+3，但攻击力、防御力和生命+50%",
+      "lubiao_effects": [
+        "所有干员的部署费用+3，但攻击力、防御力和生命+50%"
+      ]
+    },
+    {
+      "name": "红日冠冕",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 113,
+      "prts_category": "斗争之物",
+      "prts_effect": "高台干员对每个敌人首次造成的伤害提升至300%",
+      "lubiao_effects": [
+        "高台干员对每个敌人首次造成的伤害提升至300%"
+      ]
+    },
+    {
+      "name": "黑夜披肩",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 114,
+      "prts_category": "斗争之物",
+      "prts_effect": "地面干员对每个敌人首次造成的伤害提升至300%",
+      "lubiao_effects": [
+        "地面干员对每个敌人首次造成的伤害提升至300%"
+      ]
+    },
+    {
+      "name": "伪翅",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 115,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员击倒敌人时，获得3秒迷彩",
+      "lubiao_effects": [
+        "我方干员击倒敌人时，获得3秒迷彩"
+      ]
+    },
+    {
+      "name": "“撕咬的渴望”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 116,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员击倒敌人时，攻击速度+100，持续2秒",
+      "lubiao_effects": [
+        "我方干员击倒敌人时，攻击速度+100，持续2秒"
+      ]
+    },
+    {
+      "name": "异香角",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 117,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员击倒敌人时，获得2点技力",
+      "lubiao_effects": [
+        "我方干员击倒敌人时，获得2点技力"
+      ]
+    },
+    {
+      "name": "渴血钳兽",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 118,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员击倒敌人时，回复10%最大生命",
+      "lubiao_effects": [
+        "我方干员击倒敌人时，回复10%最大生命"
+      ]
+    },
+    {
+      "name": "“庇护”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 119,
+      "prts_category": "斗争之物",
+      "prts_effect": "高台干员部署时立刻获得最大生命100%的屏障",
+      "lubiao_effects": [
+        "高台干员部署时立刻获得最大生命100%的屏障"
+      ]
+    },
+    {
+      "name": "种植者保单",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 120,
+      "prts_category": "斗争之物",
+      "prts_effect": "若我方干员在5秒内未受到伤害，则获得最大生命20%的屏障",
+      "lubiao_effects": [
+        "若我方干员在5秒内未受到伤害，则获得最大生命20%的屏障"
+      ]
+    },
+    {
+      "name": "战术背心",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 121,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员拥有屏障时，造成的伤害提升至140%",
+      "lubiao_effects": [
+        "我方干员拥有屏障时，造成的伤害提升至140%"
+      ]
+    },
+    {
+      "name": "赐福新生",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 122,
+      "prts_category": "斗争之物",
+      "prts_effect": "首个干员部署时获得最大生命300%的屏障，且拥有屏障时攻击额外造成攻击力50%的法术伤害",
+      "lubiao_effects": [
+        "首个干员部署时获得最大生命300%的屏障，且拥有屏障时攻击额外造成攻击力50%的法术伤害"
+      ]
+    },
+    {
+      "name": "他缚",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 123,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员部署费用-50%，部署后损失70%的当前生命（退场前仅生效一次）",
+      "lubiao_effects": [
+        "所有干员部署费用-50%，部署后损失70%的当前生命（退场前仅生效一次）"
+      ]
+    },
+    {
+      "name": "染血辞典",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 124,
+      "prts_category": "斗争之物",
+      "prts_effect": "所有干员生命值低于10%时，仅一次立刻获得最大生命100%的屏障",
+      "lubiao_effects": [
+        "所有干员生命值低于10%时，仅一次立刻获得最大生命100%的屏障"
+      ]
+    },
+    {
+      "name": "液体化肥",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 125,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员攻击时流失50点生命（至少保留1点），获得100屏障（此效果获得的屏障最大为100%生命上限）",
+      "lubiao_effects": [
+        "我方干员攻击时流失50点生命（至少保留1点），获得100屏障（此效果获得的屏障最大为100%生命上限）"
+      ]
+    },
+    {
+      "name": "热辣可可",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 126,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员生命值越低，攻击力越高，30%生命值时达到最大可提升攻击力（+150%）",
+      "lubiao_effects": [
+        "干员生命值越低，攻击力越高，30%生命值时达到最大可提升攻击力（+150%）"
+      ]
+    },
+    {
+      "name": "止痛片",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 127,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员生命值越低，技力恢复速度越快，30%生命值时达到最大恢复速度（+2/s）",
+      "lubiao_effects": [
+        "干员生命值越低，技力恢复速度越快，30%生命值时达到最大恢复速度（+2/s）"
+      ]
+    },
+    {
+      "name": "窜天源石虫",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 128,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员起飞时，对攻击范围内所有敌人造成相当于自身攻击力400%的物理伤害",
+      "lubiao_effects": [
+        "干员起飞时，对攻击范围内所有敌人造成相当于自身攻击力400%的物理伤害"
+      ]
+    },
+    {
+      "name": "贴地炸",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 129,
+      "prts_category": "斗争之物",
+      "prts_effect": "干员降落时，对攻击范围内所有敌人造成相当于自身攻击力200%的物理伤害和2秒晕眩",
+      "lubiao_effects": [
+        "干员降落时，对攻击范围内所有敌人造成相当于自身攻击力200%的物理伤害和2秒晕眩"
+      ]
+    },
+    {
+      "name": "翱翼",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 130,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方每有1个起飞的单位，所有起飞的单位攻击力+25%",
+      "lubiao_effects": [
+        "我方每有1个起飞的单位，所有起飞的单位攻击力+25%"
+      ]
+    },
+    {
+      "name": "虬蜕",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 131,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方每有1个未起飞的单位，所有单位的防御力+10%",
+      "lubiao_effects": [
+        "我方每有1个未起飞的单位，所有单位的防御力+10%"
+      ]
+    },
+    {
+      "name": "天师锦囊",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 132,
+      "prts_category": "斗争之物",
+      "prts_effect": "首次部署炎国干员时，在其位置召唤一只【炎佑】",
+      "lubiao_effects": [
+        "首次部署炎国干员时，在其位置召唤一只【炎佑】"
+      ]
+    },
+    {
+      "name": "冰中火",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 133,
+      "prts_category": "斗争之物",
+      "prts_effect": "敌人受到的元素损伤和元素伤害+75%",
+      "lubiao_effects": [
+        "敌人受到的元素损伤和元素伤害+75%"
+      ]
+    },
+    {
+      "name": "河谷祭祈",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 134,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方凋亡、灼燃、神经和侵蚀损伤的爆发效果增强",
+      "lubiao_effects": [
+        "我方凋亡、灼燃、神经和侵蚀损伤的爆发效果增强"
+      ]
+    },
+    {
+      "name": "猎犬病特效药",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 135,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方狂躁元素爆发后不再受到持续伤害，且期间攻击速度额外+50",
+      "lubiao_effects": [
+        "我方狂躁元素爆发后不再受到持续伤害，且期间攻击速度额外+50"
+      ]
+    },
+    {
+      "name": "特种作战防暴盾",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 136,
+      "prts_category": "斗争之物",
+      "prts_effect": "被阻挡的敌人造成的伤害-30%",
+      "lubiao_effects": [
+        "被阻挡的敌人造成的伤害-30%"
+      ]
+    },
+    {
+      "name": "猎犬咖啡",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 137,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方单位的生命和攻击力+30%，敌人出现时有3%概率生命+100%",
+      "lubiao_effects": [
+        "我方单位的生命和攻击力+30%，敌人出现时有3%概率生命+100%"
+      ]
+    },
+    {
+      "name": "竞技场贵宾券",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 138,
+      "prts_category": "斗争之物",
+      "prts_effect": "精英敌人的生命+10%，战斗获得的源石锭和指挥经验+40%",
+      "lubiao_effects": [
+        "精英敌人的生命+10%，战斗获得的源石锭和指挥经验+40%"
+      ]
+    },
+    {
+      "name": "黄金平原",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 139,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员技能结束时获得2点技力",
+      "lubiao_effects": [
+        "我方干员技能结束时获得2点技力"
+      ]
+    },
+    {
+      "name": "第一法则",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 140,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方干员技能结束时获得4点技力",
+      "lubiao_effects": [
+        "我方干员技能结束时获得4点技力"
+      ]
+    },
+    {
+      "name": "特勤任务影像",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 141,
+      "prts_category": "斗争之物",
+      "prts_effect": "我方单位的生命、攻击力、防御力+40%，指挥经验+20%",
+      "lubiao_effects": [
+        "我方单位的生命、攻击力、防御力+40%，指挥经验+20%"
+      ]
+    },
+    {
+      "name": "探测先锋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 142,
+      "prts_category": "斗争之物",
+      "prts_effect": "完成“追猎”作战后叠加1层并使下个区域初始行动力-1，每层使“猎犬proto”的生命和攻击力+20%",
+      "lubiao_effects": [
+        "完成“追猎”作战后叠加1层并使下个区域初始行动力-1，每层使“猎犬proto”的生命和攻击力+20%"
+      ]
+    },
+    {
+      "name": "钝爪-屡战",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 143,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【先锋】干员的攻击力+50%，防御力+50%",
+      "lubiao_effects": [
+        "所有【先锋】干员的攻击力+50%，防御力+50%"
+      ]
+    },
+    {
+      "name": "钝爪-百战",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 144,
+      "prts_category": "专业工具",
+      "prts_effect": "战斗开始60秒内，所有【先锋】攻击力+100%，防御力+100%",
+      "lubiao_effects": [
+        "战斗开始60秒内，所有【先锋】攻击力+100%，防御力+100%"
+      ]
+    },
+    {
+      "name": "折戟-锋刃",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 145,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【近卫】干员的攻击力+25%",
+      "lubiao_effects": [
+        "所有【近卫】干员的攻击力+25%"
+      ]
+    },
+    {
+      "name": "折戟-浴血",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 146,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【近卫】干员在攻击后获得2点技力",
+      "lubiao_effects": [
+        "所有【近卫】干员在攻击后获得2点技力"
+      ]
+    },
+    {
+      "name": "铁卫-侵掠",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 147,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【重装】干员的攻击力+60%",
+      "lubiao_effects": [
+        "所有【重装】干员的攻击力+60%"
+      ]
+    },
+    {
+      "name": "铁卫-整固",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 148,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【重装】干员生命值+40%，防御力+40%，法术抗性+20",
+      "lubiao_effects": [
+        "所有【重装】干员生命值+40%，防御力+40%，法术抗性+20"
+      ]
+    },
+    {
+      "name": "残弩-突破",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 149,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【狙击】干员的部署费用-2，生命+60%",
+      "lubiao_effects": [
+        "所有【狙击】干员的部署费用-2，生命+60%"
+      ]
+    },
+    {
+      "name": "残弩-神速",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 150,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【狙击】干员的攻击速度+70",
+      "lubiao_effects": [
+        "所有【狙击】干员的攻击速度+70"
+      ]
+    },
+    {
+      "name": "断杖-突破",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 151,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【术师】干员的部署费用-3，生命+60%",
+      "lubiao_effects": [
+        "所有【术师】干员的部署费用-3，生命+60%"
+      ]
+    },
+    {
+      "name": "断杖-波纹",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 152,
+      "prts_category": "专业工具",
+      "prts_effect": "场上每有一名【术师】干员，所有敌人受到的法术伤害+12%（最多叠加8层）",
+      "lubiao_effects": [
+        "场上每有一名【术师】干员，所有敌人受到的法术伤害+12%（最多叠加8层）"
+      ]
+    },
+    {
+      "name": "医者-自医",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 153,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【医疗】干员的技力恢复+0.3/秒",
+      "lubiao_effects": [
+        "所有【医疗】干员的技力恢复+0.3/秒"
+      ]
+    },
+    {
+      "name": "医者-妙手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 154,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【医疗】干员的攻击速度+70",
+      "lubiao_effects": [
+        "所有【医疗】干员的攻击速度+70"
+      ]
+    },
+    {
+      "name": "锈刃-突破",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 155,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【特种】干员的部署费用-3，生命+60%",
+      "lubiao_effects": [
+        "所有【特种】干员的部署费用-3，生命+60%"
+      ]
+    },
+    {
+      "name": "锈刃-可视静谧",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 156,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【特种】干员的再部署时间-35%",
+      "lubiao_effects": [
+        "所有【特种】干员的再部署时间-35%"
+      ]
+    },
+    {
+      "name": "支柱-突破",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 157,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【辅助】干员的部署费用-2，生命+60%",
+      "lubiao_effects": [
+        "所有【辅助】干员的部署费用-2，生命+60%"
+      ]
+    },
+    {
+      "name": "支柱-援护",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 158,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【辅助】干员使攻击范围内的我方单位攻击力+30%",
+      "lubiao_effects": [
+        "所有【辅助】干员使攻击范围内的我方单位攻击力+30%"
+      ]
+    },
+    {
+      "name": "支柱-勤奋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 159,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【辅助】干员的技力消耗-40%",
+      "lubiao_effects": [
+        "所有【辅助】干员的技力消耗-40%"
+      ]
+    },
+    {
+      "name": "钝爪-先机",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 160,
+      "prts_category": "专业工具",
+      "prts_effect": "先锋干员开启技能时，立刻获得3点部署费用",
+      "lubiao_effects": [
+        "先锋干员开启技能时，立刻获得3点部署费用"
+      ]
+    },
+    {
+      "name": "折戟-避锋",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 161,
+      "prts_category": "专业工具",
+      "prts_effect": "近卫干员受到攻击范围外敌人的攻击时，有75%概率闪避",
+      "lubiao_effects": [
+        "近卫干员受到攻击范围外敌人的攻击时，有75%概率闪避"
+      ]
+    },
+    {
+      "name": "铁卫-轻行",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 162,
+      "prts_category": "专业工具",
+      "prts_effect": "重装干员首次部署费用-75%",
+      "lubiao_effects": [
+        "重装干员首次部署费用-75%"
+      ]
+    },
+    {
+      "name": "残弩-神准",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 163,
+      "prts_category": "专业工具",
+      "prts_effect": "狙击干员攻击面前直线上的敌人时，攻击力提升至140%",
+      "lubiao_effects": [
+        "狙击干员攻击面前直线上的敌人时，攻击力提升至140%"
+      ]
+    },
+    {
+      "name": "断杖-同调",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 164,
+      "prts_category": "专业工具",
+      "prts_effect": "场上每有一名术师干员，术师干员技能结束时获得3点技力",
+      "lubiao_effects": [
+        "场上每有一名术师干员，术师干员技能结束时获得3点技力"
+      ]
+    },
+    {
+      "name": "医者-地缘策略",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 165,
+      "prts_category": "专业工具",
+      "prts_effect": "医疗干员攻击范围内的地面干员阻挡数+1，可叠加",
+      "lubiao_effects": [
+        "医疗干员攻击范围内的地面干员阻挡数+1，可叠加"
+      ]
+    },
+    {
+      "name": "锈刃-研磨",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 166,
+      "prts_category": "专业工具",
+      "prts_effect": "所有【特种】干员的攻击速度+50，攻击力+50%",
+      "lubiao_effects": [
+        "所有【特种】干员的攻击速度+50，攻击力+50%"
+      ]
+    },
+    {
+      "name": "开拓之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 167,
+      "prts_category": "专业工具",
+      "prts_effect": "尖兵、冲锋手、策士的部署费用-6，技力需求-50%；拥有钝爪-先机时，开启技能会给其他场上干员回复2点技力",
+      "lubiao_effects": [
+        "尖兵、冲锋手、策士的部署费用-6，技力需求-50%；拥有钝爪-先机时，开启技能会给其他场上干员回复2点技力"
+      ]
+    },
+    {
+      "name": "诛戮之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 168,
+      "prts_category": "专业工具",
+      "prts_effect": "武者、无畏者、术战者对周围四格敌人造成的伤害提升至200%；拥有折戟-避锋时，击倒敌人后下次再部署时间和部署费用-50%",
+      "lubiao_effects": [
+        "武者、无畏者、术战者对周围四格敌人造成的伤害提升至200%；拥有折戟-避锋时，击倒敌人后下次再部署时间和部署费用-50%"
+      ]
+    },
+    {
+      "name": "坚御之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 169,
+      "prts_category": "专业工具",
+      "prts_effect": "铁卫、哨戒铁卫、不屈者部署时和技能结束后攻击力和最大生命+100%，加成在60秒内递减；拥有铁卫-轻行时，生命高于50%时阻挡数+3",
+      "lubiao_effects": [
+        "铁卫、哨戒铁卫、不屈者部署时和技能结束后攻击力和最大生命+100%，加成在60秒内递减；拥有铁卫-轻行时，生命高于50%时阻挡数+3"
+      ]
+    },
+    {
+      "name": "慑空之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 170,
+      "prts_category": "专业工具",
+      "prts_effect": "炮手、散射手、裂空炮手开启技能时攻击力+150%，持续5秒；拥有残弩-神准时，每3秒获得3点技力",
+      "lubiao_effects": [
+        "炮手、散射手、裂空炮手开启技能时攻击力+150%，持续5秒；拥有残弩-神准时，每3秒获得3点技力"
+      ]
+    },
+    {
+      "name": "波纹之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 171,
+      "prts_category": "专业工具",
+      "prts_effect": "轰击术师、链术师、驭械术师每对一个单位造成伤害就回复2点技力值，拥有断杖-同调时，造成伤害后3秒内攻击力+20%（最高+100%）",
+      "lubiao_effects": [
+        "轰击术师、链术师、驭械术师每对一个单位造成伤害就回复2点技力值，拥有断杖-同调时，造成伤害后3秒内攻击力+20%（最高+100%）"
+      ]
+    },
+    {
+      "name": "护愈之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 172,
+      "prts_category": "专业工具",
+      "prts_effect": "疗养师、行医、护佑者攻击范围内的我方干员免疫异常状态，拥有医者-地缘策略时，溢出的治疗量可以转化成等量的屏障（最大为100%生命上限）",
+      "lubiao_effects": [
+        "疗养师、行医、护佑者攻击范围内的我方干员免疫异常状态，拥有医者-地缘策略时，溢出的治疗量可以转化成等量的屏障（最大为100%生命上限）"
+      ]
+    },
+    {
+      "name": "剿袭之手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 173,
+      "prts_category": "专业工具",
+      "prts_effect": "敌人进入秘术师、神射手、猎手的攻击范围内时，受到一次攻击力300%的法术或物理伤害和50%的法术或物理脆弱（持续3秒）",
+      "lubiao_effects": [
+        "敌人进入秘术师、神射手、猎手的攻击范围内时，受到一次攻击力300%的法术或物理伤害和50%的法术或物理脆弱（持续3秒）"
+      ]
+    },
+    {
+      "name": "钝爪-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 174,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【先锋】干员（不消耗希望），并使其：每次开启技能后攻击力+10%（最多+60%）",
+      "lubiao_effects": [
+        "立即进阶一个【先锋】干员（不消耗希望），并使其：每次开启技能后攻击力+10%（最多+60%）"
+      ]
+    },
+    {
+      "name": "断杖-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 175,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【术师】干员（不消耗希望），并使其：攻击时降低目标5点法术抗性（最多降低25）",
+      "lubiao_effects": [
+        "立即进阶一个【术师】干员（不消耗希望），并使其：攻击时降低目标5点法术抗性（最多降低25）"
+      ]
+    },
+    {
+      "name": "折戟-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 176,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【近卫】干员（不消耗希望），并使其：首次被击倒时回复100%生命",
+      "lubiao_effects": [
+        "立即进阶一个【近卫】干员（不消耗希望），并使其：首次被击倒时回复100%生命"
+      ]
+    },
+    {
+      "name": "铁卫-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 177,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【重装】干员（不消耗希望），并使其：受到攻击时回复2技力",
+      "lubiao_effects": [
+        "立即进阶一个【重装】干员（不消耗希望），并使其：受到攻击时回复2技力"
+      ]
+    },
+    {
+      "name": "残弩-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 178,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【狙击】干员（不消耗希望），并使其：攻击时无视目标50%的防御",
+      "lubiao_effects": [
+        "立即进阶一个【狙击】干员（不消耗希望），并使其：攻击时无视目标50%的防御"
+      ]
+    },
+    {
+      "name": "医者-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 179,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【医疗】干员（不消耗希望），并使其：治疗时使目标获得2技力",
+      "lubiao_effects": [
+        "立即进阶一个【医疗】干员（不消耗希望），并使其：治疗时使目标获得2技力"
+      ]
+    },
+    {
+      "name": "锈刃-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 180,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【特种】干员（不消耗希望），并使其：再部署时间-50%",
+      "lubiao_effects": [
+        "立即进阶一个【特种】干员（不消耗希望），并使其：再部署时间-50%"
+      ]
+    },
+    {
+      "name": "支柱-新典训",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 181,
+      "prts_category": "专业工具",
+      "prts_effect": "立即进阶一个【辅助】干员（不消耗希望），并使其：攻击范围内的敌人防御力和法术抗性-40%",
+      "lubiao_effects": [
+        "立即进阶一个【辅助】干员（不消耗希望），并使其：攻击范围内的敌人防御力和法术抗性-40%"
+      ]
+    },
+    {
+      "name": "疗养礼品卡",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 182,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员攻击速度+50",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员攻击速度+50"
+      ]
+    },
+    {
+      "name": "指中狼",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 183,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员无法开启技能，但攻击力+100%，攻击速度+50",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员无法开启技能，但攻击力+100%，攻击速度+50"
+      ]
+    },
+    {
+      "name": "“老妈的鼓励”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 184,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员首次部署时攻击力+50%",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员首次部署时攻击力+50%"
+      ]
+    },
+    {
+      "name": "发泡胶",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 185,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员攻击速度-50，攻击力+120%",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员攻击速度-50，攻击力+120%"
+      ]
+    },
+    {
+      "name": "零食盒",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 186,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员的技能会自动开启，技力需求-20%",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员的技能会自动开启，技力需求-20%"
+      ]
+    },
+    {
+      "name": "静谧扩香石",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 187,
+      "prts_category": "专业工具",
+      "prts_effect": "下一个招募或进阶的干员攻击范围内的所有干员每3秒获得1点技力",
+      "lubiao_effects": [
+        "下一个招募或进阶的干员攻击范围内的所有干员每3秒获得1点技力"
+      ]
+    },
+    {
+      "name": "幸运饼干",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 188,
+      "prts_category": "专业工具",
+      "prts_effect": "获得此收藏品时，使随机2名干员的技力回复速度+0.8/秒",
+      "lubiao_effects": [
+        "获得此收藏品时，使随机2名干员的技力回复速度+0.8/秒"
+      ]
+    },
+    {
+      "name": "罗德岛战术电台",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 189,
+      "prts_category": "巧用收藏",
+      "prts_effect": "战斗后掉落招募券时，增加一个可选项",
+      "lubiao_effects": [
+        "战斗后掉落招募券时，增加一个可选项"
+      ]
+    },
+    {
+      "name": "古地树实",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 190,
+      "prts_category": "巧用收藏",
+      "prts_effect": "立即获得三件随机的小玩意",
+      "lubiao_effects": [
+        "立即获得三件随机的小玩意"
+      ]
+    },
+    {
+      "name": "城墙之子",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 191,
+      "prts_category": "巧用收藏",
+      "prts_effect": "部署在蓝色目标点周围8格的干员阻挡数+2，最大生命值+50%",
+      "lubiao_effects": [
+        "部署在蓝色目标点周围8格的干员阻挡数+2，最大生命值+50%"
+      ]
+    },
+    {
+      "name": "金酒之杯",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 192,
+      "prts_category": "巧用收藏",
+      "prts_effect": "每有5源石锭，所有我方单位的攻击速度+7",
+      "lubiao_effects": [
+        "每有5源石锭，所有我方单位的攻击速度+7"
+      ]
+    },
+    {
+      "name": "圆石祭坛",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 193,
+      "prts_category": "巧用收藏",
+      "prts_effect": "战斗后有概率使所有我方单位的攻击力和防御力永久+5%（最多叠加10层）",
+      "lubiao_effects": [
+        "战斗后有概率使所有我方单位的攻击力和防御力永久+5%（最多叠加10层）"
+      ]
+    },
+    {
+      "name": "锈蚀的铁锤",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 194,
+      "prts_category": "巧用收藏",
+      "prts_effect": "在商店中购买道具所需源石锭-50%",
+      "lubiao_effects": [
+        "在商店中购买道具所需源石锭-50%"
+      ]
+    },
+    {
+      "name": "四叶草化石",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 195,
+      "prts_category": "巧用收藏",
+      "prts_effect": "我方在得偿所愿节点和战斗后掉落战利品时，增加一个可选项",
+      "lubiao_effects": [
+        "我方在得偿所愿节点和战斗后掉落战利品时，增加一个可选项"
+      ]
+    },
+    {
+      "name": "《拳经三问》",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 196,
+      "prts_category": "巧用收藏",
+      "prts_effect": "干员每使用过一次技能，自身的攻击力+5%，最多叠加40层",
+      "lubiao_effects": [
+        "干员每使用过一次技能，自身的攻击力+5%，最多叠加40层"
+      ]
+    },
+    {
+      "name": "佣兵的饰物",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 197,
+      "prts_category": "巧用收藏",
+      "prts_effect": "使随机一名干员的攻击力、防御力、最大生命值+5%，且每次完美作战结束后额外+5%（最多叠加10层）",
+      "lubiao_effects": [
+        "使随机一名干员的攻击力、防御力、最大生命值+5%，且每次完美作战结束后额外+5%（最多叠加10层）"
+      ]
+    },
+    {
+      "name": "薄行囊",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 198,
+      "prts_category": "巧用收藏",
+      "prts_effect": "零件箱容量+4",
+      "lubiao_effects": [
+        "零件箱容量+4"
+      ]
+    },
+    {
+      "name": "悲伤的红",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 199,
+      "prts_category": "巧用收藏",
+      "prts_effect": "零件箱中每有1个零件，所有干员的生命和攻击力+8%",
+      "lubiao_effects": [
+        "零件箱中每有1个零件，所有干员的生命和攻击力+8%"
+      ]
+    },
+    {
+      "name": "空床",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 200,
+      "prts_category": "巧用收藏",
+      "prts_effect": "零件箱中存在4个或更多空栏位时，所有干员部署费用-6",
+      "lubiao_effects": [
+        "零件箱中存在4个或更多空栏位时，所有干员部署费用-6"
+      ]
+    },
+    {
+      "name": "迷藏",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 201,
+      "prts_category": "巧用收藏",
+      "prts_effect": "每次进入新区域时标记一个节点，探索该节点后获得一个较为稀有的随机自然物",
+      "lubiao_effects": [
+        "每次进入新区域时标记一个节点，探索该节点后获得一个较为稀有的随机自然物"
+      ]
+    },
+    {
+      "name": "复得之轮",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 202,
+      "prts_category": "巧用收藏",
+      "prts_effect": "加工品使用次数耗尽时，获得一个随机加工品",
+      "lubiao_effects": [
+        "加工品使用次数耗尽时，获得一个随机加工品"
+      ]
+    },
+    {
+      "name": "果腹",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 203,
+      "prts_category": "巧用收藏",
+      "prts_effect": "加工品的最后一次移动不再消耗行动力",
+      "lubiao_effects": [
+        "加工品的最后一次移动不再消耗行动力"
+      ]
+    },
+    {
+      "name": "囊中骨",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 204,
+      "prts_category": "巧用收藏",
+      "prts_effect": "立刻获得3个随机的普通加工品",
+      "lubiao_effects": [
+        "立刻获得3个随机的普通加工品"
+      ]
+    },
+    {
+      "name": "林中小手",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 205,
+      "prts_category": "巧用收藏",
+      "prts_effect": "立刻获得3个随机的普通自然物",
+      "lubiao_effects": [
+        "立刻获得3个随机的普通自然物"
+      ]
+    },
+    {
+      "name": "血孩子",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 206,
+      "prts_category": "巧用收藏",
+      "prts_effect": "获得自然物<枯苔藓球>，直到零件箱被填满",
+      "lubiao_effects": [
+        "获得自然物<枯苔藓球>，直到零件箱被填满"
+      ]
+    },
+    {
+      "name": "同行者",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 207,
+      "prts_category": "巧用收藏",
+      "prts_effect": "应急助力节点中招募所需源石锭-50%，应急干员的生命值、攻击力和防御力+40%",
+      "lubiao_effects": [
+        "应急助力节点中招募所需源石锭-50%，应急干员的生命值、攻击力和防御力+40%"
+      ]
+    },
+    {
+      "name": "厄运火杆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 208,
+      "prts_category": "巧用收藏",
+      "prts_effect": "与“居民”作战时，敌人生命-40%，且作战胜利后所有干员的攻击速度永久+10",
+      "lubiao_effects": [
+        "与“居民”作战时，敌人生命-40%，且作战胜利后所有干员的攻击速度永久+10"
+      ]
+    },
+    {
+      "name": "猎印",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 209,
+      "prts_category": "巧用收藏",
+      "prts_effect": "猎犬proto的攻击力-50%；每拥有1层【探测先锋】，我方法术抗性+10",
+      "lubiao_effects": [
+        "猎犬proto的攻击力-50%；每拥有1层【探测先锋】，我方法术抗性+10"
+      ]
+    },
+    {
+      "name": "源私钥",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 210,
+      "prts_category": "巧用收藏",
+      "prts_effect": "立刻获得99源石锭，在部分事件中能发挥特殊的作用",
+      "lubiao_effects": [
+        "立刻获得99源石锭，在部分事件中能发挥特殊的作用"
+      ]
+    },
+    {
+      "name": "黑流树海笔记",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 211,
+      "prts_category": "巧用收藏",
+      "prts_effect": "每探索一种新节点叠加1层，每层使作战后获得收藏品的概率提升",
+      "lubiao_effects": [
+        "每探索一种新节点叠加1层，每层使作战后获得收藏品的概率提升"
+      ]
+    },
+    {
+      "name": "基础物联终端",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 212,
+      "prts_category": "巧用收藏",
+      "prts_effect": "探索2个诡意行商或秘境行商后，获得【高级物联终端】",
+      "lubiao_effects": [
+        "探索2个诡意行商或秘境行商后，获得【高级物联终端】"
+      ]
+    },
+    {
+      "name": "高级物联终端",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 213,
+      "prts_category": "巧用收藏",
+      "prts_effect": "干员部署后与攻击范围内一名干员用高级物联终端连接，敌人触碰高级物联终端时停顿，每0.5秒受到所有相连的干员攻击力之和50%的法术伤害",
+      "lubiao_effects": [
+        "干员部署后与攻击范围内一名干员用高级物联终端连接，敌人触碰高级物联终端时停顿，每0.5秒受到所有相连的干员攻击力之和50%的法术伤害"
+      ]
+    },
+    {
+      "name": "植浆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 214,
+      "prts_category": "巧用收藏",
+      "prts_effect": "完成1场【追猎】作战后，获得【犬植浆】",
+      "lubiao_effects": [
+        "完成1场【追猎】作战后，获得【犬植浆】"
+      ]
+    },
+    {
+      "name": "犬植浆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 215,
+      "prts_category": "巧用收藏",
+      "prts_effect": "干员攻击范围内的其他干员获得迷彩，攻击力+10%（可叠加）",
+      "lubiao_effects": [
+        "干员攻击范围内的其他干员获得迷彩，攻击力+10%（可叠加）"
+      ]
+    },
+    {
+      "name": "追忆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 216,
+      "prts_category": "巧用收藏",
+      "prts_effect": "进入下一区域时，变为重新进入本区域，之后该收藏品失效",
+      "lubiao_effects": [
+        "进入下一区域时，变为重新进入本区域，之后该收藏品失效"
+      ]
+    },
+    {
+      "name": "垂降劫掠装置",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 217,
+      "prts_category": "巧用收藏",
+      "prts_effect": "我方干员的再部署时间-50%，部署时对随机1名敌人及周围8格的敌人造成攻击力1000%的物理伤害",
+      "lubiao_effects": [
+        "我方干员的再部署时间-50%，部署时对随机1名敌人及周围8格的敌人造成攻击力1000%的物理伤害"
+      ]
+    },
+    {
+      "name": "仇名录",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 218,
+      "prts_category": "巧用收藏",
+      "prts_effect": "我方干员的攻击力+2%，每击倒一名敌人永久额外+0.2%（最高+200%）",
+      "lubiao_effects": [
+        "我方干员的攻击力+2%，每击倒一名敌人永久额外+0.2%（最高+200%）"
+      ]
+    },
+    {
+      "name": "支援补给站",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 219,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带1个便携式补给站",
+      "lubiao_effects": [
+        "每次战斗中携带1个便携式补给站"
+      ]
+    },
+    {
+      "name": "支援地雷组",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 220,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带3个干扰地雷",
+      "lubiao_effects": [
+        "每次战斗中携带3个干扰地雷"
+      ]
+    },
+    {
+      "name": "支援轰隆隆",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 221,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带2个轰隆隆先生",
+      "lubiao_effects": [
+        "每次战斗中携带2个轰隆隆先生"
+      ]
+    },
+    {
+      "name": "支援起重机",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 222,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带2个雪雉的安全起重机",
+      "lubiao_effects": [
+        "每次战斗中携带2个雪雉的安全起重机"
+      ]
+    },
+    {
+      "name": "支援防暴桩",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 223,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带2个防暴桩",
+      "lubiao_effects": [
+        "每次战斗中携带2个防暴桩"
+      ]
+    },
+    {
+      "name": "支援雾机",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 224,
+      "prts_category": "支援道具",
+      "prts_effect": "每次战斗中携带1个失修舞台雾机",
+      "lubiao_effects": [
+        "每次战斗中携带1个失修舞台雾机"
+      ]
+    },
+    {
+      "name": "沙盘α",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 225,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "我方单位部署费用+2，让探索开启不同的方向，同时持有【沙盘β】可以揭示源阶方的所在位置",
+      "lubiao_effects": [
+        "我方单位部署费用+2，让探索开启不同的方向，同时持有【沙盘β】可以揭示源阶方的所在位置"
+      ]
+    },
+    {
+      "name": "沙盘β",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 226,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "我方单位部署费用+3，让探索开启不同的方向，同时持有【沙盘α】可以揭示源阶方的所在位置",
+      "lubiao_effects": [
+        "我方单位部署费用+3，让探索开启不同的方向，同时持有【沙盘α】可以揭示源阶方的所在位置"
+      ]
+    },
+    {
+      "name": "怦然信标",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 227,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "所有敌人的生命+20%，我方单位的生命-40%，让探索开启不同的方向",
+      "lubiao_effects": [
+        "所有敌人的生命+20%，我方单位的生命-40%，让探索开启不同的方向"
+      ]
+    },
+    {
+      "name": "击坠“神明”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 228,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "可以在特殊节点中，使“玻利瓦尔，症结之核”首次释放“灾厄之口”时不摧毁“危朽”",
+      "lubiao_effects": [
+        "可以在特殊节点中，使“玻利瓦尔，症结之核”首次释放“灾厄之口”时不摧毁“危朽”"
+      ]
+    },
+    {
+      "name": "湮没“光明”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 229,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "可以在特殊节点中，使“玻利瓦尔，症结之核”的“灾厄之口”伤害降低",
+      "lubiao_effects": [
+        "可以在特殊节点中，使“玻利瓦尔，症结之核”的“灾厄之口”伤害降低"
+      ]
+    },
+    {
+      "name": "焚毁“文明”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 230,
+      "prts_category": "叙事珍奇",
+      "prts_effect": "可以在特殊节点中，使“玻利瓦尔，症结之核”的“灾厄之口”无法封锁待部署区",
+      "lubiao_effects": [
+        "可以在特殊节点中，使“玻利瓦尔，症结之核”的“灾厄之口”无法封锁待部署区"
+      ]
+    },
+    {
+      "name": "“文明的存续”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 231,
+      "prts_category": "泰拉之密",
+      "prts_effect": "所有敌方单位受到的真实伤害+150%",
+      "lubiao_effects": [
+        "所有敌方单位受到的真实伤害+150%"
+      ]
+    },
+    {
+      "name": "“荣耀套餐”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 232,
+      "prts_category": "泰拉之密",
+      "prts_effect": "我方单位被击倒时，对周围四格的敌人造成6秒晕眩",
+      "lubiao_effects": [
+        "我方单位被击倒时，对周围四格的敌人造成6秒晕眩"
+      ]
+    },
+    {
+      "name": "“时光之末”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 233,
+      "prts_category": "泰拉之密",
+      "prts_effect": "仅一次，在非区域最终战斗和领袖战中失败时不结束探索，目标生命+1并继续下一步行动",
+      "lubiao_effects": [
+        "仅一次，在非区域最终战斗和领袖战中失败时不结束探索，目标生命+1并继续下一步行动"
+      ]
+    },
+    {
+      "name": "“小格兰法洛”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 234,
+      "prts_category": "泰拉之密",
+      "prts_effect": "每次敌人进入保护目标点时，立刻对全场所有敌人造成5秒晕眩",
+      "lubiao_effects": [
+        "每次敌人进入保护目标点时，立刻对全场所有敌人造成5秒晕眩"
+      ]
+    },
+    {
+      "name": "“碎片大厦的回忆”",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 235,
+      "prts_category": "泰拉之密",
+      "prts_effect": "每次敌人进入保护目标点时，立刻对全场所有敌人造成5000点真实伤害",
+      "lubiao_effects": [
+        "每次敌人进入保护目标点时，立刻对全场所有敌人造成5000点真实伤害"
+      ]
+    },
+    {
+      "name": "人事部铜印",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 236,
+      "prts_category": "泰拉之密",
+      "prts_effect": "随机临时招募1名5星干员，且直接就是已进阶的状态",
+      "lubiao_effects": [
+        "随机临时招募1名5星干员，且直接就是已进阶的状态"
+      ]
+    },
+    {
+      "name": "博士银印",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 237,
+      "prts_category": "泰拉之密",
+      "prts_effect": "随机临时招募1名6星干员，且直接就是已进阶的状态",
+      "lubiao_effects": [
+        "随机临时招募1名6星干员，且直接就是已进阶的状态"
+      ]
+    },
+    {
+      "name": "彩虹瓮",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 238,
+      "prts_category": "泰拉之密",
+      "prts_effect": "每次敌人进入保护目标点时，使随机一名再部署中的单位当前再部署时间减为0",
+      "lubiao_effects": [
+        "每次敌人进入保护目标点时，使随机一名再部署中的单位当前再部署时间减为0"
+      ]
+    },
+    {
+      "name": "一串钱伥",
+      "status": "agreed_text",
+      "coverage": "both",
+      "prts_number": 239,
+      "prts_category": "泰拉之密",
+      "prts_effect": "所有干员的部署费用-1，战斗开始时，打乱所有干员的部署费用",
+      "lubiao_effects": [
+        "所有干员的部署费用-1，战斗开始时，打乱所有干员的部署费用"
+      ]
+    },
+    {
+      "name": "襁褓中的猫",
+      "status": "deferred_inherited",
+      "coverage": "lubiao_only",
+      "prts_number": null,
+      "prts_category": null,
+      "prts_effect": null,
+      "lubiao_effects": [
+        "下次探索时，初始可额外获得5源石锭",
+        "下次探索时，初始可额外获得5源石锭",
+        "下次探索时，初始可额外获得5源石锭"
+      ]
+    },
+    {
+      "name": "襁褓中的狗",
+      "status": "deferred_inherited",
+      "coverage": "lubiao_only",
+      "prts_number": null,
+      "prts_category": null,
+      "prts_effect": null,
+      "lubiao_effects": [
+        "下次探索时，初始可额外获得1点希望",
+        "下次探索时，初始可额外获得1点希望",
+        "下次探索时，初始可额外获得1点希望"
+      ]
+    },
+    {
+      "name": "襁褓三头犬",
+      "status": "deferred_inherited",
+      "coverage": "lubiao_only",
+      "prts_number": null,
+      "prts_category": null,
+      "prts_effect": null,
+      "lubiao_effects": [
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1次选择支援的机会"
+      ]
+    },
+    {
+      "name": "襁褓羽蛇",
+      "status": "deferred_inherited",
+      "coverage": "lubiao_only",
+      "prts_number": null,
+      "prts_category": null,
+      "prts_effect": null,
+      "lubiao_effects": [
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项",
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项",
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项",
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项",
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项",
+        "若本次探索通过至少两个区域，下次探索时，初始可额外获得1个支援选项"
+      ]
+    }
+  ]
+}
