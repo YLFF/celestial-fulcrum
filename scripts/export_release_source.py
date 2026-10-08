@@ -43,11 +43,13 @@ def publication_files(root=ROOT):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("destination", type=Path)
+    parser.add_argument("--refresh", action="store_true", help="Refresh an existing managed publication checkout")
     args = parser.parse_args()
     destination = args.destination.resolve()
     if not destination.is_relative_to((ROOT / "work").resolve()):
         parser.error("The publication checkout must be inside this project's work directory")
-    if destination.exists() and any(destination.iterdir()):
+    managed = (destination / "publication-manifest.json").is_file()
+    if destination.exists() and any(destination.iterdir()) and not (args.refresh and managed):
         parser.error("Use a new, empty publication directory")
     destination.mkdir(parents=True, exist_ok=True)
     manifest = {}

@@ -88,9 +88,11 @@ jobs:
           name: diagnostics-${{ matrix.platform }}
           path: |
             build/desktop-self-test.json
-            build/macos-self-test.json
+            work/macos-self-test.json
             build/pyinstaller/**/warn-*.txt
             build/pyinstaller/**/xref-*.html
+            build/pyinstaller-macos/**/warn-*.txt
+            build/pyinstaller-macos/**/xref-*.html
           if-no-files-found: ignore
           retention-days: 7
 
