@@ -126,8 +126,8 @@ def attach_node_posterior(instance, prediction):
                 "known category count exceeds the floor maximum": "已确认同类节点超过本层数量上限",
                 "observations are impossible under the declared model": "当前已确认节点与统计模型不相容",
                 "exact DP state limit reached; no approximate result returned": "精确预测达到状态上限，保留兼容估算",
-            }.get(str(error), str(error))
-            families[family] = {"status": "fallback", "reason": reason}
+            }.get(str(error), "当前观测与数量先验模型不相容，已回退兼容估算")
+            families[family] = {"status": "fallback", "reason": reason, "diagnosticDetail": str(error)}
             label = "未知诡秘" if family == "unknown_mystery" else "未知凶戾"
             prediction["warnings"].append(f"节点预测 beta：{label}：{reason}")
             for row in unknown.values():

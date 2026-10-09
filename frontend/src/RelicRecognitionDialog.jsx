@@ -55,8 +55,9 @@ export default function RelicRecognitionDialog({ loaded, entries, startJob, onCo
       <input ref={input} type="file" accept="image/*" aria-label="藏品截图" hidden onChange={event => { upload(event.target.files[0]); event.target.value = ''; }} />
       <button disabled={locked} onClick={() => input.current.click()}><ImagePlus size={16} />选择 / 拖入截图</button>
       <span>{asset ? `${asset.width} × ${asset.height}` : '未选择截图'}</span>
-      <button className="primary" disabled={!asset || locked} onClick={recognize}>{working ? <LoaderCircle size={16} className="spin" /> : <ScanLine size={16} />}识别</button>
     </div>
+    <div className="relic-scan-actions"><button className="primary" disabled={!asset || locked} onClick={recognize}>{working ? <LoaderCircle size={16} className="spin" /> : <ScanLine size={16} />}识别最新截图藏品栏</button>
+      <small className="quiet">默认使用最近导入或截取的图片；也可选择、拖入新的截图。</small></div>
     {job?.result && !job.result.success && <p className="negative" role="alert">{job.result.reason}</p>}
     {preview && <figure className="relic-row-preview"><img src={preview.row} alt="检测到的收藏品栏" /><figcaption>可见 {job.result.slots.length} 件 · {job.elapsedSeconds} 秒</figcaption></figure>}
     {job?.result.success && <div className="relic-scan-results">{job.result.slots.map((slot, index) => {

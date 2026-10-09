@@ -5,10 +5,11 @@ from __future__ import annotations
 from dataclasses import dataclass
 import math
 from typing import Any, Iterable, Mapping
+from .scoring_profile import RESOURCE_POINTS
 
 
-REFERENCE_POINTS = 100.0
-DEFAULT_UNIT_VALUES = {"relicCount": 1.0, "originiumIngot": 0.08}
+REFERENCE_POINTS = float(RESOURCE_POINTS["relicPoints"])
+DEFAULT_UNIT_VALUES = {"relicCount": 1.0, "originiumIngot": RESOURCE_POINTS["cashPoints"] / REFERENCE_POINTS}
 
 
 def _nonnegative(value: float, label: str) -> float:

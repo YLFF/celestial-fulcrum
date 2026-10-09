@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { candidatePositions, POSITION_FILTERS, routeCurve } from '../src/mapPresentation.js';
+import { candidateIconSwitch, candidatePositions, POSITION_FILTERS, routeCurve } from '../src/mapPresentation.js';
 import { mergedRecognitionPreview, recognitionChanges, recognitionReview } from '../src/recognitionMerge.js';
 import { AREA_NAMES } from '../src/model.js';
 
@@ -8,13 +8,33 @@ test('ten fixed area names and candidate filter order', () => {
   assert.equal(Object.keys(AREA_NAMES).length, 10);
   assert.equal(AREA_NAMES.I, 'I · 玻利瓦尔肤层');
   assert.ok(AREA_NAMES.V.includes('卡德霍之颅'));
-  assert.deepEqual(POSITION_FILTERS.map(row => row[1]), ['秘境行商', '诡意行商', '误入奇境', '狭路相逢', '不期而遇', '先行一步', '无效验尸', '险路小径']);
+  assert.deepEqual(POSITION_FILTERS.map(row => row[1]), ['秘境行商', '诡意行商', '误入奇境', '狭路相逢', '不期而遇', '先行一步', '无效验尸', '险路小径', '小八戒']);
   const instance = { nodes: { a: {}, b: { completion: 'completed' }, c: { resolvedCategoryId: 'node_type_013' } },
     prediction: { unknownNodes: { a: { candidates: [{ categoryId: 'node_type_013' }], endingOccupancy: [{ goalId: 'ending3_autopsy', probability: .5 }] },
       b: { candidates: [{ categoryId: 'node_type_013' }] }, c: { candidates: [{ categoryId: 'node_type_013' }] } } } };
   assert.deepEqual([...candidatePositions(instance, 'node_type_013')], ['a']);
   assert.deepEqual([...candidatePositions(instance, 'autopsy')], ['a']);
   assert.equal(candidatePositions(instance, '').size, 0);
+});
+
+test('little eight highlights unknown mystery, then unvisited noncombat, then all noncombat without icon switching', () => {
+  const instance = { nodes: {
+    a: { observedCategoryId: 'unknown_mystery', completion: 'pending' },
+    b: { resolvedCategoryId: 'node_type_007', completion: 'pending' },
+    c: { resolvedCategoryId: 'node_type_004', completion: 'completed' },
+    d: { resolvedCategoryId: 'node_type_001', observedCategoryId: 'node_type_020', completion: 'completed' },
+    e: { observedCategoryId: 'unknown_ferocity', completion: 'pending' },
+    f: { resolvedCategoryId: 'node_type_007', confirmedMarkIds: ['node_mark_001'], completion: 'pending' },
+    g: { resolvedCategoryId: 'node_type_021', confirmedMarkIds: ['node_mark_001'], completion: 'completed' },
+  } };
+  assert.deepEqual([...candidatePositions(instance, 'little-eight')], ['a']);
+  instance.nodes.a.resolvedCategoryId = 'node_type_001';
+  assert.deepEqual([...candidatePositions(instance, 'little-eight')], ['b']);
+  instance.nodes.b.completion = 'completed';
+  assert.deepEqual([...candidatePositions(instance, 'little-eight')], ['b', 'c', 'd', 'g']);
+  assert.equal(candidateIconSwitch('little-eight'), false);
+  assert.equal(candidateIconSwitch('node_type_013'), true);
+  assert.equal(candidateIconSwitch(''), false);
 });
 
 test('straight and jump moves become directional curves, not map edges', () => {

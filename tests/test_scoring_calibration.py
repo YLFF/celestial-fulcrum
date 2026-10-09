@@ -1,4 +1,4 @@
-from itertools import product
+from itertools import permutations
 import unittest
 
 from fulcrum.scoring_calibration import (
@@ -112,23 +112,20 @@ class CalibrationMathTests(unittest.TestCase):
         self.assertEqual(ticket_reference_points("精英突击招募券", squad_id="squad_005", below_threshold=True), 281.25)
         self.assertEqual(ticket_reference_points("前线统合资深招募券"), 125)
 
-    def test_iid_max_uses_cdf_instead_of_full_cartesian_product(self) -> None:
-        outcomes = [(10, 0.4), (100, 0.6)]
-        for count in (1, 2, 3):
-            brute_force = sum(max(value for value, _ in row) * self.probability(row)
-                              for row in product(outcomes, repeat=count))
-            result = expected_best_score(outcomes, candidate_count=count)
-            self.assertAlmostEqual(result["iidBest"], brute_force)
-            self.assertLessEqual(result["lowerBound"], result["iidBest"])
-            self.assertGreaterEqual(result["upperBound"], result["iidBest"])
-        self.assertEqual(expected_best_score([(100, 1)], candidate_count=2)["iidBest"], 100)
-
-    @staticmethod
-    def probability(row) -> float:
-        result = 1.0
-        for _, p in row:
-            result *= p
-        return result
+    def test_distinct_candidates_match_weighted_ordered_pairs(self) -> None:
+        outcomes = [(10, 0.2), (100, 0.3), (200, 0.5)]
+        brute_force = sum(max(first[0], second[0]) * first[1] * second[1] / (1 - first[1])
+                          for first, second in permutations(outcomes, 2))
+        result = expected_best_score(outcomes, candidate_count=2)
+        self.assertAlmostEqual(result["expectedBest"], brute_force)
+        self.assertEqual(result["model"], "weighted_without_replacement")
+        self.assertLessEqual(result["lowerBound"], result["expectedBest"])
+        self.assertGreaterEqual(result["upperBound"], result["expectedBest"])
+        self.assertEqual(expected_best_score([(10, .99), (100, .01)], candidate_count=2)["expectedBest"], 100)
+        self.assertEqual(expected_best_score([(100, .5), (100, .5)], candidate_count=2)["expectedBest"], 100)
+        self.assertEqual(expected_best_score(outcomes)["expectedBest"], 132)
+        with self.assertRaises(ValueError):
+            expected_best_score([(100, 1)], candidate_count=2)
 
     def test_invalid_distributions(self) -> None:
         for outcomes in ([], [(100, 0.5)], [(100, -1), (10, 2)], [(float("nan"), 1)]):
@@ -144,7 +141,7 @@ class NodeScoreReportTests(unittest.TestCase):
         self.assertAlmostEqual(report["merchants"]["greenMet"]["points"], green_merchant_base_score(50) + 100)
         self.assertEqual(report["encounters"]["met"]["points"], report["encounters"]["met"]["knownContribution"])
         self.assertEqual(report["encounters"]["met"]["missingTerms"], [])
-        self.assertIn("独立同分布", markdown(report))
+        self.assertIn("同池的不同物品", markdown(report))
         self.assertNotIn("nan", markdown(report))
         for row in report["combat"]:
             self.assertAlmostEqual(sum(row["met"]["parts"].values()), row["met"]["total"])
@@ -200,7 +197,7 @@ class NodeScoreReportTests(unittest.TestCase):
             self.assertIsNotNone(report["encounters"][key]["points"])
         pool = next(row for row in report["pools"] if row["contextId"] == "node_battle_elite_scrap")
         lake = next(row for row in report["encounters"]["met"]["events"] if row["id"] == "encounter_017")
-        self.assertAlmostEqual(lake["knownPoints"], 292.2 + 0.8 * pool["iidBest"])
+        self.assertAlmostEqual(lake["knownPoints"], 292.2 + 0.8 * pool["expectedBest"])
 
     def test_exchange_proxy_is_not_the_painted_bonus_or_an_actual_resource_grant(self) -> None:
         report = build_report(painted_agor=1)

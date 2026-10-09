@@ -22,6 +22,8 @@ class MacBuildMaterialsTests(unittest.TestCase):
         self.assertIn("frontend/pnpm-workspace.yaml", names)
         self.assertIn("eng.traineddata", names)
         self.assertIn("packaging/MACOS_TEST.md", names)
+        self.assertIn("data/scoring/blackstream/default.json", names)
+        self.assertIn("data/scoring/blackstream/relics.json", names)
         for entry in entries().values():
             if entry.get("imagePath"):
                 self.assertIn(image_path(entry["id"]), paths, entry["id"])
@@ -39,6 +41,8 @@ class MacBuildMaterialsTests(unittest.TestCase):
                 "COLLECT": lambda *args, **kwargs: None, "BUNDLE": lambda *args, **kwargs: kwargs,
             })
         bundled = {Path(source).resolve() for source, _ in spec["datas"]}
+        for path in (ROOT / "data/scoring").rglob("*.json"):
+            self.assertIn((str(path), str(path.relative_to(ROOT).parent)), spec["datas"])
         for entry in entries().values():
             if entry.get("imagePath"):
                 self.assertIn(image_path(entry["id"]), bundled, entry["id"])

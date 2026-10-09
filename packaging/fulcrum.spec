@@ -21,7 +21,8 @@ version_resource = VSVersionInfo(ffi=FixedFileInfo(filevers=version, prodvers=ve
         StringStruct("InternalName", project["executableName"]),
         StringStruct("OriginalFilename", project["executableName"] + ".exe"),
     ])]), VarFileInfo([VarStruct("Translation", [2052, 1200])])])
-datas = [(str(path), "data") for path in (root / "data").glob("*.json")
+data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+datas = [(str(path), str(path.relative_to(root).parent)) for path in data_paths
          if path.name not in {"arkrog_blackflowmap_findings.json", "lubiao_reference_catalog.v1.json"}]
 datas += [(str(path), str(path.relative_to(root).parent))
           for path in (root / "assets").rglob("*")

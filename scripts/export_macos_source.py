@@ -25,7 +25,8 @@ def source_files(root=ROOT):
     for folder in FOLDERS:
         paths.update(path for path in (root / folder).rglob("*") if path.is_file()
                      and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"})
-    paths.update(path for path in (root / "data").glob("*.json") if path.name not in EXCLUDED_DATA)
+    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+    paths.update(path for path in data_paths if path.name not in EXCLUDED_DATA)
     missing = [str(path.relative_to(root)) for path in paths if not path.is_file()]
     if missing:
         raise RuntimeError(f"Required source inputs are missing: {missing}")

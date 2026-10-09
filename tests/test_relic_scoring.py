@@ -33,7 +33,7 @@ class RelicScoringTests(unittest.TestCase):
         self.assertEqual(len(context["members"]), 26)
         self.assertTrue(all(row["probability"] is None for row in context["members"]))
         probe = pool_probe(self.catalog, context["id"], relic_scorer=self.scorer)
-        self.assertEqual(probe["iidBest"], 100)
+        self.assertEqual(probe["expectedBest"], 100)
         self.assertEqual(probe["assumption"], "configured_per_received_relic_points")
         for event_id in ("encounter_013", "encounter_014", "encounter_015", "encounter_016"):
             self.assertEqual(self.scorer.event_pool(event_id), context["id"])
@@ -57,7 +57,7 @@ class RelicScoringTests(unittest.TestCase):
     def test_pool_proxy_already_contains_two_choice_value(self):
         for context, points in (("pool_boss", 200), ("node_wish_relic_advanced", 150)):
             probe = pool_probe(self.catalog, context, relic_scorer=self.scorer)
-            self.assertEqual(probe["iidBest"], points)
+            self.assertEqual(probe["expectedBest"], points)
             self.assertEqual(probe["assumption"], "configured_per_received_relic_points")
 
     def test_report_uses_correct_pools_without_adding_normal_relic_rewards(self):

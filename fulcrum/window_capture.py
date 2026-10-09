@@ -243,7 +243,7 @@ def _capture_worker(connection, selected, method, crop):
         if not success:
             raise CaptureUnavailable("could not encode capture")
         connection.send({"image": encoded.tobytes(), "window": info, "method": method,
-                         "warnings": ["Screen capture may include overlapping windows; confirm the preview."] if method == "screen" else []})
+                         "warnings": ["屏幕截图可能包含其他窗口的遮挡；请核对预览。"] if method == "screen" else []})
     except Exception as error:
         connection.send({"error": str(error)})
     finally:

@@ -20,6 +20,7 @@ class Circle:
     x: float
     y: float
     radius: float
+    source: str = "hough"
 
 
 @dataclass(frozen=True)
@@ -77,7 +78,7 @@ def _connector_circles(gray: np.ndarray, offset: tuple[int, int]) -> list[Circle
     peaks = (scores >= 0.73) & (scores >= cv2.dilate(scores, np.ones((19, 19), np.uint8)))
     yy, xx = np.where(peaks)
     half = templates[0].shape[0] // 2
-    return [Circle(float(x + half + offset[0]), float(y + half + offset[1]), 8.0) for x, y in zip(xx, yy)]
+    return [Circle(float(x + half + offset[0]), float(y + half + offset[1]), 8.0, "connector") for x, y in zip(xx, yy)]
 
 
 def detect_circles(
@@ -233,9 +234,10 @@ def _edge_contrast(gray: np.ndarray, first: tuple[float, float], second: tuple[f
     flank: list[float] = []
     for t in np.linspace(0.29, 0.71, 9):
         point = start + direction * t
-        for offset in (-2.0, 0.0, 2.0):
-            sample = point + normal * offset
-            center.append(float(gray[round(sample[1]), round(sample[0])]))
+        # Map links bend slightly between grid centers; sample a narrow corridor.
+        cross_section = [point + normal * offset for offset in range(-8, 9, 2)]
+        center.append(float(np.percentile([gray[round(sample[1]), round(sample[0])]
+                                          for sample in cross_section], 80)))
         for offset in (-17.0, 17.0):
             sample = point + normal * offset
             flank.append(float(gray[round(sample[1]), round(sample[0])]))
@@ -260,6 +262,47 @@ def _edge_agreement(gray: np.ndarray, match: TemplateMatch) -> float:
     return float(np.mean(values)) if values else 0.0
 
 
+def _refine_connector_fit(match: TemplateMatch, circles: list[Circle], points: np.ndarray) -> TemplateMatch:
+    anchors = []
+    for slot in match.template.occupied_slots:
+        pixel = match.pixel_at(slot)
+        near = [circle for circle in circles if circle.source == "connector"
+                and np.hypot(circle.x - pixel[0], circle.y - pixel[1]) < match.grid_step * .22]
+        if near:
+            anchors.append((slot, min(near, key=lambda circle: np.hypot(circle.x - pixel[0], circle.y - pixel[1]))))
+    if len(anchors) < 3:
+        return match
+    fits = []
+    for axis, origin, step in ((0, match.origin_x, match.step_x), (1, match.origin_y, match.step_y)):
+        indices = np.array([slot[axis] for slot, _ in anchors])
+        values = np.array([getattr(circle, "x" if axis == 0 else "y") for _, circle in anchors])
+        slopes = [(values[b] - values[a]) / (indices[b] - indices[a])
+                  for a, b in combinations(range(len(indices)), 2) if abs(indices[b] - indices[a]) >= 2]
+        if slopes:
+            refined_step = float(np.median(slopes))
+            if abs(refined_step - step) <= step * .12:
+                step = refined_step
+        if len(set(indices)) >= 2:
+            origin = float(np.median(values - indices * step))
+        fits.append(AxisFit(origin, step, 0))
+    return _score_template(match.template, *fits, points)
+
+
+def differing_edge_evidence(image: np.ndarray, first: TemplateMatch, second: TemplateMatch) -> tuple[int, float, float]:
+    """Compare only the links that distinguish two layouts with identical slots."""
+    first_edges = {frozenset(edge) for edge in first.template.edges}
+    second_edges = {frozenset(edge) for edge in second.template.edges}
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    values = []
+    for edge in first_edges ^ second_edges:
+        a, b = tuple(edge)
+        contrast = _edge_contrast(gray, first.pixel_at(a), first.pixel_at(b))
+        evidence = float(np.tanh((contrast - 8) / 16))
+        values.append(evidence if edge in first_edges else -evidence)
+    return (len(values), float(np.mean(values)) if values else 0,
+            sum(value > 0 for value in values) / len(values) if values else 0)
+
+
 def match_templates(
     circles: list[Circle],
     templates: list[MapTemplate],
@@ -271,6 +314,7 @@ def match_templates(
         return []
     points = np.array([(circle.x, circle.y) for circle in circles], dtype=np.float32)
     width, height = image_size
+    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image is not None else None
     fits_by_shape: dict[tuple[int, int], tuple[list[AxisFit], list[AxisFit]]] = {}
     results: list[TemplateMatch] = []
     for template in templates:
@@ -310,9 +354,14 @@ def match_templates(
                     origin = float(np.median(values-indices*step))
                     fits.append(AxisFit(origin, step, 0))
                 best = _score_template(template, *fits, points)
+        if gray is not None:
+            refined = _refine_connector_fit(best, circles, points)
+            def evidence(candidate):
+                return candidate.score + .20 * _edge_agreement(gray, candidate) + .18 * candidate.point_explanation
+            if refined.score >= best.score and evidence(refined) > evidence(best):
+                best = refined
         results.append(best)
     if image is not None and results:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         refined: list[TemplateMatch] = []
         for match in results:
             edge_score = _edge_agreement(gray, match)

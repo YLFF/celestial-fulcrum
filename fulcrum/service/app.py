@@ -12,12 +12,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.security import APIKeyHeader
+from fastapi.exceptions import RequestValidationError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from pydantic import BaseModel, ConfigDict, Field
 
 from ..goals import goal_summary, node_goal_annotations
 from ..ending_prediction import planning_check, require_planning_valid
 from ..playtime_state import AREA_SPECS, active_instance, merge_map_observation, merge_resource_observation, merge_action_observation
 from ..window_capture import CaptureUnavailable, capture_window, list_windows, select_window
+from ..diagnostics import public_error
+from ..scoring_profile import PROFILE
 from .access import AccessPolicy, local_client
 from .assets import AssetStore, MAX_UPLOAD_BYTES
 from .catalog import editor_catalog, image_path
@@ -80,8 +84,8 @@ class ConfirmRelics(RevisionRequest):
 class PlanRequest(RevisionRequest):
     areaKey: str | None = None
     pursuit: bool = False
-    topN: int = Field(default=5, ge=1, le=50)
-    maxStates: int = Field(default=50000, ge=1, le=500000)
+    topN: int = Field(default=PROFILE["search"]["defaultTopN"], ge=1, le=50)
+    maxStates: int = Field(default=PROFILE["search"]["defaultMaxStates"], ge=1, le=500000)
     planningGoalIds: list[str] | None = None
     useItemIds: list[str] | None = None
 
@@ -143,17 +147,17 @@ def create_app(storage_root=None, *, allowed_origins=None):
     async def local_boundary(request, call_next):
         host = request.url.hostname
         if not access.valid_host(host) or not local_client(request):
-            return JSONResponse({"detail": "loopback host required"}, status_code=403)
+            return JSONResponse({"detail": "服务仅允许本机访问"}, status_code=403)
         origin = request.headers.get("origin")
         if origin and origin not in origins:
-            return JSONResponse({"detail": "origin not allowed"}, status_code=403)
+            return JSONResponse({"detail": "当前页面来源未获授权"}, status_code=403)
         length = request.headers.get("content-length")
         if length:
             try:
                 if int(length) < 0 or int(length) > MAX_UPLOAD_BYTES + 1024 * 1024:
-                    return JSONResponse({"detail": "request too large"}, status_code=413)
+                    return JSONResponse({"detail": "上传内容过大，请缩小图片或文件"}, status_code=413)
             except ValueError:
-                return JSONResponse({"detail": "invalid content length"}, status_code=400)
+                return JSONResponse({"detail": "请求的内容长度不合法"}, status_code=400)
         response = await call_next(request)
         response.headers["Cache-Control"] = "no-store"
         return response
@@ -173,19 +177,34 @@ def create_app(storage_root=None, *, allowed_origins=None):
 
     @app.exception_handler(RevisionConflict)
     async def conflict(_, error):
-        return JSONResponse({"detail": str(error)}, status_code=409)
+        return JSONResponse({"detail": "对局状态已更新，请刷新页面后重新计算或确认", "diagnosticDetail": str(error)}, status_code=409)
+
+    @app.exception_handler(RequestValidationError)
+    async def request_invalid(_, error):
+        fields = [".".join(str(part) for part in row["loc"] if part != "body") for row in error.errors()]
+        return JSONResponse({"detail": "输入格式或数值范围不合法，请检查：" + "、".join(fields),
+                             "validationFields": fields}, status_code=422)
+
+    @app.exception_handler(StarletteHTTPException)
+    async def http_error(_, error):
+        defaults = {401: "访问授权已失效，请刷新页面重新连接服务",
+                    403: "没有此操作的授权，请确认本机访问或截图授权", 404: "找不到所需资源",
+                    405: "此接口不支持当前请求方式",
+                    503: "当前功能不可用，请检查服务和前端构建状态"}
+        detail = error.detail if isinstance(error.detail, str) and any("\u4e00" <= char <= "\u9fff" for char in error.detail) else defaults.get(error.status_code, "请求未完成，请重试")
+        return JSONResponse({"detail": detail, "diagnosticDetail": str(error.detail)}, status_code=error.status_code, headers=error.headers)
 
     @app.exception_handler(ValueError)
     async def invalid(_, error):
-        return JSONResponse({"detail": str(error)}, status_code=422)
+        return JSONResponse({"detail": public_error(error), "diagnosticDetail": str(error)}, status_code=422)
 
     @app.exception_handler(FileNotFoundError)
     async def missing(_, error):
-        return JSONResponse({"detail": str(error)}, status_code=404)
+        return JSONResponse({"detail": public_error(error), "diagnosticDetail": str(error)}, status_code=404)
 
     @app.exception_handler(CaptureUnavailable)
     async def capture_unavailable(_, error):
-        return JSONResponse({"detail": str(error)}, status_code=503)
+        return JSONResponse({"detail": public_error(error), "diagnosticDetail": str(error)}, status_code=503)
 
     def loaded_at_revision(run_id, revision):
         loaded = store.load(run_id)
@@ -309,11 +328,16 @@ def create_app(storage_root=None, *, allowed_origins=None):
 
     @app.patch("/api/runs/{run_id}", dependencies=auth)
     def patch_run(run_id: str, body: PatchRun):
-        return store.update(run_id, body.expectedRevision, lambda draft: apply_commands(draft, body.commands))
+        movement = any(command.get("type") in {"position", "currentArea"} for command in body.commands)
+        return store.update(run_id, body.expectedRevision, lambda draft: apply_commands(draft, body.commands), map_update=movement)
 
     @app.post("/api/runs/{run_id}/undo", dependencies=auth)
     def undo(run_id: str, body: RevisionRequest):
         return store.undo(run_id, body.expectedRevision)
+
+    @app.post("/api/runs/{run_id}/redo", dependencies=auth)
+    def redo(run_id: str, body: RevisionRequest):
+        return store.redo(run_id, body.expectedRevision)
 
     @app.get("/api/runs/{run_id}/markdown", dependencies=auth)
     def markdown(run_id: str):
@@ -464,6 +488,6 @@ def create_app(storage_root=None, *, allowed_origins=None):
             else:
                 from ..playtime_state import rebuild_derived
                 rebuild_derived(draft)
-        return store.update(run_id, body.expectedRevision, mutate)
+        return store.update(run_id, body.expectedRevision, mutate, map_update=body.confirmMap)
 
     return app

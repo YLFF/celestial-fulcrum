@@ -13,7 +13,7 @@ def node_runtime() -> tuple[str, str]:
         return str(bundled), str(bundled.parent.parent / "node_modules")
     node = shutil.which("node")
     if not node:
-        raise RuntimeError("Node.js is required for local HUD OCR")
+        raise RuntimeError("本地资源文字识别需要 Node.js 运行环境")
     local_modules = ROOT / "node_modules"
     modules = local_modules if local_modules.is_dir() else Path(node).resolve().parent.parent / "node_modules"
     return node, str(modules)

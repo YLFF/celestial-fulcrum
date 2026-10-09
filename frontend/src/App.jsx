@@ -1,9 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Plus, Upload, Download, ImagePlus, ScanLine, Monitor, Undo2, RefreshCw, Sun, Moon,
+import { Plus, Upload, Download, ImagePlus, ScanLine, Monitor, Undo2, Redo2, RefreshCw, Sun, Moon,
   Heart, Shield, Coins, Zap, Package, Users, ChevronRight, ChevronDown, Route, LoaderCircle, X, Pencil, Layers, Flag, Sparkles, Eye, Check, ArrowRight } from 'lucide-react';
 import { api, download, setToken } from './api';
 import { applyTheme, savedTheme } from './theme';
 import { readPreference } from './preferences.js';
+import { relicGroups } from './relicPresentation';
 import { filterRoutes } from './routeFilters';
 import { AREA_NAMES, currentInstance, num, operatorProgressLabel, pct, SOURCES, stepScoreDetails } from './model';
 import { EntryImage, IconButton, Modal, NumberField, SaveButton } from './common';
@@ -42,6 +43,7 @@ export default function App() {
     [planning, routeFilterIds, routeFilterMode, topN]);
   useEffect(() => { setRouteIndex(0); setStepDetail(null); }, [routeFilterIds, routeFilterMode, planning]);
   const [lastAsset, setLastAsset] = useState(null);
+  const [relicView, setRelicView] = useState('acquired');
   const [selectedNodes, setSelectedNodes] = useState([]);
   useEffect(() => { setSelectedNodes([]); }, [loaded?.runId, loaded?.revision, area]);
   const loadedRef = useRef(null), fileInput = useRef(null), importInput = useRef(null), taskControllers = useRef(new Map());
@@ -209,9 +211,9 @@ export default function App() {
     } catch (e) { failed(e); }
     finally { setBusy(false); }
   }
-  async function undo() {
+  async function travelHistory(direction) {
     setBusy(true);
-    try { await api(`/api/runs/${loaded.runId}/undo`, { method: 'POST', body: { expectedRevision: loaded.revision } }); await openRun(loaded.runId, false); notify('已撤销上一版修改'); }
+    try { await api(`/api/runs/${loaded.runId}/${direction}`, { method: 'POST', body: { expectedRevision: loaded.revision } }); await openRun(loaded.runId, true); notify(direction === 'undo' ? '已撤销上次地图更新' : '已重做地图更新'); }
     catch (e) { failed(e); } finally { setBusy(false); }
   }
   async function exportRun() { download(JSON.stringify(loaded.state, null, 2), `${loaded.runId}.json`); }
@@ -239,7 +241,8 @@ export default function App() {
           aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
         <IconButton icon={Upload} label="恢复 Playtime" onClick={() => importInput.current.click()} disabled={busy} />
         <IconButton icon={Download} label="导出 Playtime" onClick={exportRun} disabled={!loaded} />
-        <IconButton icon={Undo2} label="撤销上一版" onClick={undo} disabled={!loaded || busy} />
+        <IconButton icon={Undo2} label="撤销上次地图更新" onClick={() => travelHistory('undo')} disabled={!loaded?.history?.canUndo || busy} />
+        <IconButton icon={Redo2} label="重做地图更新" onClick={() => travelHistory('redo')} disabled={!loaded?.history?.canRedo || busy} />
         <IconButton icon={RefreshCw} label="刷新对局" onClick={() => loaded && openRun(loaded.runId, false).catch(failed)} disabled={!loaded || busy} />
       </div></header>
     <div className="resource-strip">{state ? <>
@@ -266,9 +269,11 @@ export default function App() {
         <InventoryStrip title="藏品" subtitle={state ? `${state.relics.reduce((a, r) => a + (r.count || 1), 0)} 件` : '—'} icon={Sparkles}
           contentClass="relic-inventory"
           onEdit={() => edit('relics')} onAdd={() => edit('relics', { adding: true })} disabled={!state || busy}
-          actions={<><IconButton icon={ScanLine} label="识别藏品" disabled={!state || busy || !caps.relicRecognition} onClick={() => edit('relicRecognition', { assetInfo: lastAsset })} />
+          actions={<><div className="segmented relic-view-switch" aria-label="藏品展示方式"><button className={relicView === 'acquired' ? 'active' : ''} onClick={() => setRelicView('acquired')}>获得顺序</button><button className={relicView === 'category' ? 'active' : ''} onClick={() => setRelicView('category')}>分类</button></div><IconButton icon={ScanLine} label="识别藏品" disabled={!state || busy || !caps.relicRecognition} onClick={() => edit('relicRecognition', { assetInfo: lastAsset })} />
             <button className="bonus-button" title="藏品属性合并尚未接入" disabled={!caps.relicEffectAggregation}><Sparkles size={14} />加成汇总</button></>}>
-          {state?.relics.map(row => <button key={row.id} className="inventory-token" title={entries[row.id]?.name} onClick={() => edit('relics')}><EntryImage entry={entries[row.id]} className="inventory-image" />{row.count > 1 && <span>{row.count}</span>}</button>)}
+          {(relicView === 'category' ? relicGroups(state?.relics || [], entries, catalog.relicCategories) : [{ name: '', items: state?.relics || [] }]).map(group => <div className={`relic-display-group ${group.name ? 'classified' : ''}`} key={group.name}>
+            {group.name && <small>{group.name}</small>}<div>{group.items.map(row => <button key={row.id} className="inventory-token" title={`${entries[row.id]?.name}${row.enchantment ? ` · 已附魔 ${row.enchantment.operatorName}` : ''}`} onClick={() => edit('relics')}><EntryImage entry={entries[row.id]} className="inventory-image" />{row.count > 1 && <span>{row.count}</span>}</button>)}</div>
+          </div>)}
           {!state?.relics.length && <span className="quiet">暂无藏品</span>}
         </InventoryStrip>
         <InventoryStrip title="零件箱" subtitle={state ? `${state.componentBox.items.length}/${state.componentBox.capacity}` : '—'} icon={Package}
@@ -350,7 +355,7 @@ export default function App() {
     {dragging && <div className="drop-overlay"><Upload size={38} /><b>导入截图 / Playtime</b></div>}
     {toast && <div className={`toast ${toast.error ? 'error' : ''}`} role={toast.error ? 'alert' : 'status'}>{toast.error ? <X size={16} /> : <Check size={16} />}<span>{toast.message}</span><button aria-label="关闭提示" onClick={() => setToast(null)}><X size={14} /></button></div>}
     {node && <NodeEditor key={`${node.source.revision}-${node.id}`} node={node.instance.nodes[node.id]} instance={node.instance} catalog={catalog} value={scores?.nodeValues[node.id]}
-      anchor={node.anchor} busy={busy} onClose={() => setNode(null)} onSave={commands => mutate(commands, node.source.revision)} />}
+      entries={entries} heldRelics={state?.relics} anchor={node.anchor} busy={busy} onClose={() => setNode(null)} onSave={commands => mutate(commands, node.source.revision)} />}
     {modal?.type === 'new' && <NewRunEditor catalog={catalog} busy={busy} onClose={close} onCreate={createRun} />}
     {modal?.type === 'planning' && <PlanningDialog key={`${modal.source.revision}-${modal.areaKey}`} check={modal.check} items={modal.source.state.componentBox.items}
       entries={entries} busy={busy} onClose={close} onPlan={(ids, items) => executeSearch(ids, modal.source, items)} />}
@@ -361,7 +366,7 @@ export default function App() {
     {modal?.type === 'relicRecognition' && <RelicRecognitionDialog loaded={modal.source} entries={entries} assetInfo={modal.assetInfo} onAsset={setLastAsset}
       startJob={startJob} onConfirm={confirmRelics} onClose={close} busy={busy} notify={notify} />}
     {modal?.type === 'components' && <ComponentEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
-    {modal?.type === 'operators' && <OperatorEditor adding={modal.adding} state={modal.source.state} catalog={catalog} onSave={saveModal} onClose={close} busy={busy} />}
+    {modal?.type === 'operators' && <OperatorEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'resources' && <ResourceEditor state={modal.source.state} instance={currentInstance(modal.source.state, area)} catalog={catalog} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'quickResource' && <QuickResourceEditor field={modal.field} state={modal.source.state} instance={currentInstance(modal.source.state, area)} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'goals' && <GoalEditor loaded={modal.source} onSave={saveModal} onClose={close} busy={busy} />}

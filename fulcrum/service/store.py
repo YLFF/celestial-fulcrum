@@ -1,4 +1,4 @@
-"""Atomic JSON snapshots with revision checks and one undo snapshot per run."""
+"""Atomic run snapshots and map-update checkpoints for undo/redo."""
 
 from copy import deepcopy
 from datetime import datetime, timezone
@@ -67,6 +67,10 @@ class RunStore:
             if not path.is_file():
                 raise FileNotFoundError("run not found")
             state = json.loads(path.read_text(encoding="utf-8"))
+            history = state.pop("_serviceHistory", None)
+            if history is None:
+                history = self._legacy_history(run_id, state)
+            self._validate_history(history)
             self.validate(state)
             rebuild_derived(state)
             if state["runId"] != run_id:
@@ -74,7 +78,9 @@ class RunStore:
             revision = state.get("_serviceRevision", 0)
             if type(revision) is not int or revision < 0:
                 raise ValueError("invalid saved revision")
-            return {"runId": run_id, "revision": revision, "state": state}
+            return {"runId": run_id, "revision": revision, "state": state,
+                    "history": {"canUndo": bool(history["past"]), "canRedo": bool(history["future"]),
+                                "undoCount": len(history["past"]), "redoCount": len(history["future"])}}
 
     def list(self):
         rows = []
@@ -97,6 +103,7 @@ class RunStore:
             if not isinstance(source, dict):
                 raise ValueError("Playtime must be an object")
             state = deepcopy(source)
+            state.pop("_serviceHistory", None)
             run_id = safe_id(run_id or state.get("runId"))
             state["runId"] = run_id
             state.setdefault("goals", new_goals())
@@ -113,10 +120,57 @@ class RunStore:
             self._save(path, state, 1)
             return self.load(run_id)
 
-    def _save(self, path, state, revision):
+    def _save(self, path, state, revision, history=None):
         state["_serviceRevision"] = revision
         state["updatedAt"] = datetime.now(timezone.utc).isoformat()
-        atomic_json(path, state)
+        saved = deepcopy(state)
+        saved["_serviceHistory"] = history or {"past": [], "future": []}
+        atomic_json(path, saved)
+
+    @staticmethod
+    def _validate_history(history):
+        if not isinstance(history, dict) or set(history) != {"past", "future"} or any(
+            not isinstance(history[key], list) or any(not isinstance(row, dict) or "_serviceHistory" in row
+                                                      for row in history[key]) for key in ("past", "future")
+        ):
+            raise ValueError("invalid exploration history")
+
+    def _history(self, run_id):
+        saved = json.loads(self.path(run_id).read_text(encoding="utf-8"))
+        history = saved.get("_serviceHistory")
+        if history is None:
+            history = self._legacy_history(run_id, saved)
+        self._validate_history(history)
+        return history
+
+    def _legacy_history(self, run_id, state):
+        history = {"past": [], "future": []}
+        path = self.checked_file(self.path(run_id).with_name("previous.json"))
+        if not path.is_file():
+            return history
+        try:
+            previous = json.loads(path.read_text(encoding="utf-8"))
+            self.validate(previous)
+            if previous.get("runId") != run_id:
+                return history
+            def map_fingerprint(snapshot):
+                return (snapshot.get("currentAreaKey"), {
+                    key: (slot.get("activeInstanceId"), [(row.get("instanceId"), row.get("playerPosition"),
+                        row.get("sourceAssetId"), row.get("sourceScreenshot")) for row in slot.get("instances", [])])
+                    for key, slot in snapshot["areas"].items()
+                })
+            # Old releases retained only one edit; reuse it only if it was a map transition.
+            if map_fingerprint(previous) != map_fingerprint(state):
+                previous.pop("_serviceHistory", None)
+                history["past"].append(previous)
+        except (ValueError, KeyError, TypeError):
+            pass
+        return history
+
+    @staticmethod
+    def _check_revision(loaded, revision):
+        if type(revision) is not int or revision != loaded["revision"]:
+            raise RevisionConflict("snapshot changed; reload before confirming")
 
     @staticmethod
     def validate(state):
@@ -126,11 +180,10 @@ class RunStore:
         except (KeyError, TypeError, AttributeError) as error:
             raise ValueError("malformed Playtime snapshot") from error
 
-    def update(self, run_id, revision, mutate):
+    def update(self, run_id, revision, mutate, *, map_update=False):
         with self.lock:
             loaded = self.load(run_id)
-            if type(revision) is not int or revision != loaded["revision"]:
-                raise RevisionConflict("snapshot changed; reload before confirming")
+            self._check_revision(loaded, revision)
             draft = deepcopy(loaded["state"])
             try:
                 mutate(draft)
@@ -138,20 +191,33 @@ class RunStore:
             except (KeyError, TypeError, AttributeError) as error:
                 raise ValueError("invalid snapshot update") from error
             path = self.path(run_id)
-            atomic_json(self.checked_file(path.with_name("previous.json")), loaded["state"])
-            self._save(path, draft, revision + 1)
+            history = self._history(run_id)
+            if map_update:
+                history["past"].append(loaded["state"])
+            history["future"] = []
+            self._save(path, draft, revision + 1, history)
             return self.load(run_id)
 
     def undo(self, run_id, revision):
+        return self._travel(run_id, revision, "past", "future")
+
+    def redo(self, run_id, revision):
+        return self._travel(run_id, revision, "future", "past")
+
+    def _travel(self, run_id, revision, source, destination):
         with self.lock:
-            path = self.checked_file(self.path(run_id).with_name("previous.json"))
-            if not path.is_file():
-                raise FileNotFoundError("no previous snapshot")
-            previous = json.loads(path.read_text(encoding="utf-8"))
-            def restore(draft):
-                draft.clear()
-                draft.update(deepcopy(previous))
-            return self.update(run_id, revision, restore)
+            loaded = self.load(run_id)
+            self._check_revision(loaded, revision)
+            history = self._history(run_id)
+            if not history[source]:
+                raise ValueError("没有可撤销的地图更新" if source == "past" else "没有可重做的地图更新")
+            restored = history[source].pop()
+            if restored.get("runId") != run_id:
+                raise ValueError("history run ID does not match directory")
+            self.validate(restored)
+            history[destination].append(loaded["state"])
+            self._save(self.path(run_id), restored, revision + 1, history)
+            return self.load(run_id)
 
     def markdown(self, run_id):
         state = self.load(run_id)["state"]

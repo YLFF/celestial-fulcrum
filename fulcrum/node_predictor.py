@@ -7,6 +7,7 @@ from functools import lru_cache
 import json
 from pathlib import Path
 from typing import Any
+from .diagnostics import message
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -276,7 +277,7 @@ def predict_instance(instance: dict[str, Any]) -> dict[str, Any]:
         "frequencyMeaning": "P(distance from start | node type, selected floor mode); not a normalized node posterior",
         "sampleSource": stats["sourceChunk"],
         "sampleVersion": stats["statisticsUpdatedAt"][:10],
-        "nodePool": node_pool, "unknownNodes": unknown_nodes, "warnings": warnings,
+        "nodePool": node_pool, "unknownNodes": unknown_nodes, "warnings": [message(text) for text in warnings],
     }
 
 

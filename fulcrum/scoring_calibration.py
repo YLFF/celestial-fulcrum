@@ -8,6 +8,7 @@ from typing import Iterable, Mapping
 
 from .component_box import INITIAL_USES
 from .merchant_preferences import merchant_entry_preferences
+from .scoring_profile import PROFILE, RESOURCE_POINTS, CASH_POINTS
 
 
 DUAL_SQUADS = {
@@ -17,34 +18,22 @@ DUAL_SQUADS = {
     "squad_008": ("术师", "特种", "破坏"),
 }
 # E2 six-stars, all six-stars (including E2), permanent roster size.
-TEAM_THRESHOLDS = ((0, 0, 0), (1, 2, 5), (2, 4, 6), (3, 6, 8), (5, 8, 10), (7, 9, 13))
+TEAM_THRESHOLDS = tuple(tuple(row) for row in PROFILE["teamThresholds"])
 LEVEL_COSTS = (10, 24, 36, 40, 55, 65, 75, 90, 95)
 LEVEL_HOPE = (4, 4, 5, 5, 6, 6, 6, 6, 8)
-SEED_POINTS = 250
-DELAYED_REWARD_DISCOUNT = 0.7
-EXCHANGE_OPPORTUNITY_POINTS = 200
-REVEAL_VALUE_COEFFICIENT = 0.2
-MERCHANT_REPEAT_FACTOR = 0.8  # Default after viewing one of five shelf faces.
-PATH_STEP_INGOT_EXPECTATION = 1
-GREEN_LOG_SCALE = 301.87354704659674
-GREEN_LOG_OFFSET = 21.28357517084065
-FIXED_COMPONENT_POINTS = dict(zip(
-    [f"component_{i:03}" for i in (*range(1, 13), *range(25, 31))],
-    (250, 125, 150, 500, 150, 250, 200, 15, 2000, 200, 250, 250, 125, 100, 25, 10, 250, 500),
-))
-MOVEMENT_POINTS = dict(zip(
-    [f"component_{i:03}" for i in range(13, 25)],
-    (10, 10, 10, 20, 20, 15, 20, 100, 50, 40, 100, 10),
-))
+SEED_POINTS = PROFILE["components"]["fixedPoints"]["component_001"]
+DELAYED_REWARD_DISCOUNT = PROFILE["events"]["delayDiscount"]
+EXCHANGE_OPPORTUNITY_POINTS = PROFILE["events"]["exchangeOpportunityPoints"]
+REVEAL_VALUE_COEFFICIENT = PROFILE["information"]["revealCoefficient"]
+MERCHANT_REPEAT_FACTOR = PROFILE["merchants"]["repeatFallbackFactor"]
+PATH_STEP_INGOT_EXPECTATION = PROFILE["information"]["pathStepIngotExpectation"]
+GREEN_LOG_SCALE = PROFILE["merchants"]["greenLogScale"]
+GREEN_LOG_OFFSET = PROFILE["merchants"]["greenLogOffset"]
+FIXED_COMPONENT_POINTS = PROFILE["components"]["fixedPoints"]
+MOVEMENT_POINTS = PROFILE["components"]["movementPoints"]
 ACTION_UNITS = {"component_016": 1, "component_019": 1, "component_020": 1, "component_024": 4}
-SYNERGY_COMPONENTS = {"component_004", "component_006", "component_007", "component_029", "component_030"}
-TICKET_WEIGHTS = {
-    **{f"{name}招募券": 1 for name in ("先锋", "近卫", "重装", "狙击", "术师", "医疗", "辅助", "特种")},
-    **{f"{name}协议招募券": 1.5 for name in ("突击", "堡垒", "远程", "破坏")},
-    "前线统合招募券": 2, "后方协调招募券": 2, "高级人事调度函": 3.5,
-    "前线统合资深招募券": 2.5, "后方协调资深招募券": 2.5, "高级人事资深招募券": 4,
-    **{f"精英{name}招募券": 3 for name in ("突击", "堡垒", "远程", "破坏")},
-}
+SYNERGY_COMPONENTS = set(PROFILE["components"]["synergyIds"])
+TICKET_WEIGHTS = PROFILE["tickets"]["weights"]
 
 
 def _integer(value: int, name: str, minimum: int = 0) -> None:
@@ -65,10 +54,8 @@ def team_threshold(floor: int, squad_id: str | None = None) -> dict[str, int]:
         raise ValueError("floor must be 1..6; treeholes use their entry floor")
     e2, six, total = TEAM_THRESHOLDS[floor - 1]
     if squad_id in DUAL_SQUADS:
-        if floor == 2:
-            e2, six = e2 + 1, six + 1
-        elif floor == 3:
-            e2, six = e2 + 1, six + 2
+        extra = PROFILE["dualSquadThresholdAdditions"].get(str(floor), [0, 0, 0])
+        e2, six, total = e2 + extra[0], six + extra[1], total + extra[2]
     return {"elite2SixStars": e2, "sixStars": six, "totalOperators": total}
 
 
@@ -118,12 +105,14 @@ def experience_reward_score(
     useful = min(shadow, hope_deficit) if below_threshold else 0.0
     return {"levelAfter": level, "experienceAfter": experience, "actualHopeAward": actual,
             "progressHopeEquivalent": shadow, "usefulHopeEquivalent": useful,
-            "points": useful * 500 / reference_six_star_cost * (1.25 if below_threshold else 1),
+            "points": useful * RESOURCE_POINTS["completeSixStarPoints"] / reference_six_star_cost
+                      * (RESOURCE_POINTS["belowThresholdFactor"] if below_threshold else 1),
             "segments": segments}
 
 
 def component_reference_points(
-    component_id: str, *, action_unit: float = 200, small_movement: float = 20,
+    component_id: str, *, action_unit: float = PROFILE["components"]["actionUnitPoints"],
+    small_movement: float = MOVEMENT_POINTS["component_019"],
     existing_same: int = 0, remaining_uses: int | None = None,
 ) -> float:
     """Fixed-context calibration only; small-teleport/AP prices are not live-map prices."""
@@ -133,7 +122,7 @@ def component_reference_points(
     if component_id in FIXED_COMPONENT_POINTS:
         if remaining_uses is not None:
             raise ValueError("Only processed components have remaining uses")
-        multiplier = 1 + 0.05 * existing_same if component_id in SYNERGY_COMPONENTS else 1
+        multiplier = 1 + PROFILE["components"]["sameItemFactorIncrement"] * existing_same if component_id in SYNERGY_COMPONENTS else 1
         return FIXED_COMPONENT_POINTS[component_id] * multiplier
     if component_id not in MOVEMENT_POINTS:
         raise ValueError(f"Unpriced component: {component_id}")
@@ -155,7 +144,9 @@ def ticket_reference_points(name: str, *, squad_id: str | None = None, below_thr
     home_ticket = any(name == f"{profession}招募券" for profession in home[:2])
     if home:
         home_ticket |= name in {f"{home[2]}协议招募券", f"精英{home[2]}招募券"}
-    return 50 * TICKET_WEIGHTS[name] * (1.5 if home_ticket else 1) * (1.25 if below_threshold else 1)
+    return (PROFILE["tickets"]["ordinaryPoints"] * TICKET_WEIGHTS[name]
+            * (PROFILE["tickets"]["homeFactor"] if home_ticket else 1)
+            * (RESOURCE_POINTS["belowThresholdFactor"] if below_threshold else 1))
 
 
 def dispatch_reference_score(
@@ -166,7 +157,7 @@ def dispatch_reference_score(
     _number(hope_points, "hope_points")
     if type(grants_promotion) is not bool:
         raise ValueError("grants_promotion must be boolean")
-    promotion = 1.5 * ticket_reference_points("先锋招募券", below_threshold=True) if grants_promotion else 0
+    promotion = PROFILE["events"]["dispatchPromotionFactor"] * ticket_reference_points("先锋招募券", below_threshold=True) if grants_promotion else 0
     parts = {"delayedProcessing": DELAYED_REWARD_DISCOUNT * processed_points,
              "delayedHope": DELAYED_REWARD_DISCOUNT * hope_points, "promotion": promotion}
     return {"points": sum(parts.values()), "parts": parts, "delayDiscount": DELAYED_REWARD_DISCOUNT,
@@ -234,8 +225,8 @@ def safe_corner_score(
         raise ValueError("E1 six-star presence must be boolean")
     options = {
         "rest": 0, "carry_slot": 0, "hope": hope_points,
-        "advanced_supply_ticket": 150 if has_elite1_six_star else 75,
-        "action_points": two_action_points_value, "box_capacity": 100,
+        "advanced_supply_ticket": PROFILE["events"]["safeCorner"]["advancedSupplyWithElite1Points" if has_elite1_six_star else "advancedSupplyOtherwisePoints"],
+        "action_points": two_action_points_value, "box_capacity": PROFILE["events"]["safeCorner"]["boxCapacityPoints"],
     }
     if offered_option_ids is None:
         menus = [("rest", *pair) for pair in combinations(list(options)[1:], 2)]
@@ -262,7 +253,7 @@ def emergency_aid_score(corn_count: int) -> dict:
     from .component_box import APPRAISAL_EVENTS
     _integer(corn_count, "corn count")
     gain = 3 * APPRAISAL_EVENTS["recruit"]["component_004"] * corn_count
-    return {"points": gain * 8, "estimatedValueIncrease": gain,
+    return {"points": gain * CASH_POINTS, "estimatedValueIncrease": gain,
             "freeHireCount": 3, "cornCount": corn_count, "actualCashAward": 0,
             "mutatesPlaytime": False}
 
@@ -287,7 +278,7 @@ def painted_component_relic_bonus(
             count = 2 * painted_agor
         elif category_id == "node_type_007":
             count = painted_perro
-    return {"extraRelics": count, "points": 100 * count}
+    return {"extraRelics": count, "points": RESOURCE_POINTS["relicPoints"] * count}
 
 
 def merchant_reference_score(
@@ -314,7 +305,7 @@ def merchant_reference_score(
     factor = 1 if first_visit else repeat_factor
     if category_id == "node_type_013":
         economy = cash + estimated_value
-        base = min(1000, 30 * economy)
+        base = min(PROFILE["merchants"]["yellowMaxPoints"], PROFILE["merchants"]["yellowPointsPerEconomy"] * economy)
         return {"points": base * factor, "qualified": economy > 0,
                 "parts": {"entry": base * factor, "tickets": 0}, "rawPoints": base,
                 "repeatFactor": factor, "economyInput": economy, "preferences": preference}
@@ -395,20 +386,27 @@ def merchant_prefix_score(
 
 
 def expected_best_score(outcomes: list[tuple[float, float]], *, candidate_count: int = 1) -> dict:
-    """Explicit IID candidate approximation, not a reconstructed joint game distribution."""
+    """Each row is an item identity; draw distinct candidates with empirical weights."""
     _integer(candidate_count, "candidate_count", 1)
+    if candidate_count not in (1, 2):
+        raise ValueError("奖励评分暂支持单候选或二选一")
     for points, probability in outcomes:
         _number(points, "points")
         _number(probability, "probability")
     if not outcomes or not isclose(sum(p for _, p in outcomes), 1, rel_tol=0, abs_tol=1e-9):
         raise ValueError("Outcome probabilities must sum to one")
     mean = sum(points * probability for points, probability in outcomes)
-    # Sorting a marginal CDF avoids enumerating the Cartesian product of candidates.
-    cdf, result = 0.0, 0.0
-    for points, probability in sorted(outcomes):
-        next_cdf = cdf + probability
-        result += points * (next_cdf ** candidate_count - cdf ** candidate_count)
-        cdf = next_cdf
-    positive_support = [points for points, p in outcomes if p > 0]
-    return {"mean": mean, "iidBest": result, "candidateCount": candidate_count,
-            "lowerBound": mean, "upperBound": min(candidate_count * mean, max(positive_support))}
+    positive = [(points, weight) for points, weight in outcomes if weight > 0]
+    if len(positive) < candidate_count:
+        raise ValueError("奖励池已观察的不同物品不足以计算不重复候选")
+    result = mean
+    if candidate_count == 2:
+        # Frequencies supply draw weights, not the unavailable joint pair distribution.
+        result = 0.0
+        for i, (first, probability) in enumerate(positive):
+            others = [(second, weight) for j, (second, weight) in enumerate(positive) if i != j]
+            remaining = sum(weight for _, weight in others)
+            result += probability * sum(max(first, second) * weight / remaining for second, weight in others)
+    return {"mean": mean, "expectedBest": result, "candidateCount": candidate_count,
+            "model": "weighted_without_replacement" if candidate_count == 2 else "empirical_single_draw",
+            "lowerBound": mean, "upperBound": max(points for points, _ in positive)}

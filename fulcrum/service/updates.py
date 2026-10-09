@@ -33,7 +33,7 @@ def validate_relics(rows):
         raise ValueError("relics must be a list")
     seen = set()
     for row in rows:
-        keys(row, ("id",), ("count", "state", "source", "note"))
+        keys(row, ("id",), ("count", "state", "source", "note", "enchantment"))
         entry = entries().get(row["id"])
         if not entry or entry["category"] != "relic" or row["id"] in seen:
             raise ValueError("invalid or duplicate relic ID")
@@ -44,6 +44,8 @@ def validate_relics(rows):
             integer(value, "relic layers")
         if any(key in row and not isinstance(row[key], str) for key in ("source", "note")):
             raise ValueError("relic source/note must be text")
+        from ..relic_presentation import validate_binding
+        validate_binding(row)
 
 
 def seed_owned_milestones(state):
@@ -167,8 +169,13 @@ def apply_commands(state, commands):
         elif kind == "relics":
             keys(command, ("type", "items"))
             validate_relics(command["items"])
-            state["relics"] = deepcopy(command["items"])
+            from ..relic_presentation import preserve_bindings
+            state["relics"] = preserve_bindings(state["relics"], command["items"])
             seed_owned_milestones(state)
+        elif kind == "relicEnchant":
+            keys(command, ("type", "relicId", "operatorInstanceId"))
+            from ..relic_presentation import enchant_relic
+            enchant_relic(state, command["relicId"], command["operatorInstanceId"])
         elif kind == "tickets":
             keys(command, ("type", "items"))
             if not isinstance(command["items"], list):

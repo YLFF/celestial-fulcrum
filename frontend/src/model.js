@@ -11,6 +11,8 @@ Object.assign(TERM_NAMES, { sandboxAlpha: '沙盘α（结局前置）', promotio
   exchangeOpportunity: '交换机会', dystopiaCashCost: '改良：现金损失', dystopiaNaturalAppraisal: '增益：自然物估价',
   combat80Percent: '80%概率触发湖中魇战斗', directRelic20Percent: '20%概率直接获得藏品', conditionalRounds: '逐轮扣血与奖励期望',
   actionOpportunity: '获得行动力的机会收益', hopefulSoil: '下层希望的沃土', seedCost: '消耗1种子',
+  remembrance: '取得追忆', utopiaCash: '乌托邦：完成节点的额外源石锭', fruitMarkNatural: '藏果地自然物期望',
+  hopefulSoilComponent: '希望的沃土：额外零件', treeholeCombatExpectation: '树洞战斗：本层与下层奖励期望',
   freeVisit: '免费前往目标的收益', component: '零件收益', temporarySixStar: '随机临时招募六星',
   lifeShieldExcluded: '生命与护盾（暂不计分）', nextLayerCombat: '下层普通战斗期望',
   delayedProcessing: '延迟获得加工品', delayedHope: '延迟获得希望', treeholeActionProxy: '树洞行动力机会',
@@ -19,23 +21,19 @@ Object.assign(TERM_NAMES, { sandboxAlpha: '沙盘α（结局前置）', promotio
   strategyAdjustment: '本层权重调整', merchantPrefixAdjustment: '到店预测经济调整', tributePrefixAdjustment: '到达上贡时现金损失调整',
   endingPlacementExpectation: '结局前置与普通节点的混合期望', exitProcessing: '离层零件', remainingHope: '剩余行动力转希望',
   nextLayerAP: '携带下层行动力', pursuitTicket: '追猎招募券' });
+Object.assign(TERM_NAMES, { finalBattle: '终战结算（当前无奖励）', treeholeReturn: '树洞返回（无额外奖励）', emptyEventPenalty: '空过事件惩罚', conditionalMarkExpectation: '结局标记条件期望' });
 
 const SCORE_NOTES = {
   'empty event penalty pending': '空过事件的惩罚分尚未设置',
   'no seed/controller: empty event penalty pending': '没有种子或笼控器，红苔无法获得沃土；空过惩罚分尚未设置',
-  'fruit-mark natural reward not priced yet': '藏果地自然物奖励尚未量化',
   'planned tribute needs two held natural components': '自然物不足2件，无法上贡',
   'random tribute assumes uniform selection of two held natural-component instances': '随机上贡按当前自然物实例等概率选2件估计',
   'tribute item identities remain frozen during search; confirm inventory and replan': '上贡物品按当前库存估算，实际结果确认后重新规划',
   'tribute appraisal uses confirmed values only': '部分自然物估价未填写，损失参考仅含已知估价',
-  'treehole actual combat stage unknown; entry-layer reward proxy': '树洞战斗关卡未确认，暂用进入层奖励',
   'variable combat cash distribution unpriced': '该战斗的随机现金分布尚未量化',
-  'VI final rewards beyond experience/cash not modeled': '六层终战的经验、现金以外奖励尚未量化',
   'eligible events missing weight': '部分合资格事件缺少统计权重', 'empty sampled encounter pool': '没有可用的不期而遇统计样本',
   'no nonzero category evidence; no invented posterior': '候选节点没有非零样本，无法估分',
   'unclassified node; confirm its category before interpreting its utility': '节点类型尚未确认',
-  'treehole exhaustion transition not modeled as a main-layer pursuit reward': '树洞耗尽行动力的结算尚未量化',
-  'pursuit terminal reward undefined for area': '该区域的追猎结算尚未量化',
 };
 export const scoreNote = text => SCORE_NOTES[text] || text;
 

@@ -344,12 +344,13 @@ class SnapshotScoringTests(unittest.TestCase):
         self.assertEqual(after["carryFactor"], 1)
         self.assertGreater(after["points"], before["points"])
 
-    def test_vi_reward_does_not_invent_iii_boss_extras(self):
+    def test_vi_final_battle_has_no_rewards_or_missing_terms(self):
         scorer = SnapshotScorer([{"id": "b", "categoryId": "node_type_003"}], context("VI"), state(2))
         row = scorer.values["b"]
-        for key in ("tickets", "relics", "components"):
-            self.assertEqual(row["parts"][key], 0)
-        self.assertTrue(row["missingTerms"])
+        self.assertEqual(row["points"], 0)
+        self.assertEqual(row["expectedCashDelta"], 0)
+        self.assertEqual(row["missingTerms"], [])
+        self.assertEqual(scorer.terminal("b", 0, pursuit=True)["points"], 0)
 
     def test_red_moss_prices_cash_and_configured_soil(self):
         c = context()

@@ -28,12 +28,12 @@ ROMAN = ("I", "II", "III", "IV", "V", "VI")
 def pool_probe(catalog: NodeRewardPoolCatalog, context_id: str, *, below: bool = False,
                relic_scorer: RelicScorer | None = None) -> dict:
     pool = catalog.get(context_id)
+    scorer = relic_scorer if relic_scorer is not None else RelicScorer(catalog=catalog)
     observed = [row for row in pool["members"] if row["occurrenceCount"] is not None]
     total = sum(row["occurrenceCount"] for row in observed)
     if pool["members"] and all(row["dataType"] == "藏品" for row in pool["members"]):
-        scorer = relic_scorer if relic_scorer is not None else RelicScorer(catalog=catalog)
         points = scorer.pool_score(context_id)
-        return {"contextId": context_id, "recordCount": total, "mean": points, "iidBest": points,
+        return {"contextId": context_id, "recordCount": total, "mean": points, "expectedBest": points,
                 "lowerBound": points, "upperBound": points,
                 "unobservedMembers": [row["name"] for row in pool["members"] if row["occurrenceCount"] is None],
                 "scope": pool.get("statistics", {}).get("scopeLabel"),
@@ -48,7 +48,7 @@ def pool_probe(catalog: NodeRewardPoolCatalog, context_id: str, *, below: bool =
         elif row["dataType"] == "招募券":
             points = ticket_reference_points(row["name"], below_threshold=below)
         elif row["dataType"] == "藏品":
-            points = 100
+            points = scorer.fixed_score(row["itemId"])
         else:
             raise ValueError(f"Unpriced reward: {row['name']}")
         outcomes.append((points, row["occurrenceCount"] / total))
@@ -61,7 +61,7 @@ def pool_probe(catalog: NodeRewardPoolCatalog, context_id: str, *, below: bool =
             "unobservedMembers": [row["name"] for row in pool["members"] if row["occurrenceCount"] is None],
             "scope": pool.get("statistics", {}).get("scopeLabel"),
             "observationSource": pool.get("statistics", {}).get("observationSource"),
-            "assumption": "iid_candidates" if candidates > 1 else "empirical_single_draw"}
+            "assumption": "weighted_without_replacement" if candidates > 1 else "empirical_single_draw"}
 
 
 def encounter_probe(
@@ -92,7 +92,7 @@ def encounter_probe(
         return min(amount, deficit) * 50 if below else 0
 
     def pool_value(context: str) -> float:
-        return pool_probe(pools, context, relic_scorer=scorer)["iidBest"]
+        return pool_probe(pools, context, relic_scorer=scorer)["expectedBest"]
 
     def companion(stage: str, *, emergency: bool = False, relics: float = 0,
                   relic_context: str | None = None, fixed_relic: str | None = None) -> float:
@@ -244,7 +244,7 @@ def build_report(
     }
 
     def value(context_id: str, below: bool = False) -> float:
-        return pool_probe(pools, context_id, below=below, relic_scorer=relic_scorer)["iidBest"] if below else probes[context_id]["iidBest"]
+        return pool_probe(pools, context_id, below=below, relic_scorer=relic_scorer)["expectedBest"] if below else probes[context_id]["expectedBest"]
 
     def xp_points(xp: int, below: bool) -> float:
         return experience_reward_score(level=level, experience=experience, reward=xp,
@@ -413,7 +413,7 @@ def markdown(report: dict) -> str:
              "- 黄店min(1000,30×总经济)；绿店301.873547×ln(1+x/21.283575)＋两单券机会（四职业队随机单券＋本家单券）。x为总经济减勾选留钱的非负余量，重复机会整体×0.2，不视为已经买入券。",
              "- 默认只给未去过且尚可能存在的黄店留20；黄店后/明确无黄店不扣这项。事件留钱改为用户勾选数额相加，不自动以事件池取最大门槛。各表是独立到达状态对照。",
              "- 使用当前本地奖励池的条件频次，不合并各来源列；未观察成员不宣称不可能。各池的样本范围见末表；N6/I层或III领袖统计跨层使用只是校准代理，未证明各层/N15一致。",
-             "- 零件/券二选一采用明确的IID（独立同分布）临时假设，另列相同边际的上下界。藏品改用各池每实际领取一件的配置分，已经包含二选一收益，不再次求择优或乘2。",
+             "- 零件/券二选一来自同池的不同物品，暂按经验权重依次不放回抽取；候选组合真实联合频次未知。所列上下界为粗略评分范围。藏品使用每实际领取一件的池分，不再次求择优或乘2。",
              "- 不包含普通/紧急局内额外箱奖励。普通作战未明确触发率的零件不算入本版确认部分。概率与偏好数值不混改。", "",
              "## 各类节点", "", "| ID | 类别 | 测试分/公式 | 说明 |", "| --- | --- | --- | --- |"]
     lines.extend(f"| `{r['id']}` | {r['name']} | {r['score']} | {r['notes']} |" for r in report["nodes"])
@@ -493,12 +493,12 @@ def markdown(report: dict) -> str:
     lines.extend(["", "## 居民与特殊战斗", "", "| 关卡 | 达标分 | 未达分 | 经验 | 零件分 |", "| --- | --- | --- | --- | --- |"])
     lines.extend(f"| {r['name']} | {r['met']['total']:.2f} | {r['unmet']['total']:.2f} | "
                  f"{r['met']['experienceAward']} | {r['met']['parts']['components']:.2f} |" for r in report["specialBattles"])
-    lines.extend(["", "## 奖励池取值", "", "上下界只讨论候选的相同边际频次，不包含来源跨层偏差；不是实际游戏置信区间。", "",
-                  "| 条件池 | 候选记录数 | 单候选均值 | IID择优值 | 同边际下界/上界 | 样本范围 |",
+    lines.extend(["", "## 奖励池取值", "", "范围仅为按当前抽取权重估计的均值至最高物品分，不包含来源跨层偏差，不是实际游戏置信区间。", "",
+                  "| 条件池 | 候选记录数 | 单候选均值 | 不重复择优值 | 评分下界/上界 | 样本范围 |",
                   "| --- | --- | --- | --- | --- | --- |"])
     for r in report["pools"]:
         scope = r["scope"] or r["observationSource"] or "见本地源数据条件"
-        lines.append(f"| `{r['contextId']}` | {r['recordCount']} | {r['mean']:.2f} | {r['iidBest']:.2f} | "
+        lines.append(f"| `{r['contextId']}` | {r['recordCount']} | {r['mean']:.2f} | {r['expectedBest']:.2f} | "
                      f"{r['lowerBound']:.2f}/{r['upperBound']:.2f} | {scope} |")
     lines.extend(["", "## 下一步校准", "",
                   "狭路相逢中档高于高档的当前排序保留；黄/绿店首次机会已有试用分。继续校准结局前置、揭示系数及实际顺序幅度。条件规则虽已有设计，不代表每个系数已填。",

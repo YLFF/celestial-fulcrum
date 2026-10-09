@@ -15,7 +15,7 @@ from playwright_browser import chromium_executable
 
 ROOT = Path(__file__).resolve().parents[1]
 PRTS_DATA = ROOT / "data" / "prts_relic_effects.json"
-DEFAULT_OUTPUT = ROOT / "RELIC_SOURCE_DIFFERENCES.md"
+DEFAULT_OUTPUT = ROOT / "work/relic_catalog_comparison/report.md"
 DEFAULT_DATA_OUTPUT = ROOT / "data" / "blackstream_relic_texts.json"
 LUBIAO_URL = "https://www.lubiao.wiki/archives/blackstream"
 

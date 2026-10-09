@@ -17,6 +17,9 @@ from ..route_planner import RoutePlanner
 from .store import atomic_json
 
 
+from ..diagnostics import localize_result, public_error, message
+
+
 class JobCancelled(RuntimeError):
     pass
 
@@ -35,7 +38,7 @@ class JobManager:
             path = self.path(path.stem)
             row = json.loads(path.read_text(encoding="utf-8"))
             if row.get("status") in {"queued", "running"}:
-                row.update(status="interrupted", error="service restarted; submit against the current snapshot")
+                row.update(status="interrupted", error=message("service restarted; submit against the current snapshot"))
                 atomic_json(path, row)
 
     def path(self, job_id):
@@ -64,6 +67,12 @@ class JobManager:
             revision = None
         row["currentRevision"] = revision
         row["stale"] = revision != row["sourceRevision"]
+        row = localize_result(row)
+        if isinstance(row.get("error"), str):
+            original = row["error"]
+            row["error"] = public_error(RuntimeError(original))
+            if row["error"] != original:
+                row.setdefault("diagnosticDetail", original)
         return row
 
     def submit(self, kind, loaded, options):
@@ -127,7 +136,7 @@ class JobManager:
                 if options.get("resourcesOnly"):
                     import cv2
                     result = {"success": False, "resourceObservation": HudRecognizer().recognize_image(cv2.imread(str(asset))),
-                              "warnings": ["Resource-only job; no map candidate."]}
+                              "warnings": ["本次仅识别资源，不生成地图候选。"]}
                 else:
                     area_key = options.get("areaKey")
                     area, floor = AREA_SPECS[area_key] if area_key else (None, None)
@@ -156,11 +165,11 @@ class JobManager:
                 result["goalSummary"] = goal_summary(state)
                 result["nodeGoalAnnotations"] = node_goal_annotations(state, instance)
             check()
-            finished = {"status": "completed", "result": result}
+            finished = {"status": "completed", "result": localize_result(result)}
         except JobCancelled as error:
-            finished = {"status": "cancelled", "error": str(error)}
+            finished = {"status": "cancelled", "error": "任务已取消"}
         except Exception as error:
-            finished = {"status": "failed", "error": str(error), "errorType": type(error).__name__}
+            finished = {"status": "failed", "error": public_error(error), "diagnosticDetail": str(error), "errorType": type(error).__name__}
         finally:
             with self.lock:
                 self.records[job_id].update(finished)

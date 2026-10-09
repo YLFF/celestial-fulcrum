@@ -38,6 +38,8 @@ class DesktopTests(unittest.TestCase):
                 "COLLECT": lambda *args, **kwargs: None,
             })
         bundled = {Path(source).resolve() for source, _ in spec["datas"]}
+        for path in (root / "data/scoring").rglob("*.json"):
+            self.assertIn((str(path), str(path.relative_to(root).parent)), spec["datas"])
         for entry in entries().values():
             if entry.get("imagePath"):
                 self.assertIn(image_path(entry["id"]), bundled, entry["id"])

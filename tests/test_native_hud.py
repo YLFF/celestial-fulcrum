@@ -30,11 +30,25 @@ class NativeHudTests(unittest.TestCase):
         self.assertFalse(match_quality(sparse, (0, 70, 1280, 640))["accepted"])
         self.assertFalse(match_quality(good, (0, 70, 450, 640))["accepted"])
 
+    def test_second_floor_progress_map_and_currency(self):
+        result = MapRecognizer().recognize(ROOT / "samples/maps/desktop_floor_2_progress.png", include_resources=True)
+        self.assertTrue(result.success)
+        self.assertEqual(result.template_id, "floor-2-09")
+        self.assertEqual(len(result.nodes), 19)
+        self.assertEqual(result.player_position_observation["nodeId"], "0,0")
+        self.assertEqual(result.resource_observation["fields"]["originium_ingot"]["value"], 23)
+        self.assertEqual(result.resource_observation["fields"]["originium_ingot"]["status"], "recognized")
+        for node in result.nodes:
+            if node.category_id is None:
+                self.assertTrue(any(f"({node.coord.key})" in warning and "类型未识别" in warning for warning in result.warnings))
+
     def test_full_native_map(self):
         result = MapRecognizer().recognize(ROOT / "samples/maps/desktop_native_3840.png")
         self.assertTrue(result.success)
         self.assertEqual(result.template_id, "floor-1-vertical-fork")
         self.assertEqual(len(result.nodes), 13)
+        self.assertTrue(any("单张截图不能确认" in warning for warning in result.warnings))
+        self.assertTrue(all(any("\u4e00" <= char <= "\u9fff" for char in warning) for warning in result.warnings))
 
     def test_missing_map_regions_fail_even_with_manual_template(self):
         image = cv2.imread(str(ROOT / "samples/maps/desktop_native_3840.png"))

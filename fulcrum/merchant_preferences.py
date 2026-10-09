@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any, Iterable, Mapping
 
 from .resource_scoring import _nonnegative
+from .scoring_profile import PROFILE
 
 
 EVENT_CASH_REQUIREMENTS = {
@@ -42,7 +43,7 @@ def merchant_entry_preferences(
         raise ValueError("reserve entries must be a mapping")
     if reserve_entries is not None and reserve_override is not None:
         raise ValueError("use named reserve entries or a total override, not both")
-    entries = {"yellow_shop": 20} if reserve_entries is None else dict(reserve_entries)
+    entries = {"yellow_shop": PROFILE["merchants"]["defaultReserve"]} if reserve_entries is None else dict(reserve_entries)
     for name, amount in entries.items():
         if not isinstance(name, str) or not name:
             raise ValueError("reserve entries need nonempty names")

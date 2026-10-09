@@ -16,6 +16,7 @@ from urllib.request import urlopen, Request
 from .runtime import ROOT
 from .product import PROJECT
 from .compat import configured_app_data, default_data_directory
+from .diagnostics import public_error
 
 
 def data_directory(override=None):
@@ -179,7 +180,7 @@ def window_probe(window, result):
                 result.update(ok=True, engine=desktop_engine(), frontendMounted=True)
                 return
             time.sleep(.2)
-        raise RuntimeError("Desktop frontend did not mount within 30 seconds")
+        raise RuntimeError("桌面页面未能在30秒内加载，请查看日志并重试。")
     except Exception as error:
         result.update(ok=False, error=str(error))
     finally:
@@ -225,7 +226,7 @@ def main(argv=None):
                               storage_path=str(directory / "webview"))
                 if args.window_test:
                     if not probe.get("ok"):
-                        raise RuntimeError(probe.get("error", "window test did not finish"))
+                        raise RuntimeError(probe.get("error", "程序窗口测试未完成。"))
                     args.report.parent.mkdir(parents=True, exist_ok=True)
                     args.report.write_text(json.dumps(probe, indent=2), encoding="utf-8")
             finally:
@@ -238,5 +239,5 @@ def main(argv=None):
             args.report.write_text(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False), encoding="utf-8")
         if not args.self_test and not args.window_test and sys.platform == "win32":
             import ctypes
-            ctypes.windll.user32.MessageBoxW(None, f"{error}\n\n日志位置：{directory / 'logs/desktop.log'}\n如缺少浏览器运行库，请安装 Microsoft WebView2 Runtime。", PROJECT["shortName"], 0x10)
+            ctypes.windll.user32.MessageBoxW(None, f"{public_error(error)}\n\n日志位置：{directory / 'logs/desktop.log'}\n如缺少浏览器运行库，请安装 Microsoft WebView2 Runtime。", PROJECT["shortName"], 0x10)
         return 1

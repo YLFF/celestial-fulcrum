@@ -1,0 +1,18 @@
+{
+  "schemaVersion": 1,
+  "sortBy": "id",
+  "orderOverrides": [],
+  "categorySource": "bonus_classification",
+  "categories": ["未分类"],
+  "categoryOverrides": {},
+  "enchantments": {
+    "relic_174": {"profession": "先锋"},
+    "relic_175": {"profession": "术师"},
+    "relic_176": {"profession": "近卫"},
+    "relic_177": {"profession": "重装"},
+    "relic_178": {"profession": "狙击"},
+    "relic_179": {"profession": "医疗"},
+    "relic_180": {"profession": "特种"},
+    "relic_181": {"profession": "辅助"}
+  }
+}

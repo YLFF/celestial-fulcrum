@@ -1,0 +1,28 @@
+{
+  "schemaVersion": 1,
+  "featureName": "沉沦者手册",
+  "status": "defaults_only",
+  "theme": "沉沦者的黑流树海",
+  "editableUIEnabled": false,
+  "reloadPolicy": "application_restart",
+  "files": {
+    "defaults": "data/scoring/blackstream/default.json",
+    "relicPoolValues": "data/scoring/blackstream/relics.json"
+  },
+  "relatedReadOnlyData": {
+    "nodeGeneration": "data/lubiao_prediction_data.json",
+    "eventEligibility": "data/blackstream_encounter_pool.json",
+    "eventFrequencies": "data/blackflow_encounter_weights.json",
+    "gameRewardRules": "data/blackflow_reward_rules.json",
+    "battleRewards": "data/blackflow_battle_rewards.json",
+    "rewardFrequencies": "data/blackflow_node_reward_pools.json",
+    "rewardPoolLinks": "data/reward_pool_links.json",
+    "relicClassification": "data/relic_presentation.json"
+  },
+  "boundaries": {
+    "runOptions": "追猎、结局前置选择、战力门槛强制判定、本层留钱和节点权重覆盖均由Playtime维护，优先于默认值。",
+    "gameFacts": "经验升级表、分队职业、奖励数量、支付门槛、次数和移动范围是游戏规则，不是可自由校准的评分权重。",
+    "algorithms": "概率估算、合法移动、视野传播、一次性奖励、方针终止和安全状态合并由代码实现；不能只改JSON改变这些规则。",
+    "pending": "空过与低价值契约的惩罚值为null表示尚未定值，不冒充已经实现；未来模板版本、校验和导入另做。"
+  }
+}

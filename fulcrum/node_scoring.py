@@ -16,6 +16,8 @@ from .operators import PERMANENT_SOURCES
 from .team_status import team_status
 from .goals import BEACON_DISPATCH_AREAS, goal_summary, planning_pursuit
 from .relic_scoring import RelicScorer
+from .scoring_profile import PROFILE, PROFILE_PATH, RESOURCE_POINTS, CASH_POINTS
+from .diagnostics import localize_result, message
 from .merchant_state import DEFAULT_INVESTMENT_BALANCE, SHOP_CATEGORIES, shelf_fraction, snapshot_shelves, withdrawal_quote
 from .scoring_calibration import (
     DUAL_SQUADS, action_opportunity_score, component_reference_points,
@@ -31,8 +33,9 @@ UNKNOWN = {"unknown_mystery", "unknown_ferocity"}
 
 @lru_cache(maxsize=2)
 def _cached_catalogs(stamps):
+    from .node_rewards import RULES_PATH
     pools = NodeRewardPoolCatalog()
-    return pools, BattleRewardCatalog(), RelicScorer(catalog=pools)
+    return pools, BattleRewardCatalog(), RelicScorer(catalog=pools), json.loads(RULES_PATH.read_text(encoding="utf-8"))
 
 
 def _catalogs():
@@ -65,7 +68,7 @@ def _finite(value: Any, name: str, *, nonnegative: bool = False) -> float:
 def _value(parts=None, *, cash=0.0, appraisal=0.0, missing=(), **details):
     parts = parts or {}
     return {"points": sum(parts.values()), "parts": parts, "expectedCashDelta": cash,
-            "expectedAppraisalDelta": appraisal, "missingTerms": list(missing), **details}
+            "expectedAppraisalDelta": appraisal, "missingTerms": [message(text) for text in missing], **details}
 
 
 class SnapshotScorer:
@@ -93,7 +96,7 @@ class SnapshotScorer:
         self.cash = _finite(self.resources["originiumIngot"], "originiumIngot", nonnegative=True)
         self.investment_balance = _finite(self.resources.get("investmentBalance", DEFAULT_INVESTMENT_BALANCE),
                                           "investmentBalance", nonnegative=True)
-        self.withdrawal_cash_points = _finite(self.options.get("withdrawalCashPointValue", 8),
+        self.withdrawal_cash_points = _finite(self.options.get("withdrawalCashPointValue", PROFILE["merchants"]["withdrawalCashPoints"]),
                                                "withdrawalCashPointValue", nonnegative=True)
         self.merchant_shelves = {key: snapshot_shelves({**row, "completion": "completed"} if key in self.completed else row)
                                  for key, row in self.nodes.items()}
@@ -109,11 +112,12 @@ class SnapshotScorer:
         self.counts = Counter(item["componentId"] for item in self.components)
         self.natural_count_initial = sum(int(item["componentId"].split("_")[1]) <= 12 for item in self.components)
         self.dystopia = deepcopy(state.get("dystopia") or {})
+        self.utopia = state.get("utopiaId") if "treehole" in self.area else None
         self.capacity = self.context.get("componentBox", {}).get("capacity", 8)
         self.warnings: set[str] = set()
         if "merchantRepeatFactor" in self.options:
             self.warnings.add("merchantRepeatFactor is superseded by per-node merchantViewedShelves")
-        self.pools, self.battles, self.relics = _catalogs()
+        self.pools, self.battles, self.relics, self.reward_rules = _catalogs()
         self.definitions, self.weight_data = _events()
         self.operators = self.context.get("operators", [])
         permanent = [op for op in self.operators if op.get("source") in PERMANENT_SOURCES
@@ -137,7 +141,7 @@ class SnapshotScorer:
         self.hope_deficit = _finite(self.options.get("hopeDeficit", max(0, recruits * recruit_cost
                                     + promotions * (2 if self.squad in DUAL_SQUADS else 3) - hope)),
                                     "hopeDeficit", nonnegative=True)
-        self.exit_hope_floor = _finite(self.options.get("exitHopePointFloor", 10),
+        self.exit_hope_floor = _finite(self.options.get("exitHopePointFloor", RESOURCE_POINTS["exitHopePointFloor"]),
                                        "exitHopePointFloor", nonnegative=True)
         self.threshold["hopeDeficit"] = self.hope_deficit
         self.threshold["hopeCostAssumption"] = "missing six-stars/promotion only; other roster slots may use free recruits; dual-squad home cost proxy"
@@ -166,10 +170,7 @@ class SnapshotScorer:
                 raise ValueError(f"unknown node scoring override: {key}")
             _finite(value, key)
         self.event_distribution = self._event_distribution()
-        if state.get("utopiaId") is not None:
-            self.warnings.add("Special-area reward overlays are not applied yet; ordinary reward proxies remain listed")
         if self.dystopia.get("active"):
-            self.warnings.add("Dystopia ideology reward modifiers are not applied; improvement and benefit policies are priced")
             if self.dystopia.get("uncertainNodeIds"):
                 self.warnings.add("Unconfirmed dystopia coverage has no policy adjustment until reviewed")
         # One nonrecursive pass: AP-bearing rewards cannot inflate their own marginal queue.
@@ -181,8 +182,8 @@ class SnapshotScorer:
                              and self.nodes[key].get("categoryId") not in {"node_type_003", "node_type_012", "node_type_015", "node_type_016"}]
         self.pool_cache.clear()
         self.values = {node_id: self._node(row) for node_id, row in self.nodes.items()}
-        self.reveal_coefficient = _finite(self.options.get("revealCoefficient", 0.2), "revealCoefficient", nonnegative=True)
-        self.step_ingot = _finite(self.options.get("stepIngotExpectation", 1), "stepIngotExpectation", nonnegative=True)
+        self.reveal_coefficient = _finite(self.options.get("revealCoefficient", PROFILE["information"]["revealCoefficient"]), "revealCoefficient", nonnegative=True)
+        self.step_ingot = _finite(self.options.get("stepIngotExpectation", PROFILE["information"]["pathStepIngotExpectation"]), "stepIngotExpectation", nonnegative=True)
         for key, value in self.values.items():
             factor = self.weights.get(key, 1)
             original = value["points"]
@@ -216,7 +217,7 @@ class SnapshotScorer:
         appraisal_gain = 2 * count if policy == "dystopia_014" else 0
         return {"policyId": policy, "cashBefore": max(0, cash), "cashLost": cash_lost,
                 "naturalCount": count, "appraisalIncrease": appraisal_gain,
-                "unitPoints": 8, "points": 8 * (appraisal_gain - cash_lost),
+                "unitPoints": CASH_POINTS, "points": CASH_POINTS * (appraisal_gain - cash_lost),
                 "sourceDestroyedAfter": key == self.dystopia.get("idealSourceNodeId")
                     and self.dystopia.get("ideologyId") != "dystopia_008"}
 
@@ -250,9 +251,9 @@ class SnapshotScorer:
     def natural_tribute(self) -> dict:
         natural = [item for item in self.components if int(item["componentId"].split("_")[1]) <= 12]
         if len(natural) < 2:
-            return _value({"exchangeOpportunity": 200}, missing=["planned tribute needs two held natural components"],
+            return _value({"exchangeOpportunity": PROFILE["events"]["exchangeOpportunityPoints"]}, missing=["planned tribute needs two held natural components"],
                           goalId="ending3_trade", plannedOption="exchange", goalFeasible=False,
-                          scoringBasis=[{"label": "自然物不足2件，按普通交换估值", "points": 200}])
+                          scoringBasis=[{"label": "自然物不足2件，按普通交换估值", "points": PROFILE["events"]["exchangeOpportunityPoints"]}])
         cost = 2 * sum(component_reference_points(item["componentId"],
             existing_same=max(0, self.counts[item["componentId"]] - 1)) for item in natural) / len(natural)
         appraisal_cost = 2 * sum(item.get("estimatedValue") or 0 for item in natural) / len(natural)
@@ -264,33 +265,33 @@ class SnapshotScorer:
         return _value(appraisal=-appraisal_cost, missing=missing, modelLimitations=limitations,
                       goalId="ending3_trade", plannedOption="tribute", goalFeasible=True,
                       naturalCount=len(natural), expectedNaturalCountLost=2,
-                      scoringBasis=[{"label": "选择失与得上贡，不计普通两次交换的200分", "points": 0},
+                      scoringBasis=[{"label": f"选择失与得上贡，不计普通交换的{PROFILE['events']['exchangeOpportunityPoints']}分", "points": 0},
                                     {"label": "获得焚毁“文明”（结局前置）", "points": 0}],
                       referenceLoss={"points": -cost, "parts": {"naturalTributeCost": -cost},
                                      "includedInPlanningScore": False, "expectedNaturalCountLost": 2,
                                      "expectedAppraisalLost": appraisal_cost,
-                                     "cashEquivalentPoints": -8 * appraisal_cost, "cashUnitPoints": 8,
+                                     "cashEquivalentPoints": -CASH_POINTS * appraisal_cost, "cashUnitPoints": CASH_POINTS,
                                      "componentUnitPoints": cost / 2,
                                      "basis": "current_inventory_uniform_two_naturals"})
 
     def cash_tribute(self, cash: float) -> dict:
         selected = self.options.get("planningGoalIds")
         reference_only = selected is None or self.goal_pending("ending3_tribute")
-        return _value({} if reference_only else {"cashCost": -8 * cash}, cash=-cash,
+        return _value({} if reference_only else {"cashCost": -CASH_POINTS * cash}, cash=-cash,
                       goalId="ending3_tribute", plannedOption="tribute", goalFeasible=True,
                       scoringBasis=[{"label": "倾囊资助，获得击坠“神明”（结局前置）", "points": 0}],
-                      referenceLoss={"points": -8 * cash, "parts": {"cashCost": -8 * cash},
+                      referenceLoss={"points": -CASH_POINTS * cash, "parts": {"cashCost": -CASH_POINTS * cash},
                                      "includedInPlanningScore": not reference_only, "expectedCashLost": cash,
-                                     "cashUnitPoints": 8,
+                                     "cashUnitPoints": CASH_POINTS,
                                      "basis": "current_cash"})
 
     def hope_value(self, amount: float) -> float:
-        return min(amount, self.hope_deficit) * 500 / self.reference_cost if self.below else 0
+        return min(amount, self.hope_deficit) * RESOURCE_POINTS["completeSixStarPoints"] / self.reference_cost if self.below else 0
 
     def ticket(self, name: str, *, heavy_special: bool | None = None) -> float:
         points = ticket_reference_points(name, squad_id=self.squad, below_threshold=self.below)
         special = self.heavy_held < self.heavy_needed if heavy_special is None else heavy_special
-        return points * (3 if name == "重装招募券" and special else 1)
+        return points * (PROFILE["tickets"]["mechanistHeavyFactor"] if name == "重装招募券" and special else 1)
 
     def _held_ticket_value(self) -> float:
         heavy = 0
@@ -330,35 +331,104 @@ class SnapshotScorer:
             selection = pool.get("selection") or {}
             if selection.get("takeCount", 1) != 1:
                 raise ValueError(f"unsupported reward selection in {context_id}")
-            points = expected_best_score(outcomes, candidate_count=selection.get("candidateCount", 1))["iidBest"]
+            points = expected_best_score(outcomes, candidate_count=selection.get("candidateCount", 1))["expectedBest"]
         self.pool_cache[context_id] = points
         return points
 
     def battle(self, mode: str, *, stage=None, area=None, components=(), relic_context=None, relic_count=0,
-               ticket_context="node_battle_recruit") -> dict:
+               ticket_context="node_battle_recruit", node=None) -> dict:
         key = area or self.area
         missing = []
-        if "treehole" in key and stage is None:
-            key = key.split("-")[0]
-            missing.append("treehole actual combat stage unknown; entry-layer reward proxy")
+        if "treehole" in key and stage is None and mode in {"normal", "emergency"}:
+            entry = ROMAN.index(key.split("-")[0])
+            rule = PROFILE["overlays"]["unconfirmedTreeholeBattle"]
+            rows = [{"areaKey": region, "probability": probability,
+                     "score": self.battle(mode, area=region, components=components, relic_context=relic_context,
+                                          relic_count=relic_count, ticket_context=ticket_context, node=node)}
+                    for region, probability in ((ROMAN[entry], rule["entryLayerProbability"]),
+                                                (ROMAN[entry + 1], rule["nextLayerProbability"]))]
+            value = self._weighted_value(rows, "treeholeCombatExpectation", battleOutcomes=rows,
+                                         branches=[{"name": f"{row['areaKey']}层战斗奖励", **row} for row in rows],
+                                         rewardBasis="entry_next_layer_equal_mean")
+            value["experienceAward"] = sum(row["probability"] * row["score"]["experienceAward"] for row in rows)
+            return value
         try:
             reward = self.battles.resolve(area_key=key, mode=mode, stage_name=stage,
                 experience_multipliers=self.options.get("experienceMultipliers"))
         except ValueError as error:
             return _value(missing=[str(error)])
+        if reward.get("terminalRewardOverride"):
+            return _value({"finalBattle": PROFILE["exits"]["finalBattlePoints"]}, experienceAward=0, stage=stage)
         cash = reward["originiumIngot"]
         if cash["kind"] == "fixed":
             ingots = cash["value"]
+        elif stage == self.reward_rules["battles"]["stranger_companion"]["stageName"]:
+            rule = self.reward_rules["battles"]["stranger_companion"]
+            ingots = self.battles.resolve(area_key=key.split("-")[0], mode=rule["ingotsReferenceMode"],
+                                         experience_multipliers=self.options.get("experienceMultipliers"))["originiumIngot"]["value"]
+            reward["cashReference"] = {"areaKey": key.split("-")[0], **rule}
         else:
             ingots = 0
             missing.append("variable combat cash distribution unpriced")
         xp = experience_reward_score(level=self.level, experience=self.experience, reward=reward["experienceAward"],
              below_threshold=self.below, hope_deficit=self.hope_deficit, reference_six_star_cost=self.reference_cost)
-        return _value({"experience": xp["points"], "cash": ingots * 8,
+        value = _value({"experience": xp["points"], "cash": ingots * CASH_POINTS,
                        "tickets": self.pool(ticket_context) if ticket_context else 0,
                        "components": sum(self.pool(context) for context in components),
                        "relics": relic_count * self.relics.pool_score(relic_context) if relic_count else 0},
-                      cash=ingots, missing=missing, experienceAward=reward["experienceAward"], stage=stage)
+                      cash=ingots, missing=missing, experienceAward=reward["experienceAward"], stage=stage,
+                      **({"cashReference": reward["cashReference"]} if "cashReference" in reward else {}))
+        return self.with_soil_reward(value, node)
+
+    def with_soil_reward(self, value: dict, node: dict | None) -> dict:
+        rule = PROFILE["overlays"]["hopefulSoil"]
+        if (not node or not self.dystopia.get("active") or self.dystopia.get("ideologyId") != rule["ideologyId"]
+                or node["id"] not in self.dystopia.get("affectedNodeIds", [])):
+            return value
+        points = rule["componentCount"] * self.pool(rule["componentContextId"])
+        return {**value, "points": value["points"] + points,
+                "parts": {**value["parts"], "hopefulSoilComponent": points},
+                "extraComponentContextIds": [rule["componentContextId"]]}
+
+    def fruit_reward(self) -> dict:
+        rule = PROFILE["overlays"]["fruitMark"]
+        members = self.pools.by_id[rule["contextId"]]["members"]
+        total = sum(row.get("occurrenceCount") or 0 for row in members)
+        if not total:
+            return _value(missing=["藏果地零件池缺少统计频次"])
+        rows = [{"itemId": row["itemId"], "probability": (row.get("occurrenceCount") or 0) / total,
+                 "cashEquivalent": rule["cashEquivalents"][row["itemId"]],
+                 "points": rule["cashEquivalents"][row["itemId"]] * CASH_POINTS} for row in members]
+        return _value({"fruitMarkNatural": sum(row["probability"] * row["points"] for row in rows)}, fruitOutcomes=rows,
+                      rewardContextId=rule["contextId"], cashUnitPoints=CASH_POINTS)
+
+    def utopia_cash(self, category: str | None) -> float:
+        rule = PROFILE["overlays"]["utopiaCash"].get(self.utopia)
+        if not rule or category in {None, "start", "node_type_020"}:
+            return 0
+        return rule["ingots"] if not rule.get("categoryId") or category == rule["categoryId"] else 0
+
+    def healing_heart(self) -> dict:
+        rule = self.reward_rules["events"]["encounter_012"]
+        costs = rule["remembranceCosts"]
+        legal_costs = []
+        if self.action_points >= costs["actionPoints"]:
+            legal_costs.append("消耗3行动力")
+        processing_count = sum(13 <= int(item["componentId"].split("_")[1]) <= 24 for item in self.components)
+        if processing_count >= costs["processingCount"]:
+            legal_costs.append("消耗2件加工品")
+        if any(row.get("id") == costs["relicId"] and row.get("count", 1) > 0 for row in self.context.get("relics", [])):
+            legal_costs.append("消耗源私钥")
+        options = []
+        if legal_costs:
+            points = PROFILE["events"]["remembrancePoints"]
+            options.append(_value({"remembrance": points}, plannedOption="remembrance",
+                                  eligibleCosts=legal_costs, scoringBasis=[{"label": "取得追忆（合法选项）", "points": points}]))
+        for gain in ([5, 1] if self.counts[rule["controllerItemId"]] else [1]):
+            options.append(_value({"actionOpportunity": self.action_value(gain)}, actionGainEstimate=gain,
+                                  plannedOption=f"actionGain{gain}"))
+        selected = max(options, key=lambda row: row["points"])
+        return {**selected, "legalOptions": options, "selectionBasis": "highest_legal_option_at_snapshot"}
 
     def _event_distribution(self) -> dict:
         area = "IV" if self.area == "IV-remembrance" else self.area
@@ -386,37 +456,41 @@ class SnapshotScorer:
             self.warnings.add(f"Events without sampled weights are not silently redistributed: {', '.join(missing)}")
         return {"events": rows, "unweightedEventIds": missing, "sourceCheckedAt": self.weight_data.get("checkedAt")}
 
-    def encounter(self, event_id: str) -> dict:
+    def encounter(self, event_id: str, node=None) -> dict:
         cash, life = self.cash, self.life
         score = _value(missing=[f"event not priced: {event_id}"])
         if event_id == "encounter_001":
-            score = _value({"chosenOption": max(80, self.hope_value(3))}, cash=10 if 80 >= self.hope_value(3) else 0)
+            score = _value({"chosenOption": max(10 * CASH_POINTS, self.hope_value(3))}, cash=10 if 10 * CASH_POINTS >= self.hope_value(3) else 0)
         elif event_id == "encounter_002":
             score = _value({"lifeShieldExcluded": 0})
         elif event_id == "encounter_003":
             best = max(self.pool(f"node_incident_goods_from_mouth_{kind}") for kind in ("natural", "concept", "processing"))
-            score = _value({"component": best, "cashCost": -32}, cash=-4) if cash >= 4 else _value(missing=["empty event penalty pending"])
-        elif event_id in {"encounter_004", "encounter_012"}:
-            gain = 5 if event_id == "encounter_004" or self.counts["component_012"] else 1
+            score = _value({"component": best, "cashCost": -4 * CASH_POINTS}, cash=-4) if cash >= 4 else self.empty_event()
+        elif event_id == "encounter_004":
+            gain = 5
             score = _value({"actionOpportunity": self.action_value(gain)}, actionGainEstimate=gain)
+        elif event_id == "encounter_012":
+            score = self.healing_heart()
         elif event_id == "encounter_005":
             count, cost = (3, 10) if cash >= 10 else (1, 4) if cash >= 4 else (0, 0)
-            score = _value({"relics": count * self.relics.pool_score("node_incident_knock_lever"), "cashCost": -8 * cost},
-                           cash=-cost, missing=[] if count else ["empty event penalty pending"])
+            score = (_value({"relics": count * self.relics.pool_score("node_incident_knock_lever"), "cashCost": -CASH_POINTS * cost},
+                            cash=-cost) if count else self.empty_event())
         elif event_id in {"encounter_006", "encounter_007"}:
-            score = _value({"relics": self.options.get("eventRelicScores", {}).get(event_id, 200 if event_id == "encounter_006" else 150)})
+            score = _value({"relics": self.options.get("eventRelicScores", {}).get(event_id, PROFILE["events"]["eventRelicScores"][event_id])})
         elif event_id == "encounter_008":
             cost = 0 if life >= 3 else 8 if cash >= 8 else None
-            score = _value({"controller": 250, "cashCost": -cost * 8}, cash=-cost) if cost is not None else _value(missing=["empty event penalty pending"])
+            score = _value({"controller": PROFILE["components"]["fixedPoints"]["component_012"], "cashCost": -cost * CASH_POINTS}, cash=-cost) if cost is not None else self.empty_event()
         elif event_id == "encounter_010":
             if self.counts["component_012"]:
-                score = _value({"cash": 240, "hopefulSoil": self.options.get("hopefulSoilOpportunityPoints", 600)}, cash=30,
-                               scoringBasis=[{"label": "持有笼控器，免费触发下一层希望的沃土", "points": self.options.get("hopefulSoilOpportunityPoints", 600)}])
+                score = _value({"cash": 30 * CASH_POINTS, "hopefulSoil": self.options.get("hopefulSoilOpportunityPoints", PROFILE["events"]["hopefulSoilOpportunityPoints"])}, cash=30,
+                               scoringBasis=[{"label": "持有笼控器，免费触发下一层希望的沃土", "points": self.options.get("hopefulSoilOpportunityPoints", PROFILE["events"]["hopefulSoilOpportunityPoints"])}])
             elif self.counts["component_001"]:
-                score = _value({"seedCost": -250, "hopefulSoil": self.options.get("hopefulSoilOpportunityPoints", 600)},
-                               scoringBasis=[{"label": "消耗1种子，触发下一层希望的沃土", "points": self.options.get("hopefulSoilOpportunityPoints", 600) - 250}])
+                seed = PROFILE["components"]["fixedPoints"]["component_001"]
+                points = self.options.get("hopefulSoilOpportunityPoints", PROFILE["events"]["hopefulSoilOpportunityPoints"])
+                score = _value({"seedCost": -seed, "hopefulSoil": points},
+                               scoringBasis=[{"label": "消耗1种子，触发下一层希望的沃土", "points": points - seed}])
             else:
-                score = _value(missing=["no seed/controller: empty event penalty pending"])
+                score = self.empty_event("no seed/controller: empty event penalty pending")
         elif event_id == "encounter_011":
             score = self._shadow()
         elif event_id in {"encounter_009", "encounter_013", "encounter_014", "encounter_015", "encounter_016"}:
@@ -424,7 +498,7 @@ class SnapshotScorer:
             stage, relic_count = {"encounter_009": ("“闹乐”", 1), "encounter_013": ("陌生旅伴", 1),
                 "encounter_014": ("安保措施", 3), "encounter_015": ("开业剪彩", 3),
                 "encounter_016": ("合伙人会议", 4 if urgent else 3)}[event_id]
-            score = self.battle("specialEmergency" if urgent else "specialNormal", stage=stage)
+            score = self.battle("specialEmergency" if urgent else "specialNormal", stage=stage, node=node)
             points = self.relics.fixed_score("relic_209") if event_id == "encounter_009" else self.relics.pool_score(self.relics.event_pool(event_id)) * relic_count
             score["parts"]["relics"] = points
             score["points"] += points
@@ -432,19 +506,19 @@ class SnapshotScorer:
             urgent = cash >= 3
             combat = self.battle("specialEmergency" if urgent else "specialNormal", stage="湖中魇",
                  components=("node_battle_elite_scrap",), relic_context="node_incident_lake_fairy_emergency" if urgent else "node_incident_lake_fairy",
-                 relic_count=1 if urgent else 5 / 11)
+                 relic_count=1 if urgent else 5 / 11, node=node)
             if urgent:
                 score = _value({"combat80Percent": .8 * combat["points"], "directRelic20Percent": .2 * self.relics.pool_score("node_incident_lake_fairy_direct"),
-                                "cashCost": -24}, cash=.8 * combat["expectedCashDelta"] - 3,
+                                "cashCost": -3 * CASH_POINTS}, cash=.8 * combat["expectedCashDelta"] - 3,
                                missing=combat["missingTerms"], outcomes=[{"probability": .8, "combat": combat}, {"probability": .2, "relicOnly": True}])
             else:
                 score = combat
         elif event_id == "encounter_018":
-            combat = self.battle("normal", area=ROMAN[min(self.floor, 5)])
-            score = _value({"cash": 20, "relics": .5 * self.relics.pool_score("node_incident_cave_treasure"),
+            combat = self.battle("normal", area=ROMAN[min(self.floor, 5)], node=node)
+            score = _value({"cash": 2.5 * CASH_POINTS, "relics": .5 * self.relics.pool_score("node_incident_cave_treasure"),
                             "nextLayerCombat": .5 * combat["points"]}, cash=2.5 + .5 * combat["expectedCashDelta"], missing=combat["missingTerms"])
         elif event_id == "encounter_019":
-            score = _value({"temporarySixStar": 2 * ticket_reference_points("先锋招募券", below_threshold=self.below)})
+            score = _value({"temporarySixStar": PROFILE["tickets"]["temporarySixStarFactor"] * ticket_reference_points("先锋招募券", below_threshold=self.below)})
         elif event_id in {"encounter_020", "encounter_021"}:
             category = "node_type_019" if event_id == "encounter_020" else "node_type_017"
             targets = [row for row in self.nodes.values() if row.get("categoryId") == category and row["id"] not in self.completed]
@@ -459,10 +533,14 @@ class SnapshotScorer:
                      _value({"processing": self.pool("node_incident_informant_processing")}, plannedOption="processing"))
         elif event_id == "encounter_023":
             score = self.cash_tribute(cash)
-        extra = _finite(self.options.get("eventExtraScores", {}).get(event_id, 0), "eventExtraScore")
+        extra = _finite(self.options.get("eventExtraScores", {}).get(event_id, PROFILE["events"]["extraScores"].get(event_id, 0)), "eventExtraScore")
         score["parts"]["eventExtra"] = extra
         score["points"] += extra
         return {**score, "eventId": event_id}
+
+    def empty_event(self, note="empty event penalty pending") -> dict:
+        points = PROFILE["events"]["emptyEventPenaltyPoints"]
+        return _value({"emptyEventPenalty": points or 0}, missing=[note] if points is None else [])
 
     def _shadow(self) -> dict:
         natural = self.pool("node_incident_praised_shadow_random_natural")
@@ -474,32 +552,39 @@ class SnapshotScorer:
             if index == 8 or hp <= costs[index]:
                 return 0.0, 0.0
             hp -= costs[index]
-            rows = {0: [(0, 1, 0, 0), (32, 0, 0, 4)], 1: [(0, 1, 0, 0), (0, 0, 2, 0)],
-                    2: [(0, 2, 0, 0), (natural, 0, 0, 0)], 3: [(0, 2, 0, 0), (processed, 0, 0, 0), (96, 0, 0, 12)],
+            rows = {0: [(0, 1, 0, 0), (4 * CASH_POINTS, 0, 0, 4)], 1: [(0, 1, 0, 0), (0, 0, 2, 0)],
+                    2: [(0, 2, 0, 0), (natural, 0, 0, 0)], 3: [(0, 2, 0, 0), (processed, 0, 0, 0), (12 * CASH_POINTS, 0, 0, 12)],
                     4: [(0, 5, 0, 0), (relic, 0, 0, 0)], 5: [(0, 3, 0, 0), (0, 0, 8, 0), (0, 0, 0, 0)],
                     6: [(3 * relic, 0, 0, 0)], 7: [(self.relics.fixed_score("relic_215"), 0, 0, 0)]}[index]
             points = cash = 0.0
             for value, heal, hope, money in rows:
                 after = visit(index + 1, min(self.resources["life"].get("max") or self.life, hp + heal), max(0, deficit - hope))
-                points += value + (min(hope, deficit) * 500 / self.reference_cost if self.below else 0) + after[0]
+                points += value + (min(hope, deficit) * RESOURCE_POINTS["completeSixStarPoints"] / self.reference_cost if self.below else 0) + after[0]
                 cash += money + after[1]
             return points / len(rows), cash / len(rows)
         points, cash = visit(0, self.life, self.hope_deficit)
         return _value({"conditionalRounds": points}, cash=cash)
 
     def category(self, category: str | None, node: dict) -> dict:
+        value = self._category(category, node)
+        cash = self.utopia_cash(category) if self.utopia == "utopia_009" else 0
+        if cash:
+            value = {**value, "points": value["points"] + CASH_POINTS * cash,
+                     "parts": {**value["parts"], "utopiaCash": CASH_POINTS * cash},
+                     "expectedCashDelta": value["expectedCashDelta"] + cash}
+        return value
+
+    def _category(self, category: str | None, node: dict) -> dict:
         stage = node.get("stageName")
         if category == "node_type_001":
-            return self.battle("normal", stage=stage)
+            return self.battle("normal", stage=stage, node=node)
         if category == "node_type_002":
-            return self.battle("emergency", stage=stage, components=("node_battle_elite_scrap",), relic_count=1, relic_context="node_battle_elite")
+            return self.battle("emergency", stage=stage, components=("node_battle_elite_scrap",), relic_count=1, relic_context="node_battle_elite", node=node)
         if category == "node_type_003":
             if self.floor == 6:
-                value = self.battle("boss", stage=stage, ticket_context=None)
-                value["missingTerms"].append("VI final rewards beyond experience/cash not modeled")
-                return value
+                return _value({"finalBattle": PROFILE["exits"]["finalBattlePoints"]}, stage=stage)
             return self.battle("boss", stage=stage, components=("node_battle_boss_scrap",), relic_count=1,
-                               relic_context="pool_boss", ticket_context="node_battle_boss_recruit")
+                               relic_context="pool_boss", ticket_context="node_battle_boss_recruit", node=node)
         if category in {"node_type_004", "node_type_013"}:
             shop = self.shop(category, self.cash, self.initial_appraisal, done=self.completed, repeated=False,
                              node_id=node["id"])
@@ -511,12 +596,12 @@ class SnapshotScorer:
         if category == "node_type_006":
             event = node.get("encounterId")
             if event:
-                return self.encounter(event)
-            rows = [{**row, "score": self.encounter(row["eventId"])} for row in self.event_distribution["events"]]
+                return self.encounter(event, node)
+            rows = [{**row, "score": self.encounter(row["eventId"], node)} for row in self.event_distribution["events"]]
             marked = self.probabilities(node).get("markedEventProbabilities", {}) if node.get("categoryId") in UNKNOWN else {}
             remainder = max(0, 1 - sum(marked.values()))
             rows = [{**row, "probability": row["probability"] * remainder} for row in rows if remainder > 0]
-            rows += [{"eventId": key, "probability": probability, "score": self.encounter(key), "placementBasis": "ending_uniform_slots"}
+            rows += [{"eventId": key, "probability": probability, "score": self.encounter(key, node), "placementBasis": "ending_uniform_slots"}
                      for key, probability in marked.items() if probability > 0]
             value = self._weighted_value(rows, "encounterExpectation", events=rows)
             value["missingTerms"] += ((["empty sampled encounter pool"] if not rows else []) +
@@ -528,7 +613,7 @@ class SnapshotScorer:
         if category == "node_type_008":
             if "node_mark_006" in node.get("confirmedMarkIds", []) and self.goal_pending("ending3_trade"):
                 return self.natural_tribute()
-            return _value({"exchangeOpportunity": 200}, plannedOption="exchange")
+            return _value({"exchangeOpportunity": PROFILE["events"]["exchangeOpportunityPoints"]}, plannedOption="exchange")
         if category == "node_type_009":
             choose_beacon = (self.goal_pending("ending3_beacon") or
                              self.options.get("planningGoalIds") is None and self.options.get("chooseEnding3Dispatch", False))
@@ -538,18 +623,18 @@ class SnapshotScorer:
                 grants_promotion=not choose_beacon)
             return _value(dispatch["parts"], plannedOption="beacon" if choose_beacon else "promotion",
                           **({"scoringBasis": [{"label": "派遣取得怦然信标（结局前置）", "points": 0},
-                                               {"label": "归队不进阶，不计普通派遣的93.75分进阶价值", "points": 0}]}
+                                               {"label": "归队不进阶，不计普通派遣的进阶价值", "points": 0}]}
                              if choose_beacon else {}),
                           **({"goalId": "ending3_beacon"} if choose_beacon else {}))
         if category == "node_type_010":
-            return _value({"treeholeActionProxy": self.action_value(3) if self.processed_available else 0}, actionRewardIsEstimate=True)
+            return _value({"treeholeActionProxy": self.action_value(PROFILE["exits"]["treeholeEntryAPProxy"]) if self.processed_available else 0}, actionRewardIsEstimate=True)
         if category == "node_type_011":
             base = self.pool("node_battle_recruit")
             choices = {"low": self.pool("node_duel_left") + 2 * base,
                        "middle": self.pool("node_duel_center") + 2 * base,
-                       "high": self.relics.pool_score("node_duel_right") + base + 75 * (1.25 if self.below else 1)}
+                       "high": self.relics.pool_score("node_duel_right") + base + PROFILE["tickets"]["duelTemporaryElitePoints"] * (RESOURCE_POINTS["belowThresholdFactor"] if self.below else 1)}
             selected = node.get("duelTier") or max(choices, key=choices.get)
-            return _value({"duelReward": choices[selected]}, selectedTier=selected, choices=choices)
+            return self.with_soil_reward(_value({"duelReward": choices[selected]}, selectedTier=selected, choices=choices), node)
         if category == "node_type_012":
             role = ("true" if node["id"] in self.true_fates else "fake" if self.true_fates else node.get("fateRole", "unknown"))
             probability = 0 if role == "true" else 1 if role == "fake" else 2 / 3
@@ -569,7 +654,7 @@ class SnapshotScorer:
             return self.battle("specialNormal", stage=stage,
                 components=("node_battle_savage_scrap_left", "node_battle_savage_scrap_right") if outpost else (f"node_wandering_resident_{suffix}scrap",),
                 relic_count=1, relic_context="node_battle_savage" if outpost else f"node_wandering_resident_{suffix}relic",
-                ticket_context="node_battle_savage_recruit" if outpost else f"node_wandering_resident_{suffix}recruit")
+                ticket_context="node_battle_savage_recruit" if outpost else f"node_wandering_resident_{suffix}recruit", node=node)
         return _value()
 
     def probabilities(self, node: dict) -> dict:
@@ -636,13 +721,13 @@ class SnapshotScorer:
                 "missingTerms": (["结局前置超过未知位置容量，请修正地图或进度"] if not valid else []) +
                     (["no nonzero category evidence; no invented posterior"] if not total and occupied < 1 else [])}
 
-    def _node(self, node: dict) -> dict:
+    def _node_reward(self, node: dict) -> dict:
         marks = node.get("confirmedMarkIds", [])
         if "node_mark_001" in marks:
             value = self.category("node_type_021", node)
         elif "node_mark_004" in marks:
             value = self.battle("specialNormal", stage="无效验尸", components=("node_battle_boss_scrap",),
-                relic_count=1, relic_context="node_battle_normal_invalid_autopsy", ticket_context="node_battle_boss_recruit")
+                relic_count=1, relic_context="node_battle_normal_invalid_autopsy", ticket_context="node_battle_boss_recruit", node=node)
             value["goalId"] = "ending3_autopsy"
             value["goalFeasible"] = True
         elif node.get("categoryId") in UNKNOWN:
@@ -657,7 +742,7 @@ class SnapshotScorer:
                 if spec:
                     conditional = min(1, spec["probability"] / probability)
                     marked_node = {**node, "categoryId": key, "confirmedMarkIds": [spec["markId"]]}
-                    special_value = self._node(marked_node)
+                    special_value = self._node_reward(marked_node)
                     branches = [{"name": "结局前置", "probability": conditional, "score": special_value},
                                 {"name": "普通节点", "probability": 1 - conditional, "score": ordinary_value}]
                     ordinary_value = self._weighted_value(branches, "endingPlacementExpectation", branches=branches)
@@ -670,7 +755,7 @@ class SnapshotScorer:
             conditional = self.prediction.get("endingCategoryMarks", {}).get(node["id"], [])
             if conditional and "node_mark_006" not in marks:
                 spec = conditional[0]
-                marked_value = self._node({**node, "confirmedMarkIds": [spec["markId"]]})
+                marked_value = self._node_reward({**node, "confirmedMarkIds": [spec["markId"]]})
                 probability = spec["probability"]
                 branches = [
                     {"name": "结局前置", "probability": probability, "score": marked_value},
@@ -679,9 +764,22 @@ class SnapshotScorer:
                 value = marked_value if probability >= 1 - 1e-9 else self._weighted_value(
                     branches, "conditionalMarkExpectation", branches=branches)
             if node.get("categoryId") is None and node["id"] not in self.completed:
-                value["missingTerms"].append("unclassified node; confirm its category before interpreting its utility")
+                value["missingTerms"].append(message("unclassified node; confirm its category before interpreting its utility"))
+        return value
+
+    def _node(self, node: dict) -> dict:
+        value = self._node_reward(node)
+        marks = node.get("confirmedMarkIds", [])
         if "node_mark_007" in marks:
-            value["missingTerms"].append("fruit-mark natural reward not priced yet")
+            reward = self.fruit_reward()
+            value = {**value, "points": value["points"] + reward["points"],
+                     "parts": {**value["parts"], **reward["parts"]}, "fruitReward": reward,
+                     "missingTerms": value["missingTerms"] + reward["missingTerms"]}
+        cash = self.utopia_cash(node.get("categoryId")) if self.utopia == "utopia_007" else 0
+        if cash:
+            value = {**value, "points": value["points"] + CASH_POINTS * cash,
+                     "parts": {**value["parts"], "utopiaCash": CASH_POINTS * cash},
+                     "expectedCashDelta": value["expectedCashDelta"] + cash}
         value["nodeId"] = node["id"]
         return value
 
@@ -751,6 +849,12 @@ class SnapshotScorer:
                                  done=before_done, repeated=key not in fresh, box_count=box_count,
                                  node_id=key, viewed_shelves=shelves[key], investment_balance=balance)
                 value = _value(shop["parts"], merchant=shop)
+                if key in fresh:
+                    extras = {name: points for name, points in self.base_values[key]["parts"].items()
+                              if name in {"utopiaCash", "fruitMarkNatural"}}
+                    value["parts"].update(extras)
+                    value["points"] = sum(value["parts"].values())
+                    value["expectedCashDelta"] = self.utopia_cash(category) if self.utopia == "utopia_007" else 0
                 original = value["points"]
                 value["parts"]["strategyAdjustment"] = self.overrides.get(key, original * self.weights.get(key, 1)) - original
                 value["points"] = sum(value["parts"].values())
@@ -807,7 +911,7 @@ class SnapshotScorer:
                          "expectedAppraisalDelta": value["expectedAppraisalDelta"],
                          **({"merchant": value["merchant"]} if "merchant" in value else {}),
                          **({"merchantTypes": value["merchantTypes"]} if value.get("merchantTypes") else {}),
-                         **{name: value[name] for name in ("goalId", "plannedOption", "goalFeasible", "fateRole", "fakeFateProbability", "referenceLoss", "scoringBasis", "policyAdjustment", "modelLimitations") if name in value},
+                         **{name: value[name] for name in ("goalId", "plannedOption", "goalFeasible", "fateRole", "fakeFateProbability", "referenceLoss", "scoringBasis", "policyAdjustment", "modelLimitations", "extraComponentContextIds", "fruitReward", "legalOptions", "cashReference", "battleOutcomes") if name in value},
                          "frozenBreakdownNodeId": key if key in fresh else None})
             cash_delta += value["expectedCashDelta"]
             appraisal_delta += value["expectedAppraisalDelta"]
@@ -833,21 +937,21 @@ class SnapshotScorer:
     def terminal(self, node_id: str, remaining_ap: int, *, pursuit: bool, treehole: bool = False,
                  done: set[str] | None = None) -> dict:
         if treehole:
-            return _value({"treeholeActionProxy": self.action_value(3)})
+            return _value({"treeholeActionProxy": self.action_value(PROFILE["exits"]["treeholeEntryAPProxy"])})
         category = self.nodes[node_id].get("categoryId")
         if pursuit:
             if "treehole" in self.area:
-                return _value(missing=["treehole exhaustion transition not modeled as a main-layer pursuit reward"])
+                return _value()
             if self.floor in (3, 5):
                 return self.battle("boss", components=("node_battle_boss_scrap",), relic_count=1,
                                    relic_context="pool_boss", ticket_context="node_battle_boss_recruit")
             if self.floor in (1, 2, 4) and "treehole" not in self.area:
                 return _value({"pursuitTicket": self.pool("node_battle_recruit")})
-            return _value(missing=["pursuit terminal reward undefined for area"])
+            return _value({"finalBattle": PROFILE["exits"]["finalBattlePoints"]})
         if category == "node_type_015":
             needed = min(remaining_ap, self.hope_deficit) if self.below else 0
             hope_points = (remaining_ap * self.exit_hope_floor
-                           + needed * max(0, 500 / self.reference_cost - self.exit_hope_floor))
+                           + needed * max(0, RESOURCE_POINTS["completeSixStarPoints"] / self.reference_cost - self.exit_hope_floor))
             return _value({"exitProcessing": self.pool("node_final_scrap"), "remainingHope": hope_points},
                           convertedHope=remaining_ap, exitHopePointFloor=self.exit_hope_floor)
         if category == "node_type_016":
@@ -856,14 +960,15 @@ class SnapshotScorer:
             count = sum(key not in done and (row.get("categoryId") in core or any(
                 candidate in core for candidate, probability in self.probabilities(row)["probabilities"].items() if probability))
                 for key, row in self.nodes.items())
-            factor = max(0, 1 - .2 * max(0, count - remaining_ap))
-            return _value({"exitProcessing": self.pool("node_evacuate_scrap"), "nextLayerAP": 200 * remaining_ap * factor},
+            factor = max(0, 1 - PROFILE["exits"]["pathCarryDeficitPenalty"] * max(0, count - remaining_ap))
+            return _value({"exitProcessing": self.pool("node_evacuate_scrap"), "nextLayerAP": RESOURCE_POINTS["carryAPPoints"] * remaining_ap * factor},
                           carryFactor=factor, remainingCoreNodeCount=count)
         return _value()
 
     def report(self) -> dict:
         missing = {key: value["missingTerms"] for key, value in self.values.items() if value["missingTerms"]}
-        return {"mode": "snapshot_expected_utility", "scoreUnit": "configured relic pool points; normal relic=100, cash=8",
+        return localize_result({"mode": "snapshot_expected_utility", "scoreUnit": f"普通藏品={RESOURCE_POINTS['relicPoints']}分，源石锭={CASH_POINTS}分；其他藏品按池配置",
+                "profile": {"name": PROFILE["name"], "path": str(PROFILE_PATH.relative_to(ROOT)), "reload": "application_restart"},
                 "nodeValues": self.values, "threshold": self.threshold, "eventDistribution": self.event_distribution,
                 "actionOpportunity": {"queue": sorted(self.action_queue, reverse=True), "onePoint": self.action_value(1)},
                 "revealCoefficient": self.reveal_coefficient, "exitHopePointFloor": self.exit_hope_floor,
@@ -873,7 +978,7 @@ class SnapshotScorer:
                 "tributeLossIncludedInPlanningScore": any(value.get("referenceLoss", {}).get("includedInPlanningScore")
                     or value.get("referenceLoss", {}).get("includedPoints", 0) for value in self.values.values()),
                 "dystopiaPolicyScoring": {"supportedPolicies": ["dystopia_011", "dystopia_014"],
-                    "active": self.policy_active(self.completed), "cashUnitPoints": 8,
+                    "active": self.policy_active(self.completed), "cashUnitPoints": CASH_POINTS,
                     "naturalCount": self.natural_count_initial,
                     "naturalInventoryAssumption": "confirmed inventory minus planned known tributes; unknown acquired items not simulated"},
                 "missingTermsByNode": missing,
@@ -888,4 +993,4 @@ class SnapshotScorer:
                     "selected tribute goals use reference-only loss; unselected mandatory cash tribute deducts utility; payments reduce predicted shop economy",
                     "covered arrivals settle policy before node rewards; the ideal source disables policy after its own arrival",
                     "benefit uses confirmed natural inventory minus known planned tributes, not unknown future item acquisitions",
-                    "reward-pool candidate selection uses IID approximation; incomplete utility terms remain listed"]}
+                    "reward-pool candidate selection uses weighted sampling without replacement; joint pair frequencies unavailable"]})

@@ -10,7 +10,7 @@ from .node_rewards import NodeRewardPoolCatalog
 from .resource_scoring import DEFAULT_UNIT_VALUES, REFERENCE_POINTS
 
 
-CONFIG_PATH = Path(__file__).resolve().parents[1] / "data" / "blackflow_relic_scoring.json"
+CONFIG_PATH = Path(__file__).resolve().parents[1] / "data/scoring/blackstream/relics.json"
 
 
 def _points(value: float) -> float:

@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import { Trash2, UserRoundPlus, Swords, PackagePlus, Footprints, TreeDeciduous } from 'lucide-react';
+import { Trash2, ChevronsUp, UserRoundPlus, Swords, PackagePlus, Footprints, TreeDeciduous, WandSparkles } from 'lucide-react';
 import { EntryImage, IconButton, Modal, NumberField, SaveButton } from './common';
 import { componentCommands, operatorProgressLabel, operatorProgressOptions, PROFESSIONS, uid } from './model';
 import CatalogPicker from './CatalogPicker';
 import { SOURCE_CHOICES, sourceChoice } from './picker';
 import { acquireDraft, appraisalDraft } from './componentAppraisal';
+import { canEnchant, enchantCommands, manualTrainingPromotion, relicActive } from './relicPresentation';
 
 export function RelicEditor({ state, catalog, entries, onSave, onClose, busy, adding = false }) {
   const [items, setItems] = useState(structuredClone(state.relics));
+  const [assignments, setAssignments] = useState({});
+  function assign(id, operatorId) { setAssignments(current => { const next = { ...current }; if (operatorId) next[id] = operatorId; else delete next[id]; return next; }); }
   const change = (index, changes) => setItems(items.map((row, i) => i === index ? { ...row, ...changes } : row));
-  return <Modal title={`藏品 · ${items.reduce((a, b) => a + (b.count || 1), 0)} 件`} onClose={onClose} wide footer={<SaveButton busy={busy} onClick={() => onSave([{ type: 'relics', items }])} />}>
+  return <Modal title={`藏品 · ${items.reduce((a, b) => a + (b.count || 1), 0)} 件`} onClose={onClose} wide footer={<SaveButton busy={busy} onClick={() => onSave([{ type: 'relics', items }, ...enchantCommands(assignments)])} />}>
     <div className="picker-layout"><CatalogPicker autoFocus={adding} rows={catalog.relic} selectedIds={items.filter(row => row.id !== 'relic_014' && !/^relic_(03[2-7]|24[0-3])$/.test(row.id)).map(row => row.id)} onAdd={({ id }) => setItems(items.some(row => row.id === id) ? items.map(row => row.id === id ? { ...row, count: (row.count || 1) + 1 } : row) : [...items, { id, count: 1, state: null }])} />
     <div className="editor-list">{items.map((row, index) => <div className="relic-edit-row" key={row.id}>
       <EntryImage entry={entries[row.id]} className="inventory-image" /><div className="item-title"><b>{entries[row.id]?.name || row.id}</b><small>{row.id}</small></div>
-      <label className="field"><span>层数 / 生效</span><input aria-label={`${entries[row.id]?.name} 层数 / 生效`} placeholder="层数或生效状态" value={row.state ?? ''} onChange={e => change(index, { state: e.target.value === '' ? null : /^\d+$/.test(e.target.value) ? Number(e.target.value) : e.target.value })} /></label>
-      <IconButton icon={Trash2} label={`移除 ${entries[row.id]?.name}`} onClick={() => setItems(items.filter((_, i) => i !== index))} />
+      {entries[row.id]?.enchantmentProfession ? <div className="enchantment-controls">
+        {relicActive(row) ? <span className="enchantment-applied">已生效{row.enchantment ? ` · ${row.enchantment.operatorName}` : ' · 受益干员未记录'}</span>
+          : <label className="field"><span>{assignments[row.id] ? '待保存附魔' : `附魔 · ${entries[row.id].enchantmentProfession}`}</span><select aria-label={`${entries[row.id].name} 受益干员`} value={assignments[row.id] || ''} onChange={e => assign(row.id, e.target.value)}>
+            <option value="">未生效 / 选择干员</option>{state.operators.filter(operator => canEnchant(row, operator, entries)).map(operator => <option key={operator.instanceId} value={operator.instanceId}>{operator.name}</option>)}</select></label>}
+      </div> : <label className="field"><span>层数 / 生效</span><input aria-label={`${entries[row.id]?.name} 层数 / 生效`} placeholder="层数或生效状态" value={row.state ?? ''} onChange={e => change(index, { state: e.target.value === '' ? null : /^\d+$/.test(e.target.value) ? Number(e.target.value) : e.target.value })} /></label>}
+      <IconButton icon={Trash2} label={`移除 ${entries[row.id]?.name}`} onClick={() => { setItems(items.filter((_, i) => i !== index)); assign(row.id, null); }} />
     </div>)}</div></div>
   </Modal>;
 }
@@ -37,7 +44,7 @@ export function ComponentEditor({ state, catalog, entries, onSave, onClose, busy
       <span>总估价 {box.items.reduce((sum, row) => sum + (row.estimatedValue || 0), 0)}</span></div>
     {error && <div className="form-error" role="alert">{error}</div>}
     {confirmTrees && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除霜晶树"><h3>移除全部霜晶树？</h3><p>将从零件箱移除 {trees} 件霜晶树。</p><div><button autoFocus onClick={() => setConfirmTrees(false)}>取消</button><button className="primary" onClick={() => { setBox({ ...box, items: box.items.filter(row => row.componentId !== 'component_006') }); setConfirmTrees(false); }}>确认移除</button></div></section></div>}
-    <div className="picker-layout component-layout"><CatalogPicker autoFocus={adding} rows={catalog.component} onAdd={entry => {
+    <div className="picker-layout component-layout"><CatalogPicker components autoFocus={adding} rows={catalog.component} onAdd={entry => {
       try { setBox(acquireDraft(box, entry, catalog)); setError(''); } catch (e) { setError(e.message); }
     }} />
     <div className="component-columns">{['加工品', '自然物', '概念体'].map(kind => <section key={kind}><h3>{kind}</h3>{box.items.map((row, index) => entries[row.componentId]?.kind === kind && <div className="component-edit-row" key={row.instanceId}>
@@ -50,13 +57,16 @@ export function ComponentEditor({ state, catalog, entries, onSave, onClose, busy
   </Modal>;
 }
 
-export function OperatorEditor({ state, catalog, onSave, onClose, busy, adding = false }) {
+export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy, adding = false }) {
   const [items, setItems] = useState(() => structuredClone(state.operators).map(row => {
     const entry = catalog.operators.find(entry => entry.name === row.name);
-    return entry ? { ...row, operatorId: entry.id, profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarity } : row;
+    return { ...row, ...(entry ? { operatorId: entry.id, profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarity } : {}),
+      elite: row.elite ?? ((entry?.rarity ?? row.rarity) >= 3 ? 1 : 0) };
   }));
   const [squad, setSquad] = useState(state.squad || []);
   const [settle, setSettle] = useState(false);
+  const [pendingDelete, setPendingDelete] = useState(null);
+  const [enchantOperator, setEnchantOperator] = useState(null), [assignments, setAssignments] = useState({});
   const change = (id, changes) => setItems(items.map(row => row.instanceId === id ? { ...row, ...changes } : row));
   async function save() {
     const old = new Map(state.operators.map(row => [row.instanceId, row]));
@@ -69,15 +79,21 @@ export function OperatorEditor({ state, catalog, onSave, onClose, busy, adding =
       if (!old.has(row.instanceId)) commands.push({ type: 'operatorAdd', name: row.name, source, elite: row.elite, profession: row.profession || null,
         rarity: row.rarity ?? null, instanceId: row.instanceId, recordOnly: !settle, ...(settle && row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
       else {
-        if (settle && old.get(row.instanceId).elite === 1 && row.elite === 2 && !support) commands.push({ type: 'operatorPromote', instanceId: row.instanceId,
-          ...(row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
+        const trainingPromotion = manualTrainingPromotion(old.get(row.instanceId), row, state.relics, assignments, entries);
+        if ((settle || trainingPromotion) && old.get(row.instanceId).elite === 1 && row.elite === 2 && !support) commands.push({ type: 'operatorPromote', instanceId: row.instanceId,
+          ...(trainingPromotion ? { hopeCost: 0 } : row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
         commands.push({ type: 'operatorUpdate', instanceId: row.instanceId, changes });
       }
     }
     commands.push({ type: 'squad', operatorIds: squad.filter(id => live.has(id)) });
+    commands.push(...enchantCommands(Object.fromEntries(Object.entries(assignments).filter(([, id]) => live.has(id)))));
     await onSave(commands);
   }
-  return <Modal title={`干员与编队 · ${items.length} 人`} onClose={onClose} wide footer={<SaveButton busy={busy} onClick={save} />}>
+  return <Modal title={`干员与编队 · ${items.length} 人`} onClose={onClose} wide footer={<SaveButton busy={busy || !!pendingDelete} onClick={save} />}>
+    {pendingDelete && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除干员">
+      <h3>移除 {pendingDelete.name}？</h3><p>该干员也将从当前编队移除，保存后生效。</p><div><button autoFocus onClick={() => setPendingDelete(null)}>取消</button>
+      <button className="primary" onClick={() => { setItems(items.filter(row => row.instanceId !== pendingDelete.instanceId)); setSquad(squad.filter(id => id !== pendingDelete.instanceId)); setPendingDelete(null); }}>确认移除</button></div>
+    </section></div>}
     <div className="editor-toolbar">
       <label className="checkbox-field"><input type="checkbox" checked={settle} onChange={e => setSettle(e.target.checked)} />结算新招募 / 进阶</label>
       <span>编队 {squad.length}/{state.resources.carrySlots}</span></div>
@@ -89,14 +105,23 @@ export function OperatorEditor({ state, catalog, onSave, onClose, busy, adding =
         change(row.instanceId, { name: e.target.value, operatorId: entry?.id, ...(entry ? { profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarity } : {}) });
       }} /></label>
       <label className="field"><span>职业</span><select aria-label="职业" disabled={catalog.operators.some(entry => entry.name === row.name && !entry.professionEditable)} value={row.profession || ''} onChange={e => change(row.instanceId, { profession: e.target.value || null })}>
-        <option value="">待确认</option>{PROFESSIONS.map(text => <option key={text}>{text}</option>)}</select></label>
+        <option value="" disabled>选择职业</option>{PROFESSIONS.map(text => <option key={text}>{text}</option>)}</select></label>
       <NumberField label="星级" readOnly={catalog.operators.some(entry => entry.name === row.name)} value={row.rarity} min={1} max={6} nullable onChange={value => change(row.instanceId, { rarity: value })} />
-      <label className="field"><span>进阶状态</span><select aria-label="进阶状态" value={row.elite ?? ''} onChange={e => change(row.instanceId, { elite: e.target.value === '' ? null : Number(e.target.value) })}>
-        <option value="">待确认</option>{operatorProgressOptions(row.rarity, row.elite).map(value => <option key={value} value={value}>{operatorProgressLabel(value)}</option>)}</select></label>
+      <label className="field"><span>进阶状态</span><select aria-label="进阶状态" value={row.elite} onChange={e => change(row.instanceId, { elite: Number(e.target.value) })}>
+        {operatorProgressOptions(row.rarity, row.elite).map(value => <option key={value} value={value}>{operatorProgressLabel(value)}</option>)}</select></label>
       <label className="field"><span>来源</span><select aria-label="来源" value={sourceChoice(row.source)} onChange={e => change(row.instanceId, { source: e.target.value })}>
         {Object.entries(SOURCE_CHOICES).map(([id, text]) => <option value={id} key={id}>{text}</option>)}</select></label>
       {settle && <NumberField label="希望费用" value={row.hopeCost} nullable onChange={value => change(row.instanceId, { hopeCost: value })} />}
-      <IconButton icon={Trash2} label={`移除干员 ${row.name}`} onClick={() => { setItems(items.filter(x => x.instanceId !== row.instanceId)); setSquad(squad.filter(id => id !== row.instanceId)); }} />
+      <div className="operator-row-actions"><IconButton icon={WandSparkles} label={`附魔 ${row.name}`} disabled={busy || !state.relics.some(relic => canEnchant(relic, row, entries))} onClick={() => setEnchantOperator(enchantOperator === row.instanceId ? null : row.instanceId)} />
+        <IconButton icon={ChevronsUp} label={`进阶 ${row.name}`} disabled={busy || row.elite === 2 || !operatorProgressOptions(row.rarity, row.elite).includes(2)} onClick={() => change(row.instanceId, { elite: 2 })} />
+        <IconButton icon={Trash2} label={`移除干员 ${row.name}`} disabled={busy} onClick={() => setPendingDelete(row)} /></div>
+      {(enchantOperator === row.instanceId || Object.values(assignments).includes(row.instanceId) || state.relics.some(relic => relic.enchantment?.operatorInstanceId === row.instanceId)) &&
+        <div className="operator-enchantments">{state.relics.filter(relic => relic.enchantment?.operatorInstanceId === row.instanceId).map(relic => <span key={relic.id}>{entries[relic.id]?.name} · 已生效</span>)}
+          {state.relics.filter(relic => canEnchant(relic, row, entries) && (enchantOperator === row.instanceId || assignments[relic.id] === row.instanceId)).map(relic => <label className="checkbox-field" key={relic.id}>
+            <input type="checkbox" checked={assignments[relic.id] === row.instanceId} disabled={!!assignments[relic.id] && assignments[relic.id] !== row.instanceId} onChange={e => setAssignments(current => {
+              const next = { ...current }; if (e.target.checked) next[relic.id] = row.instanceId; else delete next[relic.id]; return next;
+            })} /><EntryImage entry={entries[relic.id]} className="inventory-image" />{entries[relic.id]?.name}{assignments[relic.id] === row.instanceId ? ' · 待保存' : ''}</label>)}
+        </div>}
     </section>)}</div></div>
   </Modal>;
 }

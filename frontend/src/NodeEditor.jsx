@@ -1,12 +1,21 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { X, Crosshair, Check } from 'lucide-react';
 import { IconButton, NumberField, SaveButton } from './common';
 import { nodeCategory, pct } from './model';
 import ScoreDetails from './ScoreDetails';
 import { coverageStatus, setCoverage } from './dystopia';
+import RewardPoolPanel, { RewardPoolButtons } from './RewardPoolPanel';
+import { besidePopover, rewardPoolsFor } from './rewardPools';
 
-export default function NodeEditor({ node, instance, catalog, value, anchor, onClose, onSave, busy }) {
+export default function NodeEditor({ node, instance, catalog, value, anchor, onClose, onSave, busy, entries, heldRelics = [] }) {
   const [tab, setTab] = useState('score');
+  const [pool, setPool] = useState(null), [panelHeight, setPanelHeight] = useState(540);
+  const panelRef = useRef(null);
+  useEffect(() => {
+    const observer = new ResizeObserver(() => setPanelHeight(panelRef.current.getBoundingClientRect().height));
+    observer.observe(panelRef.current);
+    return () => observer.disconnect();
+  }, []);
   const [viewport, setViewport] = useState({ width: window.innerWidth, height: window.innerHeight });
   useEffect(() => {
     const resize = () => setViewport({ width: window.innerWidth, height: window.innerHeight });
@@ -55,16 +64,19 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
     if (['node_type_004', 'node_type_013'].includes(category)) commands.push({ type: 'shopShelves', areaKey: instance.areaKey, nodeId: node.id, viewed: shelves });
     await onSave(commands);
   }
-  const left = Math.max(10, Math.min(viewport.width - 396, anchor.right + 8));
+  const left = Math.max(10, Math.min(viewport.width - (pool && viewport.width >= 812 ? 792 : 396), anchor.right + 8));
   const top = Math.max(70, Math.min(viewport.height - 570, anchor.top - 36));
-  return <section role="dialog" aria-label={`节点编辑 ${node.id}`} className="node-popover" style={{ left, top,
+  return <><section ref={panelRef} role="dialog" aria-label={`节点编辑 ${node.id}`} className="node-popover" style={{ left, top,
     maxHeight: viewport.width > 800 ? Math.max(120, viewport.height - top - 12) : undefined }}>
     <header><div><small>节点 ({node.id})</small><h3>{catalog.labels.nodeTypes[nodeCategory(node)]}</h3></div>
       <IconButton icon={X} label="关闭节点详情" onClick={onClose} /></header>
-    <div className="tabs"><button className={tab === 'node' ? 'active' : ''} onClick={() => setTab('node')}>节点状态</button>
+    <div className="tabs"><button className={tab === 'node' ? 'active' : ''} onClick={() => { setTab('node'); setPool(null); }}>节点状态</button>
       <button className={tab === 'score' ? 'active' : ''} onClick={() => setTab('score')}>概率与得分</button></div>
     <div className="node-popover-body">{tab === 'score' ? <>
-      <ScoreDetails value={value} catalog={catalog} />
+      {marks.includes('node_mark_007') && <div><small>藏果地</small><RewardPoolButtons
+        pools={rewardPoolsFor(catalog, { markIds: ['node_mark_007'] }, instance.areaKey)} label="藏果地" onOpen={setPool} /></div>}
+      <ScoreDetails value={value} catalog={catalog} rewardScope={{ categoryId: marks.includes('node_mark_001') ? 'node_type_021' : nodeCategory(node), eventId: node.encounterId }}
+        areaKey={instance.areaKey} onOpenPool={setPool} />
       {!!instance.prediction?.unknownNodes?.[node.id]?.candidates?.length && <details className="classification-table"><summary>路标原始距离频次（非当前分类概率）</summary>
         {instance.prediction.unknownNodes[node.id].candidates.map(row => <div className="probability-row" key={row.categoryId}>
           <span>{catalog.labels.nodeTypes[row.categoryId]}</span><span>{pct(row.distanceFrequency)}</span></div>)}
@@ -102,5 +114,6 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
     </div>}</div>
     <footer><button onClick={() => { setCompletion('completed'); setVisibility('revealed'); }} disabled={busy}><Check size={15} />已完成</button>
       <SaveButton busy={busy} onClick={save}>确认更新</SaveButton></footer>
-  </section>;
+  </section>{pool && <RewardPoolPanel key={`${pool.label}-${pool.kind}`} selection={pool} entries={entries} heldRelics={heldRelics}
+    style={besidePopover(left, top, 386, panelHeight, viewport)} onClose={() => setPool(null)} />}</>;
 }

@@ -45,7 +45,7 @@ def scaled_atlas(label_width):
 def locate_label(image, filename, region, scale_hint=None):
     reference = cv2.imread(str(ASSETS / filename), cv2.IMREAD_GRAYSCALE)
     if reference is None:
-        raise FileNotFoundError(f"missing relic HUD anchor: {filename}")
+        raise FileNotFoundError(f"缺少收藏品栏定位素材：{filename}")
     x0, y0, x1, y1 = region
     gray = cv2.cvtColor(image[y0:y1, x0:x1], cv2.COLOR_BGR2GRAY)
     best = None
@@ -101,7 +101,7 @@ class RelicRecognizer:
     def recognize(self, path):
         image = cv2.imread(str(path))
         if image is None:
-            raise ValueError("could not decode relic screenshot")
+            raise ValueError("无法读取收藏品截图")
         return self.recognize_image(image)
 
     def recognize_image(self, original):

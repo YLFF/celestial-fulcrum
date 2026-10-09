@@ -23,7 +23,14 @@ def editor_catalog():
     result = {}
     for row in entries().values():
         result.setdefault(row["category"], []).append({"id": row["id"], "name": row["name"],
-            "imageUrl": f"/api/catalog/{row['id']}/image" if row.get("imagePath") else None})
+            "imageUrl": f"/api/catalog/{row['id']}/image" if row.get("imagePath") else None,
+            "effect": row.get("effect", "")})
+    from ..relic_presentation import display_metadata, presentation
+    for row in result["relic"]:
+        row.update(display_metadata(row))
+    result["relicCategories"] = presentation()["categories"]
+    from ..reward_browser import browser_catalog
+    result["rewardBrowser"] = browser_catalog()
     result["encounters"] = json.loads((ROOT / "data/blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
     result["squads"] = SQUAD_NAMES
     result["cocoons"] = COCOON_NAMES

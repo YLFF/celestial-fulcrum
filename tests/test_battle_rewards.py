@@ -34,7 +34,11 @@ class BattleRewardTests(unittest.TestCase):
         result = self.catalog.resolve(area_key="V-treehole", mode="normal", stage_name="命运共享")
         self.assertEqual(result["resolvedRegion"], "VI")
         self.assertEqual(result["originiumIngot"], {"kind": "fixed", "value": 5})
-        self.assertEqual(self.catalog.resolve(area_key="VI", mode="boss")["experienceAward"], 93)
+        for mode in ("boss", "bossPursuit"):
+            terminal = self.catalog.resolve(area_key="VI", mode=mode)
+            self.assertEqual(terminal["experienceAward"], 0)
+            self.assertEqual(terminal["originiumIngot"]["value"], 0)
+            self.assertEqual(terminal["terminalRewardOverride"]["rewardStatus"], "no_rewards_current_version")
 
     def test_special_overrides_are_variant_specific(self) -> None:
         normal = self.catalog.resolve(area_key="III-treehole", mode="specialNormal", stage_name="合伙人会议")
@@ -71,7 +75,8 @@ class BattleRewardTests(unittest.TestCase):
             for mode, row in modes.items():
                 if row:
                     result = self.catalog.resolve(area_key=region, mode=mode)
-                    self.assertEqual(result["experienceAward"], row["experience"]["fullTechnology"])
+                    expected = result["terminalRewardOverride"]["experience"] if result.get("terminalRewardOverride") else row["experience"]["fullTechnology"]
+                    self.assertEqual(result["experienceAward"], expected)
 
 
 class TableExtractionTests(unittest.TestCase):

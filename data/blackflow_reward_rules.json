@@ -11,7 +11,7 @@
   "events": {
     "encounter_009": {"controllerItemId": "component_012", "controllerConsumed": false, "fixedRelicId": "relic_209"},
     "encounter_010": {"controllerItemId": "component_012", "controllerConsumed": false, "qualificationPersistsAfterControllerLoss": true, "relatedComponentContextIds": ["hopeful_fruits", "node_battle_savage_scrap_right"]},
-    "encounter_012": {"controllerItemId": "component_012", "controllerConsumed": false},
+    "encounter_012": {"controllerItemId": "component_012", "controllerConsumed": false, "remembranceCosts": {"actionPoints": 3, "processingCount": 2, "relicId": "relic_210"}},
     "encounter_013": {"relicContextId": "node_hidden_collectible", "stageId": "ro6_t_1", "eventRelicCount": 1},
     "encounter_014": {"relicContextId": "node_hidden_collectible", "stageId": "ro6_t_2", "eventRelicCount": 3},
     "encounter_015": {"relicContextId": "node_hidden_collectible", "ordinary": {"stageId": "ro6_t_3", "eventRelicCount": 2}, "emergency": {"stageId": "ro6_e_t_3", "cashThreshold": 0, "thresholdProvisional": true, "eventRelicCount": 3, "addEmergencyBaseRelic": false}},
@@ -21,6 +21,8 @@
     "encounter_021": {"relicId": "relic_207", "relicCount": 1, "freeTravelTargetCategoryId": "node_type_017", "freeTravelRequiresUncompletedTarget": true, "targetCompletedStillGrantsRelic": true}
   },
   "battles": {
+    "final_battle": {"areaKey": "VI", "modes": ["boss", "bossPursuit"], "experience": 0, "ingots": 0, "relicCount": 0, "componentCount": 0, "ticketCount": 0, "rewardStatus": "no_rewards_current_version", "basis": "用户确认：当前终战打完直接结算，后续版本可能调整"},
+    "stranger_companion": {"stageName": "陌生旅伴", "ingotsReferenceMode": "emergency", "provisional": true, "verificationStatus": "unverified"},
     "invalid_autopsy": {"stageName": "无效验尸", "baseExperience": 36, "fullTechnologyExperience": 47, "ingots": 5, "relicCount": 1, "componentCount": 1, "ticketCount": 1, "rewardReference": "III_boss", "provisional": true},
     "optional_boxes": {"battleModes": ["normal", "emergency"], "resourceKinds": ["component", "originiumIngot"], "requiresInBattleConditions": true, "probabilitySource": "battleRewardObservations", "additionalIngotProbability": null, "enabledForScoring": false, "phasePolicy": "existing_main_rewards_only"}
   },

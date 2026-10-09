@@ -93,7 +93,7 @@ def cell(value: str) -> str:
 def markdown(index: dict) -> str:
     lines = ["# 战斗与事件藏品池评分表", "",
              "## 评分口径", "",
-             "本表供手动校准。池分填写每实际领取一件藏品的期望收益，不是整个事件总分；固定给多件时再乘件数，奖励概率、事件出现概率、钱/经验/券/零件仍另外计算。计算配置在data/blackflow_relic_scoring.json，手动改本表不会自动解析成代码配置。",
+             "本表供手动校准。池分填写每实际领取一件藏品的期望收益，不是整个事件总分；固定给多件时再乘件数，奖励概率、事件出现概率、钱/经验/券/零件仍另外计算。计算配置在data/scoring/blackstream/relics.json，手动改本表不会自动解析成代码配置。",
              "二选一的池分填写择优领取一件后的期望分，不能再乘2或再算一次择优。若后续改为逐藏品分数推导，则需候选分布/抽样假设，并替代本表的整体代理分，不能两份相加。共用池可在下方按场景覆盖单件分，不需要复制成员清单。",
              "同一成员集合只列一次，共用池的不同条件频次不合并。频次空白表示未记录，不是概率0；仅列成员的池不默认每件等概率。进退趋同目前只有一件已记录藏品，不视为已确认完整池。",
              "普通作战池保留供查询，但本阶段普通作战不自动加一件藏品。伴生战斗的额外藏品不因战斗标签而重复叠通用紧急奖励。",
@@ -173,7 +173,7 @@ def export_sheet(sheet: Path, data_path: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--sheet", type=Path, default=ROOT / "RELIC_POOL_SCORING.md")
+    parser.add_argument("--sheet", type=Path, default=ROOT / "work/relic_pool_scoring/report.md")
     parser.add_argument("--index", type=Path, default=ROOT / "work" / "relic_pool_scoring" / "index.json")
     args = parser.parse_args()
     export_sheet(args.sheet, args.index)

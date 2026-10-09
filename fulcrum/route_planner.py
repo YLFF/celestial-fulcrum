@@ -13,6 +13,8 @@ from .node_scoring import SnapshotScorer
 from .route_allocation import GeometryCache, MovementAllocator, TrajectoryPool, item_preference
 from .goals import planning_pursuit
 from .lookout_rules import lookout_radii
+from .scoring_profile import PROFILE
+from .diagnostics import localize_result, message
 
 
 EXIT_CATEGORIES = {"node_type_003", "node_type_015", "node_type_016"}
@@ -26,7 +28,7 @@ TREEHOLE_CATEGORY = "node_type_010"
 PORTAL_CATEGORY = "node_type_014"
 MYSTERY_CATEGORY = "unknown_mystery"
 FEROCITY_CATEGORY = "unknown_ferocity"
-SCORE_SCALE = 20
+SCORE_SCALE = PROFILE["search"]["scoreScale"]
 END_CATEGORY = "node_type_015"
 EXIT_HINT_CATEGORIES = {"danger-enemy": "node_type_003", "danger-end": END_CATEGORY,
                         "danger-path": "node_type_016"}
@@ -676,11 +678,11 @@ class RoutePlanner:
         self.scorer = SnapshotScorer(self.raw_nodes, state["scoringContext"], {**state, "actionPoints": action_points}) if state.get("scoringContext") else None
         self.planning_targets = state.get("planningTargets", []) if self.scorer is not None else []
         self.group_by_priority = bool(self.planning_targets and state.get("groupByPriority", False))
-        top_n = int(state.get("topN", 5))
-        max_states = int(state.get("maxStates", 50000))
-        if type(state.get("allocationDominance", True)) is not bool:
+        top_n = int(state.get("topN", PROFILE["search"]["defaultTopN"]))
+        max_states = int(state.get("maxStates", PROFILE["search"]["defaultMaxStates"]))
+        if type(state.get("allocationDominance", PROFILE["search"]["allocationDominance"])) is not bool:
             raise ValueError("allocationDominance must be boolean")
-        search_mode = state.get("searchMode", "target")
+        search_mode = state.get("searchMode", PROFILE["search"]["defaultMode"])
         if search_mode not in ("target", "reference"):
             raise ValueError("searchMode must be target or reference")
         optimized = search_mode == "target"
@@ -755,7 +757,7 @@ class RoutePlanner:
                 scored_guards.append("negative_strategy_weight")
             if any(item.uses and item.estimated_value is None for item in items):
                 scored_guards.append("unknown_processing_appraisal")
-            if not state.get("allocationDominance", True):
+            if not state.get("allocationDominance", PROFILE["search"]["allocationDominance"]):
                 scored_guards.append("explicitly_disabled")
         dominance_enabled = (optimized and bool(items) and (not scored_guards if self.scorer is not None
                              else free_slots is None or free_slots > 1)
@@ -1177,7 +1179,8 @@ class RoutePlanner:
                                                             "pursuit" if pursuit and not single_step else "exit") for candidate in grouped]})
         if not complete and not pursuit and not single_step and not self.exit_nodes:
             warnings.append("No exit node is identified; only treehole branch routes may be available")
-        warnings.append("Treehole entry consumes the listed processing item; routes continuing past that node decline entry")
+        if any(node.category == TREEHOLE_CATEGORY for node in self.nodes):
+            warnings.append("Treehole entry consumes the listed processing item; routes continuing past that node decline entry")
         warnings.append("Unknown node outcomes, combat results, and item/relic side effects are not simulated; replan after changes")
         if single_step:
             warnings.append("Blind-zone planning uses at most 1 AP and one movement; refresh the map before the next plan")
@@ -1187,7 +1190,7 @@ class RoutePlanner:
             warnings.append("Danger-end recruitment utility is unconfigured; no recruitment points are added there")
         if self.scorer is not None:
             warnings.extend(sorted(self.scorer.warnings))
-        return {
+        return localize_result({
             "schemaVersion": 3 if self.scorer is not None else 2,
             "templateId": self.template_id,
             "planningNodeKnowledge": self.template_knowledge,
@@ -1271,5 +1274,5 @@ class RoutePlanner:
                                    "pursuit" if pursuit and not single_step else "exit") for item in selected],
             "treeholeBranches": [self._route(item, labels, items,
                                              "treehole_replan") for item in branches],
-            "warnings": warnings,
-        }
+            "warnings": [message(text) for text in warnings],
+        })

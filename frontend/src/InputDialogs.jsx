@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { ScanLine, RefreshCw, Monitor, LoaderCircle } from 'lucide-react';
 import { api } from './api';
+import { readPreference } from './preferences';
+import { captureTarget, rememberedCaptureWindow } from './captureTarget';
 import { Modal, SaveButton, AssetImage, NumberField } from './common';
 import { AREA_NAMES, areaFromObservation } from './model';
 import MapView from './MapView';
@@ -180,7 +182,16 @@ export function CaptureDialog({ onClose, onCaptured, notify }) {
   const [consent, setConsent] = useState(false), [crop, setCrop] = useState(false), [rect, setRect] = useState([0, 0, 1920, 1080]);
   const [working, setWorking] = useState(false), [error, setError] = useState('');
   async function refresh() {
-    try { const data = await api('/api/capture/windows'); setWindows(data.windows.sort((a, b) => Number(b.foreground) - Number(a.foreground))); }
+    try {
+      const data = await api('/api/capture/windows');
+      const rows = data.windows.sort((a, b) => Number(b.foreground) - Number(a.foreground));
+      setWindows(rows);
+      let saved;
+      try { saved = JSON.parse(readPreference('fulcrum-capture-target')); } catch { saved = null; }
+      const target = rows.find(row => row.windowId === selected && !row.minimized) || rememberedCaptureWindow(rows, saved);
+      setSelected(target?.windowId || ''); setConsent(false);
+      if (target) setRect([0, 0, target.clientRect.width, target.clientRect.height]);
+    }
     catch (e) { setError(e.message); }
   }
   useEffect(() => { refresh(); }, []);
@@ -188,6 +199,7 @@ export function CaptureDialog({ onClose, onCaptured, notify }) {
     const target = windows.find(w => w.windowId === selected);
     if (!target) return;
     setWorking(true); setError(''); let grant;
+    try { localStorage.setItem('fulcrum-capture-target', JSON.stringify(captureTarget(target))); } catch { /* Capture also works without preference storage. */ }
     try {
       grant = await api('/api/capture/authorize', { method: 'POST', body: { pid: target.pid, windowId: target.windowId, consent } });
       const asset = await api('/api/capture', { method: 'POST', body: { pid: target.pid, windowId: target.windowId, authorizationId: grant.authorizationId, method, crop: crop ? rect : null } });

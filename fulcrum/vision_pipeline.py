@@ -8,12 +8,13 @@ import numpy as np
 
 from .map_catalog import TemplateCatalog
 from .map_model import MapNode, MapResult, TemplateMatch
-from .vision_geometry import detect_circles, detect_map_viewport, match_templates, working_image
+from .vision_geometry import detect_circles, detect_map_viewport, match_templates, working_image, differing_edge_evidence
 from .vision_icons import IconMatcher
 from .vision_layer import recognize_layer
 from .vision_player import recognize_player_position
 from .vision_resources import HudRecognizer
 from .vision_dystopia import recognize_header, connector_evidence, recognize_nodes
+from .diagnostics import public_error
 
 
 FIXED_NODE_TYPES = {
@@ -58,7 +59,7 @@ class MapRecognizer:
     ) -> MapResult:
         image = cv2.imread(str(screenshot))
         if image is None:
-            raise ValueError(f"could not read screenshot: {screenshot}")
+            raise ValueError(f"无法读取截图：{screenshot}")
         return self.recognize_image(
             image,
             screenshot=str(screenshot),
@@ -91,15 +92,15 @@ class MapRecognizer:
             try:
                 result.resource_observation = HudRecognizer().recognize_image(image)
             except (OSError, RuntimeError) as exc:
-                result.resource_observation = {"error": str(exc)}
-                result.warnings.append(f"HUD OCR unavailable: {exc}")
+                result.resource_observation = {"error": public_error(exc), "diagnosticDetail": str(exc)}
+                result.warnings.append(f"资源文字识别不可用：{public_error(exc)}")
         if area is None:
-            result.warnings.append("Could not read the layer marker; supply area and floor to review this screenshot.")
+            result.warnings.append("未能识别层数标志；请手动选择区域和层数后重试。")
             return result
         if requested_area is not None and layer.area is not None and requested_area != layer.area:
-            result.warnings.append("Manual area overrides a different layer marker in the screenshot.")
+            result.warnings.append("手动选择的区域与截图识别结果不同，已按手动选择处理。")
         if requested_floor is not None and layer.floor is not None and requested_floor != layer.floor:
-            result.warnings.append("Manual floor overrides a different layer marker in the screenshot.")
+            result.warnings.append("手动选择的层数与截图识别结果不同，已按手动选择处理。")
         candidates = self.catalog.candidates(area, floor)
         work, scale = working_image(image)
         viewport = detect_map_viewport(work)
@@ -115,13 +116,13 @@ class MapRecognizer:
                                   refine_connectors=bool(dystopia.get("active")))
         result.template_candidates = [match.summary() for match in matches[:5]]
         if not matches:
-            result.warnings.append("No template could be aligned to detected node circles.")
+            result.warnings.append("未找到与截图节点布局匹配的地图模板；请上传完整地图。")
             return result
         selected = matches[0]
         if template_override:
             selected = next((match for match in matches if match.template.id == template_override), None)
             if selected is None:
-                raise ValueError(f"template not available in this area: {template_override}")
+                raise ValueError(f"当前区域没有可匹配的指定地图模板：{template_override}")
         classified = {}
         supported = selected.matched_slots
         # Completed small nodes and irregular combat icons can escape circle detection.
@@ -166,10 +167,16 @@ class MapRecognizer:
                     and selected.edge_score - second.edge_score >= 0.12
                     and margin >= 0.025
                 )
+                if same_occupancy and result.match_quality["coverage"] >= .9 and margin >= .025:
+                    edge_count, evidence, agreement = differing_edge_evidence(work, selected, second)
+                    result.match_quality["differingEdgeCount"] = edge_count
+                    result.match_quality["differingEdgeEvidence"] = round(evidence, 4)
+                    result.match_quality["differingEdgeAgreement"] = round(agreement, 4)
+                    edge_tie_break = edge_tie_break or (edge_count >= 4 and evidence >= .30 and agreement >= .8)
             if margin < 0.06 and not edge_tie_break:
                 result.match_quality["accepted"] = False
                 result.match_quality["reason"] = "ambiguous_template"
-                result.warnings.append("Template match is weak or ambiguous; review candidates before accepting a map.")
+                result.warnings.append("地图模板匹配不够明确；请核对候选模板后再导入。")
                 return result
         result.success = True
         result.template_id = selected.template.id
@@ -233,11 +240,12 @@ class MapRecognizer:
             result.warnings.append("实托邦覆盖与理想源是视觉候选；请确认范围内、范围外和待确认节点后导入。")
         result.player_position_observation = recognize_player_position(image, result.nodes)
         if result.player_position_observation["status"] != "recognized":
-            result.warnings.append("Player position requires review or manual confirmation.")
-        unresolved = sum(node.category_id is None for node in result.nodes)
+            result.warnings.append("玩家所在位置需要核对或手动确认。")
+        unresolved = [node.coord.key for node in result.nodes if node.category_id is None]
         if unresolved:
-            result.warnings.append(f"{unresolved} node categories require review.")
-        result.warnings.append("Mark absence and node completion are not confirmed from one screenshot.")
+            coordinates = "、".join(f"({node_id})" for node_id in unresolved)
+            result.warnings.append(f"节点 {coordinates} 的类型未识别，请在“节点候选与修正”中选择类别；这不是完成状态提醒。")
+        result.warnings.append("单张截图不能确认所有节点是否已完成，也不能因未识别到标记就判定标记不存在；请核对后导入。")
         return result
 
 

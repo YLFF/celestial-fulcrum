@@ -162,10 +162,8 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("按实际关卡所属层/特殊战斗", draft)
         self.assertIn("10 → 13", draft)
         rulebook = (ROOT / "BLACKSTREAM_RULEBOOK.md").read_text(encoding="utf-8")
-        development_notes = (ROOT / "DEVELOPMENT_NOTES.md").read_text(encoding="utf-8")
         self.assertIn("## 7. 路线收益与决策评分", rulebook)
-        self.assertIn("### 路线评分草稿", development_notes)
-        self.assertIn("尚不读取评分草稿", development_notes)
+        self.assertTrue((ROOT / "data/scoring/blackstream/default.json").is_file())
 
     def test_encounter_scoring_defaults_and_shadow_rounds_are_saved(self) -> None:
         handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
@@ -293,12 +291,12 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertIn(term, mistake_notes)
         self.assertIn("事件估值默认按这个选项处理", mistake_notes)
         self.assertIn("尽量避免触发该事件", mistake_notes)
-        for name in ("DEVELOPMENT_NOTES.md", "ROUTE_PLANNING_DESIGN.md", "BLACKSTREAM_RULEBOOK.md", "BLACKSTREAM_REFERENCE.md", "ROADMAP.md"):
+        for name in ("BLACKSTREAM_RULEBOOK.md", "BLACKSTREAM_REFERENCE.md", "ROADMAP.md"):
             document = (ROOT / name).read_text(encoding="utf-8")
             self.assertIn("不能重复进入", document)
             self.assertNotIn("两类行商与应急助力可", document)
             self.assertNotIn("应急助力已补入可重复", document)
-        self.assertTrue((ROOT / "CV_PACKAGING.md").is_file())
+        self.assertTrue((ROOT / "packaging/README.md").is_file())
         dependencies = (ROOT / "requirements-vision.txt").read_text(encoding="utf-8")
         self.assertIn("opencv-python-headless", dependencies)
         self.assertNotRegex(dependencies, r"(?m)^opencv-python[<>=]")
@@ -382,15 +380,14 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertEqual(len(state["areas"]), 10)
             self.assertIn("IV-remembrance", state["areas"])
 
-    def test_project_design_defines_modules_and_playtime(self) -> None:
-        design = (ROOT / "PROJECT_DESIGN.md").read_text(encoding="utf-8")
-        for module in ("实时地图认知", "节点预测", "路线规划", "藏品效果合并", "资源更新维护"):
+    def test_roadmap_records_current_state_and_llm_boundary(self) -> None:
+        design = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+        for module in ("Playtime", "节点预测", "路线规划", "藏品", "资源"):
             self.assertIn(module, design)
         self.assertIn("runs/<run_id>/playtime.json", design)
         self.assertIn("不要求玩家逐项标注来源或可靠性", design)
-        self.assertIn("BLACKFLOW_PLAYTIME_TEMPLATE.md", design)
         self.assertIn("模板不需要为 LLM 保留专用命名空间", design)
-        self.assertIn("应用不解析玩家手改的 Markdown 来恢复状态", design)
+        self.assertIn("不解析手改 Markdown 作为存档恢复依据", design)
         self.assertIn("客观功能输出", design)
         self.assertIn("大模型交互输出", design)
 
@@ -491,7 +488,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("将现有藏品表的效果格式化为可计算条目", roadmap)
         self.assertIn("合并所有适用加成", roadmap)
         self.assertIn("截图到地图/资源候选、确认入局和离线节点预测", roadmap)
-        self.assertTrue((ROOT / "STAGE1_MAP_AND_RESOURCES.md").exists())
+        self.assertFalse((ROOT / "STAGE1_MAP_AND_RESOURCES.md").exists())
         self.assertIn("不计算具体干员的生存、输出", roadmap)
         self.assertIn("节点预测", roadmap)
         self.assertIn("路线规划", roadmap)

@@ -41,13 +41,79 @@ class StoreTests(unittest.TestCase):
         self.assertEqual(RunStore(self.store.root).load("unit"), self.loaded)
 
     def test_revision_conflict_and_undo(self):
-        updated = self.store.update("unit", 1, lambda s: apply_commands(s, [{"type": "resources", "values": {"hope": 12}}]))
+        updated = self.store.update("unit", 1, lambda s: apply_commands(s, [{"type": "resources", "values": {"hope": 12}}]), map_update=True)
         self.assertEqual(updated["revision"], 2)
         with self.assertRaises(RevisionConflict):
             self.store.update("unit", 1, lambda s: None)
         undone = self.store.undo("unit", 2)
         self.assertEqual(undone["revision"], 3)
         self.assertEqual(undone["state"]["resources"]["hope"], 6)
+        redone = self.store.redo("unit", 3)
+        self.assertEqual(redone["state"]["resources"]["hope"], 12)
+        self.assertEqual(redone["revision"], 4)
+
+    def test_manual_edits_are_grouped_with_map_updates(self):
+        self.store.update("unit", 1, lambda s: s["resources"].update(hope=7))
+        self.assertFalse(self.store.load("unit")["history"]["canUndo"])
+        self.store.update("unit", 2, lambda s: s["resources"].update(hope=8), map_update=True)
+        self.store.update("unit", 3, lambda s: s["resources"].update(hope=9))
+        self.store.update("unit", 4, lambda s: s.update(memo="strategy edit"))
+        self.assertEqual(self.store.load("unit")["history"]["undoCount"], 1)
+        undone = self.store.undo("unit", 5)
+        self.assertEqual(undone["state"]["resources"]["hope"], 7)
+        self.assertEqual(undone["state"].get("memo", ""), "")
+        restarted = RunStore(self.store.root)
+        restored = restarted.redo("unit", 6)
+        self.assertEqual(restored["state"]["resources"]["hope"], 9)
+        self.assertEqual(restored["state"]["memo"], "strategy edit")
+        self.assertNotIn("_serviceHistory", restored["state"])
+
+    def test_multiple_undo_redo_and_branching(self):
+        for revision, hope in ((1, 8), (2, 10), (3, 12)):
+            self.store.update("unit", revision, lambda s, value=hope: s["resources"].update(hope=value), map_update=True)
+        self.store.undo("unit", 4)
+        undone = self.store.undo("unit", 5)
+        self.assertEqual(undone["state"]["resources"]["hope"], 8)
+        self.assertEqual(undone["history"]["redoCount"], 2)
+        self.store.redo("unit", 6)
+        changed = self.store.update("unit", 7, lambda s: s["resources"].update(hope=20))
+        self.assertFalse(changed["history"]["canRedo"])
+        with self.assertRaises(ValueError):
+            self.store.redo("unit", 8)
+        with self.assertRaises(RevisionConflict):
+            self.store.undo("unit", 7)
+
+    def test_history_restores_floor_maps_positions_and_strategy(self):
+        from fulcrum.playtime_state import merge_map_observation
+        from tests.test_playtime_prediction import chain_map
+        self.store.update("unit", 1, lambda state: merge_map_observation(state, "III", chain_map(3)), map_update=True)
+        self.store.update("unit", 2, lambda state: apply_commands(state, [
+            {"type": "position", "areaKey": "III", "value": "1,0"},
+            {"type": "strategy", "areaKey": "III", "value": {"scoringOptions": {"merchantReserveCash": 30}}},
+        ]))
+        self.store.update("unit", 3, lambda state: merge_map_observation(state, "IV", chain_map(4)), map_update=True)
+        undone = self.store.undo("unit", 4)["state"]
+        self.assertEqual(undone["currentAreaKey"], "III")
+        self.assertEqual(active_instance(undone, "III")["playerPosition"], "1,0")
+        self.assertEqual(active_instance(undone, "III")["strategy"]["scoringOptions"]["merchantReserveCash"], 30)
+        self.assertFalse(undone["areas"]["IV"]["instances"])
+        self.assertEqual(self.store.redo("unit", 5)["state"]["currentAreaKey"], "IV")
+
+    def test_legacy_snapshot_is_reused_only_for_map_transition(self):
+        from fulcrum.playtime_state import merge_map_observation
+        from tests.test_playtime_prediction import chain_map
+        original = deepcopy(self.loaded["state"])
+        changed = deepcopy(original)
+        changed["resources"]["hope"] = 20
+        atomic_json(self.store.path("unit"), changed)
+        atomic_json(self.store.path("unit").with_name("previous.json"), original)
+        self.assertFalse(self.store.load("unit")["history"]["canUndo"])
+        merge_map_observation(changed, "III", chain_map(3))
+        atomic_json(self.store.path("unit"), changed)
+        self.assertTrue(self.store.load("unit")["history"]["canUndo"])
+        undone = self.store.undo("unit", 1)
+        self.assertIsNone(undone["state"]["currentAreaKey"])
+        self.assertEqual(self.store.redo("unit", 2)["state"]["currentAreaKey"], "III")
 
     def test_invalid_batch_does_not_save(self):
         commands = [{"type": "resources", "values": {"hope": 99}}, {"type": "componentAdd", "componentId": "bad"}]
@@ -312,8 +378,18 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["state"]["resources"]["hope"], 0)
         self.assertEqual(response.json()["state"]["resources"]["originiumIngot"], 88)
+        self.assertEqual(response.json()["history"]["undoCount"], 1)
         self.assertEqual(self.client.post("/api/runs/api/confirm-recognition", json={
             "expectedRevision": 2, "jobId": row["jobId"], "areaKey": "I"}).status_code, 409)
+        edited = self.client.patch("/api/runs/api", json={"expectedRevision": 2, "commands": [{"type": "memo", "value": "after move"}]})
+        self.assertEqual(edited.status_code, 200, edited.text)
+        undone = self.client.post("/api/runs/api/undo", json={"expectedRevision": 3})
+        self.assertEqual(undone.status_code, 200, undone.text)
+        self.assertEqual(undone.json()["state"]["resources"]["originiumIngot"], before["state"]["resources"]["originiumIngot"])
+        redone = self.client.post("/api/runs/api/redo", json={"expectedRevision": 4})
+        self.assertEqual(redone.status_code, 200, redone.text)
+        self.assertEqual(redone.json()["state"]["resources"]["originiumIngot"], 88)
+        self.assertEqual(redone.json()["state"]["memo"], "after move")
 
     def test_partial_resource_confirmation_does_not_change_map(self):
         row = self.mock_recognition_job({"success": False, "resourceObservation": {"fields": {
@@ -325,6 +401,7 @@ class APITests(unittest.TestCase):
         self.assertEqual(response.status_code, 200, response.text)
         self.assertEqual(response.json()["state"]["resources"]["hope"], 5)
         self.assertEqual(response.json()["state"]["resources"]["originiumIngot"], self.run["state"]["resources"]["originiumIngot"])
+        self.assertFalse(response.json()["history"]["canUndo"])
 
     def test_cancel_and_job_restart(self):
         row = self.wait_job(self.client.post("/api/runs/api/jobs/score", json={"expectedRevision": 1}))
@@ -430,11 +507,15 @@ class JobRestartTests(unittest.TestCase):
             jobs.mkdir()
             common = {"runId": "restart", "sourceRevision": 1}
             atomic_json(jobs / ("a" * 32 + ".json"), {**common, "jobId": "a" * 32, "status": "running"})
-            atomic_json(jobs / ("b" * 32 + ".json"), {**common, "jobId": "b" * 32, "status": "completed", "result": {"ok": True}})
+            legacy = {"ok": True, "warnings": ["1 node categories require review."]}
+            atomic_json(jobs / ("b" * 32 + ".json"), {**common, "jobId": "b" * 32, "status": "completed", "result": legacy})
             manager = JobManager(jobs, store, assets)
             try:
                 self.assertEqual(manager.get("a" * 32)["status"], "interrupted")
-                self.assertEqual(manager.get("b" * 32)["result"], {"ok": True})
+                result = manager.get("b" * 32)["result"]
+                self.assertTrue(result["ok"])
+                self.assertIn("节点类别需核对", result["warnings"][0])
+                self.assertEqual(json.loads((jobs / ("b" * 32 + ".json")).read_text(encoding="utf-8"))["result"], legacy)
                 self.assertFalse(manager.get("b" * 32)["stale"])
             finally:
                 manager.close()

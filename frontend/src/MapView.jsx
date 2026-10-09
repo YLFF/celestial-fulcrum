@@ -3,7 +3,7 @@ import { Check, Crosshair, ZoomIn, ZoomOut, Maximize2, Flag, CircleHelp, Circle,
 import { EntryImage, IconButton } from './common';
 import { nodeCategory, num, pct } from './model';
 import { coverageStatus } from './dystopia';
-import { POSITION_FILTERS, candidatePositions, routeCurve } from './mapPresentation';
+import { POSITION_FILTERS, candidateIconSwitch, candidatePositions, routeCurve } from './mapPresentation';
 import { MAP_BACKGROUND, MAP_SIDE_BRIGHTNESS_RATIO, MAP_BRIGHTNESS_KEY, savedMapBrightness } from './mapBackgrounds';
 
 const COLORS = { node_type_001: 'combat', node_type_002: 'combat', node_type_003: 'combat',
@@ -123,8 +123,8 @@ export default function MapView({ instance, catalog, entries, scores, route, onS
                 onMouseLeave={() => setHover(null)} onFocus={event => setHover({ node, rect: event.currentTarget.getBoundingClientRect() })} onBlur={() => setHover(null)}>
                 <span className="node-coordinate">{node.id === '0,0' ? '起点' : `(${node.id})`}</span>
                 <span className="node-disc">{category === 'start' ? <Crosshair size={27} /> : category === 'node_type_020' ? <Circle size={13} /> :
-                  <span className={`node-art ${candidates.has(node.id) ? 'candidate-art' : ''}`}><EntryImage entry={entries[category]} className={`node-icon ${category.startsWith('node_type_') ? 'atlas-icon' : 'unknown-icon'}`} />
-                    {candidates.has(node.id) && <EntryImage entry={entries[filter === 'autopsy' ? 'node_type_001' : filter]} className="node-icon atlas-icon candidate-overlay" />}</span>}
+                  <span className={`node-art ${candidates.has(node.id) && candidateIconSwitch(filter) ? 'candidate-art' : ''}`}><EntryImage entry={entries[category]} className={`node-icon ${category.startsWith('node_type_') ? 'atlas-icon' : 'unknown-icon'}`} />
+                    {candidates.has(node.id) && candidateIconSwitch(filter) && <EntryImage entry={entries[filter === 'autopsy' ? 'node_type_001' : filter]} className="node-icon atlas-icon candidate-overlay" />}</span>}
                   {node.completion === 'completed' && <Check className="completed-badge" size={13} />}
                   {position && <Crosshair className="player-badge" size={19} />}
                   {order >= 0 && <span className="route-order">{order + 1}</span>}

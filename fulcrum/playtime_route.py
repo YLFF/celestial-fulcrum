@@ -9,10 +9,11 @@ from .component_box import route_items
 from .playtime_state import active_instance, validate_playtime, rebuild_derived
 from .merchant_state import snapshot_shelves
 from .goals import planning_pursuit
+from .scoring_profile import PROFILE
 
 
 def route_inputs(
-    playtime: dict[str, Any], area_key: str | None = None, *, pursuit: bool = False, top_n: int = 5,
+    playtime: dict[str, Any], area_key: str | None = None, *, pursuit: bool = False, top_n: int = PROFILE["search"]["defaultTopN"],
     recruitment_scores: Mapping[str, float] | None = None,
     scoring_mode: str = "snapshot",
     planning_goal_ids: list[str] | None = None,

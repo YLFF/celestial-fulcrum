@@ -11,6 +11,7 @@ from export_macos_source import FILES, EXCLUDED_DATA
 ROOT = Path(__file__).resolve().parents[1]
 EXTRA_FILES = (
     ".gitignore", ".github/workflows/desktop-release.yml",
+    "ROADMAP.md",
     "packaging/fulcrum.spec", "requirements-desktop-windows.txt",
     "scripts/export_release_source.py", "scripts/new_run.py",
     "experiments/__init__.py", "experiments/node_prediction_beta.py",
@@ -33,11 +34,30 @@ def publication_files(root=ROOT):
         paths.update(path for path in (root / folder).rglob("*") if path.is_file()
                      and "__pycache__" not in path.parts
                      and (extensions is None or path.suffix.lower() in extensions))
-    paths.update(path for path in (root / "data").glob("*.json") if path.name not in EXCLUDED_DATA)
+    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+    paths.update(path for path in data_paths if path.name not in EXCLUDED_DATA)
     missing = [str(path.relative_to(root)) for path in paths if not path.is_file()]
     if missing:
         raise RuntimeError(f"Required publication inputs are missing: {missing}")
     return sorted(paths)
+
+
+def remove_obsolete_files(destination, current_names):
+    destination = Path(destination).resolve()
+    previous = json.loads((destination / "publication-manifest.json").read_text(encoding="utf-8"))["fileSHA256"]
+    obsolete = []
+    for name in previous.keys() - set(current_names):
+        relative = Path(name)
+        target = (destination / relative).resolve()
+        if relative.is_absolute() or ".git" in {part.casefold() for part in relative.parts} or not target.is_relative_to(destination) or target == destination:
+            raise RuntimeError(f"Unsafe obsolete publication path: {name}")
+        if not target.exists():
+            continue
+        if not target.is_file() or hashlib.sha256(target.read_bytes()).hexdigest() != previous[name]:
+            raise RuntimeError(f"Obsolete publication file has local changes; preserve it before refreshing: {name}")
+        obsolete.append(target)
+    for target in obsolete:
+        target.unlink()
 
 
 def main():
@@ -52,8 +72,11 @@ def main():
     if destination.exists() and any(destination.iterdir()) and not (args.refresh and managed):
         parser.error("Use a new, empty publication directory")
     destination.mkdir(parents=True, exist_ok=True)
+    sources = publication_files()
+    if managed:
+        remove_obsolete_files(destination, [path.relative_to(ROOT).as_posix() for path in sources])
     manifest = {}
-    for source in publication_files():
+    for source in sources:
         relative = source.relative_to(ROOT)
         target = destination / relative
         target.parent.mkdir(parents=True, exist_ok=True)

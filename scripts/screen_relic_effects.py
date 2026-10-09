@@ -114,7 +114,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=SOURCE)
     parser.add_argument("--json", type=Path, default=ROOT / "work/relic_effects/review.json")
-    parser.add_argument("--markdown", type=Path, default=ROOT / "RELIC_EFFECTS_REVIEW.md")
+    parser.add_argument("--markdown", type=Path, default=ROOT / "work/relic_effects_review/report.md")
     args = parser.parse_args()
     protected = {args.source.resolve(), *(ROOT / name for name in
                  ("BLACKSTREAM_REFERENCE.md", "BLACKSTREAM_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md"))}

@@ -65,6 +65,8 @@ jobs:
           python -m unittest tests.test_lookout_visibility tests.test_opening_technology
           tests.test_ending_prediction tests.test_node_prediction_beta tests.test_desktop
           tests.test_macos_packaging tests.test_release_publication
+          tests.test_scoring_profile tests.test_snapshot_scoring
+          tests.test_scoring_calibration.CalibrationMathTests
       - name: Test frontend
         run: |
           pnpm --dir frontend install --frozen-lockfile

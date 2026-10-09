@@ -5,6 +5,7 @@ import os
 import re
 import subprocess
 import tempfile
+from functools import lru_cache
 from pathlib import Path
 from typing import Any
 
@@ -13,11 +14,13 @@ import numpy as np
 
 from .vision_geometry import detect_map_viewport, working_image
 from .vision_action import recognize_action
+from .vision_currency import recognize_currency
 from .runtime import node_runtime
 
 
 ROOT = Path(__file__).resolve().parents[1]
 OCR_SCRIPT = ROOT / "scripts" / "ocr_hud_batch.mjs"
+HOPE_ZERO_TEMPLATE = ROOT / "assets" / "vision" / "hope_zero.npz"
 
 # Coordinates are relative to a 2048x1152 game viewport. The left HUD is
 # anchored at its left edge; currency is anchored at the right edge.
@@ -72,6 +75,9 @@ def _hope_digits(crop: np.ndarray, scale: float) -> np.ndarray | None:
         if stats[index, cv2.CC_STAT_WIDTH] > 8 * scale
         and stats[index, cv2.CC_STAT_HEIGHT] >= 30 * scale
         and stats[index, cv2.CC_STAT_AREA] > 250 * scale * scale
+        and stats[index, cv2.CC_STAT_AREA] / (
+            stats[index, cv2.CC_STAT_WIDTH] * stats[index, cv2.CC_STAT_HEIGHT]
+        ) >= 0.60
     ]
     if not bars:
         return None
@@ -83,7 +89,7 @@ def _hope_digits(crop: np.ndarray, scale: float) -> np.ndarray | None:
     count, labels, stats, _ = cv2.connectedComponentsWithStats(glyphs)
     digit_labels = [
         index for index in range(1, count)
-        if stats[index, cv2.CC_STAT_HEIGHT] >= 18 * scale
+        if stats[index, cv2.CC_STAT_HEIGHT] >= max(18 * scale, bar[cv2.CC_STAT_HEIGHT] * 0.3)
         and stats[index, cv2.CC_STAT_AREA] >= 20 * scale * scale
     ]
     if not digit_labels:
@@ -100,6 +106,38 @@ def _hope_digits(crop: np.ndarray, scale: float) -> np.ndarray | None:
     return cv2.copyMakeBorder(digits, 15, 15, 20, 20, cv2.BORDER_CONSTANT, value=0)
 
 
+def _hope_zero_glyph(digits: np.ndarray) -> np.ndarray | None:
+    mask = (digits > 0).astype(np.uint8)
+    count, _, stats, _ = cv2.connectedComponentsWithStats(mask)
+    if count != 2:
+        return None
+    x, y, width, height, _ = (int(value) for value in stats[1])
+    if not 0.5 <= width / height <= 0.85:
+        return None
+    ratio = min(28 / width, 44 / height)
+    resized = cv2.resize(mask[y:y + height, x:x + width],
+                         (max(1, round(width * ratio)), max(1, round(height * ratio))),
+                         interpolation=cv2.INTER_NEAREST)
+    canvas = np.zeros((48, 32), dtype=np.uint8)
+    top, left = (48 - resized.shape[0]) // 2, (32 - resized.shape[1]) // 2
+    canvas[top:top + resized.shape[0], left:left + resized.shape[1]] = resized
+    return canvas
+
+
+@lru_cache(maxsize=1)
+def _hope_zero_template() -> np.ndarray:
+    with np.load(HOPE_ZERO_TEMPLATE) as bundle:
+        return bundle["0"].astype(np.uint8)
+
+
+def _hope_zero_score(digits: np.ndarray) -> float | None:
+    glyph = _hope_zero_glyph(digits)
+    if glyph is None:
+        return None
+    distance = float(np.mean(np.abs(glyph.astype(np.int16) - _hope_zero_template().astype(np.int16))))
+    return round(1 - distance, 3) if distance <= 0.10 else None
+
+
 def _node_runtime() -> tuple[str, str]:
     return node_runtime()
 
@@ -111,7 +149,7 @@ def _run_ocr(crops: dict[str, np.ndarray]) -> dict[str, dict[str, Any]]:
         for field, crop in crops.items():
             path = Path(temp) / f"{field}.png"
             if not cv2.imwrite(str(path), crop):
-                raise OSError(f"could not write OCR crop: {path}")
+                raise OSError(f"无法保存资源识别裁剪图：{path}")
             jobs.append({"name": field, "path": str(path), "psm": "13" if field == "hope_alt" else "7"})
         env = os.environ.copy()
         env["NODE_PATH"] = modules + os.pathsep + env.get("NODE_PATH", "")
@@ -128,13 +166,13 @@ def _run_ocr(crops: dict[str, np.ndarray]) -> dict[str, dict[str, Any]]:
                 creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0,
             )
         except subprocess.TimeoutExpired as exc:
-            raise RuntimeError("local HUD OCR timed out") from exc
+            raise RuntimeError("本地资源文字识别超时，请重试") from exc
     if completed.returncode:
-        raise RuntimeError(f"local HUD OCR failed: {completed.stderr.strip()}")
+        raise RuntimeError(f"本地资源文字识别失败：{completed.stderr.strip()}")
     try:
         return json.loads(completed.stdout)
     except json.JSONDecodeError as exc:
-        raise RuntimeError("local HUD OCR returned invalid JSON") from exc
+        raise RuntimeError("本地资源文字识别返回的数据格式不正确") from exc
 
 
 def _parse_field(field: str, text: str) -> dict[str, int] | None:
@@ -177,11 +215,15 @@ class HudRecognizer:
         boxes: dict[str, tuple[int, int, int, int]] = {}
         shield_blank = False
         hope_digits_found = False
+        hope_zero_score = None
+        currency = None
         for field in HUD_BOXES:
             x0, y0, x1, y1 = boxes[field] = _box(image, viewport, field, ui_scale)
             if x1 <= x0 or y1 <= y0:
-                raise ValueError(f"HUD ROI falls outside screenshot: {field}")
+                raise ValueError(f"资源识别区域超出截图范围：{field}")
             raw = image[y0:y1, x0:x1]
+            if field == "originium_ingot":
+                currency = recognize_currency(raw, image.shape[0] / 1152 * ui_scale)
             if field == "action_points":
                 continue
             if field == "shield":
@@ -191,6 +233,7 @@ class HudRecognizer:
                 processed = _hope_digits(raw, image.shape[0] / 1152.0 * ui_scale)
                 hope_digits_found = processed is not None
                 if processed is not None:
+                    hope_zero_score = _hope_zero_score(processed)
                     crops[field] = processed
                     crops["hope_alt"] = processed
             elif field == "level":
@@ -244,6 +287,16 @@ class HudRecognizer:
             if field == "hope" and not hope_digits_found:
                 parsed = None
                 status = "unreadable"
+            if field == "hope" and hope_zero_score is not None:
+                parsed = {"value": 0}
+                status = "recognized"
+            if field == "originium_ingot" and currency:
+                if currency["status"] == "recognized":
+                    parsed = {"value": currency["value"]}
+                    status = "recognized"
+                elif parsed and currency["digitCount"] and len(str(parsed["value"])) != currency["digitCount"]:
+                    parsed = {"value": currency["value"]}
+                    status = "needs_review" if parsed["value"] is not None else "unreadable"
             fields[field] = {
                 **(parsed or ({"current": None, "max": None} if field in ("life", "experience") else {"value": None})),
                 "status": status,
@@ -251,4 +304,9 @@ class HudRecognizer:
                 "ocrText": text,
                 "ocrConfidence": observed["confidence"],
             }
+            if field == "hope" and hope_zero_score is not None:
+                fields[field].update(method="cv_slashed_zero", matchScore=hope_zero_score)
+            if field == "originium_ingot" and currency and currency["status"] == "recognized":
+                fields[field].update(method="cv_currency_atlas", matchScore=currency["matchScore"],
+                                     matchMargin=currency["matchMargin"])
         return {"backend": "local_tesseract_js", "hudScale": ui_scale, "fields": fields}

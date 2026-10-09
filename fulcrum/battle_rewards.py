@@ -62,6 +62,12 @@ class BattleRewardCatalog:
             if selected is None:
                 raise ValueError("No reward is defined for this battle/region")
         result = deepcopy(selected)
+        if region == "VI" and mode in {"boss", "bossPursuit"}:
+            from .node_rewards import RULES_PATH
+            terminal = json.loads(RULES_PATH.read_text(encoding="utf-8"))["battles"]["final_battle"]
+            result.update(experience={"base": terminal["experience"], "fullTechnology": terminal["experience"]},
+                          originiumIngot={"kind": "fixed", "value": terminal["ingots"]},
+                          terminalRewardOverride=terminal)
         multipliers = (self.data["experienceCalculation"]["fullTechnologyMultipliers"]
                        if experience_multipliers is None else experience_multipliers)
         value = Fraction(result["experience"]["base"])

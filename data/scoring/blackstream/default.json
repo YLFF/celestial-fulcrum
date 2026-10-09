@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "name": "沉沦者手册 · 默认评分",
+  "description": "当前应用实际使用的默认权重。修改后重启生效；玩家自选模板与编辑界面尚未开放。游戏规则和奖励数量不属于权重。",
+  "resources": {"relicPoints": 100, "cashPoints": 8, "completeSixStarPoints": 500, "belowThresholdFactor": 1.25, "exitHopePointFloor": 10, "carryAPPoints": 200, "lifePoints": 0, "shieldPoints": 0},
+  "teamThresholds": [[0, 0, 0], [1, 2, 5], [2, 4, 6], [3, 6, 8], [5, 8, 10], [7, 9, 13]],
+  "dualSquadThresholdAdditions": {"2": [1, 1, 0], "3": [1, 2, 0]},
+  "components": {
+    "fixedPoints": {"component_001": 250, "component_002": 125, "component_003": 150, "component_004": 500, "component_005": 150, "component_006": 250, "component_007": 200, "component_008": 15, "component_009": 2000, "component_010": 200, "component_011": 250, "component_012": 250, "component_025": 125, "component_026": 100, "component_027": 25, "component_028": 10, "component_029": 250, "component_030": 500},
+    "movementPoints": {"component_013": 10, "component_014": 10, "component_015": 10, "component_016": 20, "component_017": 20, "component_018": 15, "component_019": 20, "component_020": 100, "component_021": 50, "component_022": 40, "component_023": 100, "component_024": 10},
+    "actionUnitPoints": 200,
+    "sameItemFactorIncrement": 0.05,
+    "synergyIds": ["component_004", "component_006", "component_007", "component_029", "component_030"]
+  },
+  "tickets": {
+    "ordinaryPoints": 50,
+    "homeFactor": 1.5,
+    "mechanistHeavyFactor": 3,
+    "temporarySixStarFactor": 2,
+    "duelTemporaryElitePoints": 75,
+    "weights": {"先锋招募券": 1, "近卫招募券": 1, "重装招募券": 1, "狙击招募券": 1, "术师招募券": 1, "医疗招募券": 1, "辅助招募券": 1, "特种招募券": 1, "突击协议招募券": 1.5, "堡垒协议招募券": 1.5, "远程协议招募券": 1.5, "破坏协议招募券": 1.5, "前线统合招募券": 2, "后方协调招募券": 2, "高级人事调度函": 3.5, "前线统合资深招募券": 2.5, "后方协调资深招募券": 2.5, "高级人事资深招募券": 4, "精英突击招募券": 3, "精英堡垒招募券": 3, "精英远程招募券": 3, "精英破坏招募券": 3}
+  },
+  "events": {
+    "delayDiscount": 0.7,
+    "dispatchPromotionFactor": 1.5,
+    "exchangeOpportunityPoints": 200,
+    "hopefulSoilOpportunityPoints": 600,
+    "remembrancePoints": 1000,
+    "eventRelicScores": {"encounter_006": 200, "encounter_007": 150},
+    "extraScores": {},
+    "emptyEventPenaltyPoints": null,
+    "contractLowValuePenaltyPoints": null,
+    "safeCorner": {"advancedSupplyWithElite1Points": 150, "advancedSupplyOtherwisePoints": 75, "boxCapacityPoints": 100}
+  },
+  "merchants": {"yellowPointsPerEconomy": 30, "yellowMaxPoints": 1000, "greenLogScale": 301.87354704659674, "greenLogOffset": 21.28357517084065, "defaultReserve": 20, "repeatFallbackFactor": 0.8, "withdrawalCashPoints": 8},
+  "information": {"revealCoefficient": 0.2, "pathStepIngotExpectation": 1},
+  "exits": {"treeholeEntryAPProxy": 3, "pathCarryDeficitPenalty": 0.2, "finalBattlePoints": 0},
+  "overlays": {
+    "fruitMark": {"contextId": "pool_scrap_7", "cashEquivalents": {"component_009": 50, "component_010": 24, "component_011": 32}},
+    "utopiaCash": {"utopia_007": {"ingots": 10}, "utopia_009": {"ingots": 5, "categoryId": "node_type_008"}},
+    "hopefulSoil": {"ideologyId": "dystopia_008", "componentContextId": "hopeful_fruits", "componentCount": 1},
+    "unconfirmedTreeholeBattle": {"entryLayerProbability": 0.5, "nextLayerProbability": 0.5}
+  },
+  "search": {"defaultTopN": 5, "defaultMaxStates": 50000, "scoreScale": 20, "defaultMode": "target", "allocationDominance": true},
+  "policies": {
+    "actionValue": "冻结当前节点队列，不包含揭示分，不递归计入行动力奖励；不追猎预留一步离层。",
+    "ordinaryConditions": "节点类别、事件分布及普通奖励条件按确认快照估算；商店经济沿路线预测更新。",
+    "prerequisites": "本层用户选择的目标参与软优先与相关性筛选；指定上贡的损失仅展示参考，但扣减预测商店经济。",
+    "merchantForecast": "到店先取钱并计分，预测现金和估价归零；货柜余量、取钱预算保留。未知商店按概率加权更新平均经济。",
+    "selection": "玩家可选分支取最高分合法选项；随机二选一来自同池的不同物品，缺少联合样本时按经验权重依次不放回抽取，再取较高分。安全角落的同次菜单候选不重复，十种组合等概率是建模假设，不代表整局不能重复节点。",
+    "movement": "按目的节点合并路线，保留影响未来可达性、腾空和资源副作用的库存方案；同耗优先徒步，其次按加工品使用规则。",
+    "terminal": "树洞强制返回主层无额外奖励；当前六层终战直接结算，无奖励。",
+    "scope": "权重不会改写实际Playtime。追猎、结局目标、本层留钱、门槛强制判定仍是局内设置，不属于高级评分模板。"
+  }
+}

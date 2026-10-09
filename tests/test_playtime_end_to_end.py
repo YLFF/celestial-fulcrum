@@ -72,7 +72,7 @@ class PlaytimeRoundTripTests(unittest.TestCase):
             self.assertEqual(imported.returncode, 0, imported.stdout + imported.stderr)
             refreshed = json.loads(run_json.read_text(encoding="utf-8"))
             self.assertEqual(refreshed["resources"]["hope"], 2)
-            self.assertEqual(refreshed["resources"]["originiumIngot"], 16)
+            self.assertEqual(refreshed["resources"]["originiumIngot"], 7)
             self.assertEqual(refreshed["areas"]["III"]["instances"][0]["actionPoints"], 3)
             self.assertEqual(refreshed["areas"]["III"]["instances"][0]["playerPosition"], "0,0")
 
