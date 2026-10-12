@@ -1,10 +1,12 @@
 {
   "name": "天堂支点——明日方舟集成战略助手",
-  "englishName": "Celestial Fulcrum — Arknights Integrated Strategies Assistant",
-  "shortName": "天堂支点",
-  "englishShortName": "Celestial Fulcrum",
+  "englishName": "Celestial Fulcrum — Arknights Rogue Assistant",
+  "shortName": "CFARA",
+  "englishShortName": "CFARA",
+  "dataDirectoryName": "CFARA",
   "description": "面向《明日方舟》集成战略玩家的本地辅助工具",
   "version": "0.1.0",
+  "license": "GPL-3.0-only",
   "status": "development",
   "executableName": "CelestialFulcrum",
   "supportedThemes": ["沉沦者的黑流树海"]

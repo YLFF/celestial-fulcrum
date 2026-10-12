@@ -22,7 +22,7 @@ for (const url of chunkUrls) {
 }
 
 if (!routeChunk) {
-  throw new Error("Could not locate blackstream route rule chunk");
+  throw new Error("Could not locate Lubiao route rule chunk");
 }
 
 const start = routeCode.indexOf("al=");
@@ -224,6 +224,6 @@ const output = {
   floorTemplates,
 };
 
-writeFileSync("data/blackstream_node_generation_rules.json", `${JSON.stringify(output, null, 2)}\n`, "utf8");
-console.log(`wrote data/blackstream_node_generation_rules.json from ${routeChunk}`);
+writeFileSync("data/blackflow_node_generation_rules.json", `${JSON.stringify(output, null, 2)}\n`, "utf8");
+console.log(`wrote data/blackflow_node_generation_rules.json from ${routeChunk}`);
 console.log(`ruleVersion=${output.source.ruleVersion}`);

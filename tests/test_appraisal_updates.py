@@ -44,6 +44,18 @@ class AppraisalUpdatesTests(unittest.TestCase):
                 apply_appraisal_event(self.box, event, count)
             self.assertEqual(before, self.box)
 
+    def test_reveal_grows_every_mist_grass_only_and_updates_total(self):
+        for value in (2, 9, None):
+            add_component(self.box, "component_003", estimated_value=value)
+        state = new_playtime("reveal-appraisal")
+        state["componentBox"] = self.box
+        state["resources"]["totalEstimatedValue"] = 100
+        old = deepcopy(self.box["items"])
+        apply_commands(state, [{"type": "componentAppraisal", "event": "reveal", "count": 2}])
+        self.assertEqual([row["estimatedValue"] for row in self.box["items"][-3:]], [4, 11, None])
+        self.assertEqual(self.box["items"][:-3], old[:-3])
+        self.assertEqual(state["resources"]["totalEstimatedValue"], 104)
+
     def test_moss_bundle_and_growth_count_all_four_acquisitions(self):
         row = acquire_component(self.box, "component_007", instance_id="new-moss")
         self.assertEqual(row["estimatedValue"], 5)
@@ -117,7 +129,7 @@ class TeamStatusTests(unittest.TestCase):
         self.assertTrue(forced["met"])
         self.assertFalse(forced["automaticMet"])
         self.assertEqual(forced["deficits"], automatic["deficits"])
-        self.assertEqual(team_status(operators, 2, "squad_005")["required"]["elite2SixStars"], 2)
+        self.assertEqual(team_status(operators, 2, "squad_005")["required"]["power"], 5)
 
     def test_forced_insufficient_changes_ticket_scoring(self):
         c = context("III")

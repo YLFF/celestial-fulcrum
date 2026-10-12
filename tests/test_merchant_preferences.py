@@ -3,6 +3,7 @@
 import unittest
 
 from fulcrum.merchant_preferences import merchant_entry_preferences
+from fulcrum.scoring_calibration import merchant_reference_score
 
 
 def preferences(**changes):
@@ -33,7 +34,28 @@ class MerchantPreferenceTests(unittest.TestCase):
         self.assertTrue(green["priorityForTeamDeficit"])
         self.assertTrue(green["considerEntry"])
         self.assertIsNone(preferences()["green"]["teamBelowThreshold"])
-        self.assertFalse(preferences(cash=0, team_below_threshold=True)["green"]["considerEntry"])
+        self.assertFalse(preferences(cash=0, estimated_value=0,
+                                     team_below_threshold=True)["green"]["considerEntry"])
+
+    def test_reserve_changes_only_green_score_and_default_is_zero(self) -> None:
+        arguments = {"floor": 3, "cash": 25, "estimated_value": 10,
+                     "box_capacity": 12, "box_count": 4, "yellow_visited": False,
+                     "eligible_event_ids": [], "below_threshold": False}
+        for category in ("node_type_013", "node_type_004"):
+            with self.subTest(category=category):
+                default = merchant_reference_score(category_id=category, **arguments)
+                zero = merchant_reference_score(category_id=category, reserve_override=0,
+                                                **arguments)
+                reserved = merchant_reference_score(category_id=category, reserve_override=20,
+                                                    **arguments)
+                self.assertEqual(default["points"], zero["points"])
+                self.assertEqual(default["economyInput"], 35)
+                if category == "node_type_013":
+                    self.assertEqual(default["points"], reserved["points"])
+                    self.assertEqual(reserved["economyInput"], 35)
+                else:
+                    self.assertGreater(default["points"], reserved["points"])
+                    self.assertEqual(reserved["economyInput"], 15)
 
     def test_selected_reserves_add_while_actual_cash_and_economy_remain_separate(self) -> None:
         result = preferences(cash=50, estimated_value=100, yellow_visited=True,
@@ -46,14 +68,14 @@ class MerchantPreferenceTests(unittest.TestCase):
         self.assertFalse(result["transactionModelEnabled"])
         self.assertFalse(result["mutatesPlaytime"])
         self.assertEqual(result["unreservedEconomy"], 97)
-        self.assertEqual(preferences(cash=50, eligible_event_ids=["encounter_005", "encounter_017"])["cashReserve"], 20)
-        self.assertEqual(preferences(eligible_event_ids=["encounter_017"])["cashReserve"], 20)
+        self.assertEqual(preferences(cash=50, eligible_event_ids=["encounter_005", "encounter_017"])["cashReserve"], 0)
+        self.assertEqual(preferences(eligible_event_ids=["encounter_017"])["cashReserve"], 0)
         poor = preferences(cash=2, estimated_value=100, eligible_event_ids=["encounter_016"], reserve_override=50)
         self.assertEqual(poor["reserveShortfall"], 48)
         self.assertEqual(poor["unreservedCash"], 0)
 
     def test_latest_filtered_pool_and_player_reserve_override(self) -> None:
-        self.assertEqual(preferences(eligible_event_ids=[])["cashReserve"], 20)
+        self.assertEqual(preferences(eligible_event_ids=[])["cashReserve"], 0)
         self.assertEqual(preferences(yellow_visited=True)["cashReserve"], 0)
         self.assertEqual(preferences(yellow_shop_available=False)["cashReserve"], 0)
         self.assertEqual(preferences(floor=6)["cashReserve"], 0)

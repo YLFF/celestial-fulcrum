@@ -7,6 +7,7 @@ from unittest.mock import patch
 from fastapi.testclient import TestClient
 
 from fulcrum.diagnostics import localize_result, message, public_error
+from fulcrum.component_box import catalog as component_catalog
 from fulcrum.node_scoring import SnapshotScorer
 from fulcrum.scoring_calibration import component_reference_points, green_merchant_base_score, team_threshold
 from fulcrum.scoring_profile import PROFILE, PROFILE_PATH, load_profile
@@ -17,6 +18,34 @@ from fulcrum.service.app import create_app
 
 
 class ScoringProfileTests(unittest.TestCase):
+    def test_parameter_notes_cover_configuration_without_changing_weights(self):
+        notes = PROFILE["parameterNotes"]
+
+        def check(values, explanations, path):
+            if isinstance(explanations, str):
+                self.assertTrue(any("\u4e00" <= c <= "\u9fff" for c in explanations), path)
+                return
+            self.assertIsInstance(explanations, dict, path)
+            for key, value in values.items():
+                self.assertIn(key, explanations, f"{path}.{key}")
+                check(value, explanations[key], f"{path}.{key}")
+
+        for section in ("resources", "teamThresholds", "dualSquadThresholdAdditions", "components", "tickets",
+                        "events", "merchants", "information", "exits", "overlays", "search", "policies"):
+            check(PROFILE[section], notes[section], section)
+        self.assertEqual(notes["componentNames"], {key: entry["name"] for key, entry in component_catalog().items()})
+        values = json.loads((PROFILE_PATH.parent / "relics.json").read_text(encoding="utf-8"))
+        for key in ("defaultPoints", "poolPoints", "contextPoints", "fixedRelicPoints"):
+            check(values[key], values["parameterNotes"][key], key)
+
+    def test_forced_insufficient_does_not_invent_hope_deficit_on_floor_one(self):
+        scorer = SnapshotScorer([{"id": "a", "categoryId": "node_type_001"}],
+                               context("I", options={"teamThresholdOverride": "insufficient"}), state(1))
+        self.assertFalse(scorer.threshold["met"])
+        self.assertEqual(scorer.threshold["hopeDeficit"], 0)
+        self.assertGreater(scorer.values["a"]["experienceAward"], 0)
+        self.assertEqual(scorer.values["a"]["parts"]["experience"], 0)
+
     def test_configuration_inventory_and_single_source(self):
         root = PROFILE_PATH.parents[3]
         catalog = json.loads((root / "data/scoring/catalog.json").read_text(encoding="utf-8"))

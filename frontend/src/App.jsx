@@ -6,7 +6,8 @@ import { applyTheme, savedTheme } from './theme';
 import { readPreference } from './preferences.js';
 import { relicGroups } from './relicPresentation';
 import { filterRoutes } from './routeFilters';
-import { AREA_NAMES, currentInstance, num, operatorProgressLabel, pct, SOURCES, stepScoreDetails } from './model';
+import { searchOptionsError } from './planningOptions';
+import { AREA_NAMES, componentAppraisalTotal, currentInstance, num, operatorProgressLabel, pct, routeNodeName, SOURCES, stepScoreDetails } from './model';
 import { EntryImage, IconButton, Modal, NumberField, SaveButton } from './common';
 import MapView from './MapView';
 import BatchNodeEditor from './BatchNodeEditor';
@@ -16,8 +17,11 @@ import QuickResourceEditor from './QuickResourceEditor';
 import TeamThresholdPanel from './TeamThresholdPanel';
 import DystopiaEditor from './DystopiaEditor';
 import PlanningDialog from './PlanningDialog';
+import DecisionAdvice from './DecisionAdvice';
+import { adviceMapRoute, filterAdvice } from './advicePresentation';
 import AreaTabs from './AreaTabs';
 import RelicRecognitionDialog from './RelicRecognitionDialog';
+import CombatBonusDialog from './CombatBonusDialog';
 import { ComponentEditor, OperatorEditor, RelicEditor } from './InventoryEditors';
 import { NewRunEditor, ResourceEditor, GoalEditor } from './RunEditors';
 import { UploadDialog, CaptureDialog } from './InputDialogs';
@@ -31,6 +35,7 @@ export default function App() {
   useEffect(() => { if (catalog?.project?.name) document.title = catalog.project.name; }, [catalog]);
   const [loaded, setLoaded] = useState(null), [area, setArea] = useState('I'), [scores, setScores] = useState(null);
   const [planning, setPlanning] = useState(null), [routeIndex, setRouteIndex] = useState(0), [pursuitChoice, setPursuit] = useState(false);
+  const [planMode, setPlanMode] = useState('global'), [advice, setAdvice] = useState(null);
   const endingModeLocked = area === 'V' && ['normal1', 'pursuit1'].includes(loaded?.state.goals?.endingV);
   const pursuit = endingModeLocked ? loaded.state.goals.endingV === 'pursuit1' : pursuitChoice;
   const [topN, setTopN] = useState(5), [budget, setBudget] = useState(50000), [busy, setBusy] = useState(false);
@@ -41,16 +46,21 @@ export default function App() {
   const [routeFilterIds, setRouteFilterIds] = useState([]), [routeFilterMode, setRouteFilterMode] = useState('all');
   const visibleRoutes = useMemo(() => filterRoutes(planning, routeFilterIds, routeFilterMode, topN),
     [planning, routeFilterIds, routeFilterMode, topN]);
-  useEffect(() => { setRouteIndex(0); setStepDetail(null); }, [routeFilterIds, routeFilterMode, planning]);
+  const visibleAdvice = useMemo(() => filterAdvice(advice, routeFilterIds, routeFilterMode, topN),
+    [advice, routeFilterIds, routeFilterMode, topN]);
+  const activeResult = planMode === 'advice' ? advice : planning;
+  useEffect(() => { setRouteIndex(0); setStepDetail(null); }, [routeFilterIds, routeFilterMode, planning, advice, planMode]);
+  useEffect(() => { setAdvice(null); }, [loaded?.runId, loaded?.revision, area, pursuit, topN, budget]);
   const [lastAsset, setLastAsset] = useState(null);
   const [relicView, setRelicView] = useState('acquired');
   const [selectedNodes, setSelectedNodes] = useState([]);
   useEffect(() => { setSelectedNodes([]); }, [loaded?.runId, loaded?.revision, area]);
   const loadedRef = useRef(null), fileInput = useRef(null), importInput = useRef(null), taskControllers = useRef(new Map());
   const pendingFile = useRef(null), dragDepth = useRef(0);
-  const viewRef = useRef({ area, pursuit, topN, budget }); viewRef.current = { area, pursuit, topN, budget };
+  const viewRef = useRef({ area, pursuit, topN, budget, planMode }); viewRef.current = { area, pursuit, topN, budget, planMode };
   const entries = useMemo(() => catalog ? Object.fromEntries(Object.values(catalog).filter(Array.isArray).flat().filter(row => row.id).map(row => [row.id, row])) : {}, [catalog]);
   const instance = currentInstance(loaded?.state, area), state = loaded?.state;
+  const nodeName = id => routeNodeName(id, instance?.nodes, catalog?.labels.nodeTypes);
   const planReady = instance && instance.actionPoints != null && instance.playerPosition && instance.nodes[instance.playerPosition]?.completion === 'completed';
 
   function notify(message, error = false) { setToast({ message, error, at: Date.now() }); }
@@ -63,7 +73,7 @@ export default function App() {
     const value = await api(`/api/runs/${encodeURIComponent(id)}`);
     loadedRef.current = value; setLoaded(value);
     if (forceArea) setArea(value.state.currentAreaKey || 'I');
-    setPlanning(null); setScores(null); setNode(null); setStepDetail(null);
+    setPlanning(null); setAdvice(null); setScores(null); setNode(null); setStepDetail(null);
     localStorage.setItem('fulcrum-run', id);
     return value;
   }
@@ -181,9 +191,6 @@ export default function App() {
   }
   async function search() {
     try {
-      if (!Number.isInteger(topN) || topN < 1 || topN > 50 || !Number.isInteger(budget) || budget < 1 || budget > 500000) {
-        notify('Top 需为 1–50 的整数，路径搜索上限需为 1–500000 的整数。', true); return;
-      }
       const source = loadedRef.current;
       const check = await api(`/api/runs/${source.runId}/planning-check`, { method: 'POST', body: { expectedRevision: source.revision, areaKey: area } });
       if (loadedRef.current?.runId !== source.runId || loadedRef.current?.revision !== source.revision || viewRef.current.area !== area) return;
@@ -191,6 +198,8 @@ export default function App() {
     } catch (e) { failed(e); }
   }
   async function executeSearch(planningGoalIds, source = modal?.source || loadedRef.current, useItemIds = null) {
+    const optionsError = searchOptionsError(topN, budget);
+    if (optionsError) { notify(optionsError, true); return; }
     setBusy(true);
     try {
       if (loadedRef.current?.runId !== source.runId || loadedRef.current?.revision !== source.revision || viewRef.current.area !== area ||
@@ -202,11 +211,12 @@ export default function App() {
         source = await openRun(source.runId, false);
       }
       setModal(null);
-      const job = await startJob('plan', { areaKey: area, pursuit, topN, maxStates: budget, planningGoalIds, useItemIds }, source);
+      const job = await startJob('plan', { areaKey: area, pursuit, topN, maxStates: budget, planningGoalIds, useItemIds, mode: planMode }, source);
       if (loadedRef.current.runId === job.runId && loadedRef.current.revision === job.sourceRevision &&
           viewRef.current.area === job.options.areaKey && viewRef.current.pursuit === job.options.pursuit &&
           viewRef.current.topN === job.options.topN && viewRef.current.budget === job.options.maxStates) {
-        setPlanning(job.result); setRouteFilterIds([]); setRouteFilterMode('all'); setRouteIndex(0); setStepDetail(null); notify(`搜索完成 · ${job.result.expandedStates.toLocaleString()} 个状态`);
+        if (job.options.mode === 'advice') setAdvice(job.result); else setPlanning(job.result);
+        setRouteFilterIds([]); setRouteFilterMode('all'); setRouteIndex(0); setStepDetail(null); notify(`搜索完成 · ${job.result.expandedStates.toLocaleString()} 个状态`);
       }
     } catch (e) { failed(e); }
     finally { setBusy(false); }
@@ -217,7 +227,7 @@ export default function App() {
     catch (e) { failed(e); } finally { setBusy(false); }
   }
   async function exportRun() { download(JSON.stringify(loaded.state, null, 2), `${loaded.runId}.json`); }
-  const activePlan = tasks.some(row => row.kind === 'plan'), selectedRoute = visibleRoutes[routeIndex];
+  const activePlan = tasks.some(row => row.kind === 'plan'), selectedRoute = planMode === 'advice' ? adviceMapRoute(visibleAdvice[routeIndex]) : visibleRoutes[routeIndex];
   const activeStep = stepDetail && visibleRoutes[stepDetail.route]?.steps[stepDetail.step];
   const eventPool = poolMode === 'local' ? state?.areas[area]?.encounterPool || [] : state?.globalEncounterPool || [];
   const eventWeights = Object.fromEntries((scores?.eventDistribution?.events || scores?.eventDistribution?.rows || []).map(row => [row.eventId, row.probability]));
@@ -251,7 +261,7 @@ export default function App() {
       <Resource icon={ChevronRight} name="等级 / 经验" value={`Lv.${state.resources.level} · ${state.resources.experience.current}/${state.resources.experience.max ?? '—'}`} onEdit={() => edit('quickResource', { field: 'level' })} disabled={busy} />
       <Resource icon={Sparkles} name="希望" value={num(state.resources.hope)} color="gold-text" onEdit={() => edit('quickResource', { field: 'hope' })} disabled={busy} />
       <Resource icon={Coins} name="源石锭" value={num(state.resources.originiumIngot)} color="green-text" onEdit={() => edit('quickResource', { field: 'originiumIngot' })} disabled={busy} />
-      <Resource icon={Package} name="总估价" value={num(state.resources.totalEstimatedValue ?? state.componentBox.items.reduce((s, row) => s + (row.estimatedValue || 0), 0))} />
+      <Resource icon={Package} name="总估价" value={num(state.resources.totalEstimatedValue ?? componentAppraisalTotal(state.componentBox.items))} />
       <Resource icon={Zap} name="行动力" value={num(instance?.actionPoints)} onEdit={instance ? () => edit('quickResource', { field: 'actionPoints' }) : undefined} disabled={busy} />
       <IconButton icon={Pencil} label="编辑实时资源" onClick={() => edit('resources')} disabled={busy} />
     </> : <span className="quiet">未打开对局</span>}</div>
@@ -270,7 +280,7 @@ export default function App() {
           contentClass="relic-inventory"
           onEdit={() => edit('relics')} onAdd={() => edit('relics', { adding: true })} disabled={!state || busy}
           actions={<><div className="segmented relic-view-switch" aria-label="藏品展示方式"><button className={relicView === 'acquired' ? 'active' : ''} onClick={() => setRelicView('acquired')}>获得顺序</button><button className={relicView === 'category' ? 'active' : ''} onClick={() => setRelicView('category')}>分类</button></div><IconButton icon={ScanLine} label="识别藏品" disabled={!state || busy || !caps.relicRecognition} onClick={() => edit('relicRecognition', { assetInfo: lastAsset })} />
-            <button className="bonus-button" title="藏品属性合并尚未接入" disabled={!caps.relicEffectAggregation}><Sparkles size={14} />加成汇总</button></>}>
+            <button className="bonus-button" title="查看全体干员战斗加成" onClick={() => edit('combatBonuses')} disabled={!state || busy || !caps.relicEffectAggregation}><Sparkles size={14} />加成汇总</button></>}>
           {(relicView === 'category' ? relicGroups(state?.relics || [], entries, catalog.relicCategories) : [{ name: '', items: state?.relics || [] }]).map(group => <div className={`relic-display-group ${group.name ? 'classified' : ''}`} key={group.name}>
             {group.name && <small>{group.name}</small>}<div>{group.items.map(row => <button key={row.id} className="inventory-token" title={`${entries[row.id]?.name}${row.enchantment ? ` · 已附魔 ${row.enchantment.operatorName}` : ''}`} onClick={() => edit('relics')}><EntryImage entry={entries[row.id]} className="inventory-image" />{row.count > 1 && <span>{row.count}</span>}</button>)}</div>
           </div>)}
@@ -306,48 +316,53 @@ export default function App() {
         </SidebarSection>
         <SidebarSection title="战力门槛"><TeamThresholdPanel status={loaded.teamThresholds?.[area]} instance={instance} busy={busy}
           onChange={value => mutate([{ type: 'strategy', areaKey: area, value: { scoringOptions: { ...instance.strategy.scoringOptions, teamThresholdOverride: value } } }])} /></SidebarSection>
-        <SidebarSection title="本层留钱"><ReserveEditor key={`${loaded.runId}-${loaded.revision}-${area}`} instance={instance} busy={busy}
-          onSave={merchantReserve => { const options = { ...instance.strategy.scoringOptions, merchantReserve };
-            delete options.merchantReserveEntries;
-            return mutate([{ type: 'strategy', areaKey: area, value: { scoringOptions: options } }]); }} /></SidebarSection>
         <SidebarSection title="本局备忘" defaultOpen={false}><IconButton icon={Pencil} label="编辑备忘" onClick={() => edit('memo')} /><p className="memo-text">{state.memo || state.goals.note || '—'}</p></SidebarSection>
       </> : <div className="no-run-actions"><button className="primary" onClick={() => edit('new')}><Plus size={16} />新建对局</button>{caps.exampleRun && <button onClick={openExample} disabled={busy}>打开一层实测</button>}</div>}
     </aside></div>
     <section className="route-section"><div className="route-heading"><h2><Route size={18} />路径规划</h2><div className="route-controls">
+      <div className="segmented planning-mode" aria-label="规划方式">
+        <button className={planMode === 'global' ? 'active' : ''} onClick={() => { setPlanMode('global'); setRouteFilterIds([]); }}>全局路径规划</button>
+        <button className={planMode === 'advice' ? 'active' : ''} onClick={() => { setPlanMode('advice'); setRouteFilterIds([]); }}>一步路径建议</button>
+      </div>
+      <ReserveEditor key={`${loaded?.runId}-${loaded?.revision}-${area}`} instance={instance} busy={busy}
+        onSave={merchantReserve => { const options = { ...instance.strategy.scoringOptions, merchantReserve };
+          delete options.merchantReserveEntries;
+          return mutate([{ type: 'strategy', areaKey: area, value: { scoringOptions: options } }]); }} />
       <div className="segmented" title={endingModeLocked ? '本层规划方式由五层结局目标决定' : undefined}><button disabled={endingModeLocked} className={!pursuit ? 'active' : ''} onClick={() => { setPursuit(false); setPlanning(null); }}>不追猎</button><button disabled={endingModeLocked} className={pursuit ? 'active' : ''} onClick={() => { setPursuit(true); setPlanning(null); }}>追猎</button></div>
-      <label>Top <input aria-label="Top N" type="number" min={1} max={50} value={topN} onChange={e => { setTopN(Number(e.target.value)); setPlanning(null); }} /></label>
-      <label className="budget-input">路径搜索上限 <input aria-label="路径搜索上限" type="number" min={1} max={500000} step={1000} value={budget} onChange={e => { setBudget(Number(e.target.value)); setPlanning(null); }} /></label>
       <button className="primary" onClick={search} disabled={!planReady || activePlan || busy}>{activePlan ? <LoaderCircle size={16} className="spin" /> : <Route size={16} />}规划</button>
     </div></div>
-      {planning ? <><div className="search-summary"><span>{planning.searchComplete ? '搜索完成' : '预算截断'} · {planning.expandedStates.toLocaleString()} 状态</span>
-        <span>{visibleRoutes.length} / {topN} 条路线</span>{planning.randomMovement.excludedItemInstanceIds.length > 0 && <span>随机移动另计</span>}</div>
-        {!!planning.priorityTargets?.length && <fieldset className="route-priority-filters"><legend>关联优先项</legend>
-          <div className="route-filter-options">{planning.priorityTargets.map(target => <label key={target.id}>
+      {activeResult ? <>{planMode === 'global' && <div className="search-summary"><span>{planning.searchComplete ? '搜索完成' : '预算截断'} · {planning.expandedStates.toLocaleString()} 状态</span>
+        <span>{visibleRoutes.length} / {topN} 条路线</span>{planning.randomMovement.excludedItemInstanceIds.length > 0 && <span>随机移动另计</span>}</div>}
+        {!!activeResult.priorityTargets?.length && <fieldset className="route-priority-filters"><legend>关联优先项</legend>
+          <div className="route-filter-options">{activeResult.priorityTargets.map(target => <label key={target.id}>
             <input type="checkbox" checked={routeFilterIds.includes(target.id)} onChange={event => setRouteFilterIds(old =>
               event.target.checked ? [...old, target.id] : old.filter(id => id !== target.id))} />{target.name}</label>)}</div>
           <div className="segmented small" aria-label="优先项筛选方式"><button className={routeFilterMode === 'all' ? 'active' : ''} onClick={() => setRouteFilterMode('all')}>全部相关</button>
             <button className={routeFilterMode === 'any' ? 'active' : ''} onClick={() => setRouteFilterMode('any')}>任一相关</button></div>
           <IconButton icon={X} label="清除路线筛选" disabled={!routeFilterIds.length} onClick={() => setRouteFilterIds([])} />
         </fieldset>}
+        {planMode === 'advice' ? <DecisionAdvice result={advice} rows={visibleAdvice} selectedIndex={routeIndex} onSelect={setRouteIndex}
+          instance={instance} catalog={catalog} entries={entries} /> : <>
         {!visibleRoutes.length && <div className="route-empty">{routeFilterIds.length ? '已搜索的可行路线中没有符合当前筛选条件的路线' : '当前未找到可行路线'}</div>}
         <div className="route-list">{visibleRoutes.map((row, index) => <div className={`route-row ${index === routeIndex ? 'selected' : ''}`} key={index}>
           <button className="route-choice" onClick={() => { setRouteIndex(index); setStepDetail(null); }} aria-label={`选择路线 ${index + 1}`}><span>路线 {index + 1}</span><b>{num(row.metrics.weightedValue)}<small>分</small></b></button>
           <div className="route-steps">{row.steps.map((step, i) => <React.Fragment key={i}><button className={`route-step ${stepDetail?.route === index && stepDetail?.step === i ? 'active' : ''}`}
             onClick={() => { setRouteIndex(index); setStepDetail({ route: index, step: i }); }}><small>{i + 1} · {step.componentId ? entries[step.componentId]?.name || step.movement : '徒步'}</small>
-            <b>({step.entered}){step.portalTransfer && ` → (${step.arrived})`}</b><span>{num(step.weightedValue)} 分</span>
+            <b title={`(${step.entered})${step.portalTransfer ? ` → (${step.arrived})` : ''}`}>{nodeName(step.entered)}{step.portalTransfer && ` → ${nodeName(step.arrived)}`}</b><span>{num(step.weightedValue)} 分</span>
             {step.referenceLossPoints < 0 && <span className="reference-loss-inline">上贡参考 {num(step.referenceLossPoints)}</span>}</button>{i < row.steps.length - 1 && <ArrowRight size={13} className="step-arrow" />}</React.Fragment>)}</div>
-          <div className="route-result"><span>{row.goalType === 'pursuit' ? '追猎' : `终点 (${row.endNode})`}</span><small>行动力 {row.remainingActionPoints}</small>
+          <div className="route-result"><span title={row.goalType !== 'pursuit' ? `(${row.endNode})` : undefined}>{row.goalType === 'pursuit' ? '追猎' : `终点 ${nodeName(row.endNode)}`}</span><small>行动力 {row.remainingActionPoints}</small>
             {!!row.prerequisites?.length && <small className="route-priority">前置 {row.prerequisiteRanking.plannedKnownCompletions} · 寻找覆盖 {pct(row.prerequisiteRanking.searchCoverage)}</small>}
             {!!row.prerequisites?.length && <details><summary>前置：{row.prerequisites.filter(target => target.plannedCompletion).length} / {row.prerequisites.length} 已定位目标计划完成</summary>
               {row.prerequisites.map(target => <p key={target.id}>{target.name}：{target.plannedCompletion ? '路线经过' : !target.feasibleFromSnapshot ? '当前资源不满足' : target.knownNodeIds.length ? '本路线未完成' : `候选位置探索覆盖 ${pct(target.searchCoverage)}（不保证找到）`}
-                {!!target.visitedNodeIds?.length && <span> · 前往 {target.visitedNodeIds.map(id => `(${id})`).join('、')}</span>}
-                {!!target.revealedNodeIds?.length && <span> · 可能揭示 {target.revealedNodeIds.map(id => `(${id})`).join('、')}</span>}</p>)}</details>}
+                {!!target.visitedNodeIds?.length && <span title={target.visitedNodeIds.map(id => `(${id})`).join('、')}> · 前往 {target.visitedNodeIds.map(nodeName).join('、')}</span>}
+                {!!target.revealedNodeIds?.length && <span title={target.revealedNodeIds.map(id => `(${id})`).join('、')}> · 可能揭示 {target.revealedNodeIds.map(nodeName).join('、')}</span>}</p>)}</details>}
             {row.referenceLossPoints < 0 && <small className="reference-loss-inline">上贡参考 {num(row.referenceLossPoints)} 分</small>}
             {row.terminalScore && <details className="terminal-score"><summary>离层 / 追猎奖励 {num(row.terminalScore.points)} 分</summary><ScoreDetails value={row.terminalScore} catalog={catalog} compact /></details>}
           </div>
         </div>)}</div>
-        {activeStep && <StepBreakdown step={activeStep} nodeValues={planning.scoring?.nodeValues} catalog={catalog} onClose={() => setStepDetail(null)} />}
-      </> : <div className="route-empty">{planReady ? '路线待计算' : '地图、玩家位置与完成状态待确认'}</div>}
+        {activeStep && <StepBreakdown step={activeStep} nodes={instance?.nodes} nodeValues={planning.scoring?.nodeValues} catalog={catalog} onClose={() => setStepDetail(null)} />}
+        </>}
+      </> : <div className="route-empty">{planReady ? (planMode === 'advice' ? '一步建议待计算' : '路线待计算') : '地图、玩家位置与完成状态待确认'}</div>}
     </section>
     <footer className="app-footer"><span className="status-dot" /><span>本地服务</span><span>{loaded ? `Playtime v${loaded.revision}` : '无对局'}</span>
       {tasks.map(task => <span className="task-status" key={task.jobId}><LoaderCircle size={12} className="spin" />{({ recognize: '识图', 'recognize-relics': '藏品识别', score: '评分', plan: '搜索' })[task.kind]} {task.progress.expandedStates ? task.progress.expandedStates.toLocaleString() : ''}
@@ -358,7 +373,8 @@ export default function App() {
       entries={entries} heldRelics={state?.relics} anchor={node.anchor} busy={busy} onClose={() => setNode(null)} onSave={commands => mutate(commands, node.source.revision)} />}
     {modal?.type === 'new' && <NewRunEditor catalog={catalog} busy={busy} onClose={close} onCreate={createRun} />}
     {modal?.type === 'planning' && <PlanningDialog key={`${modal.source.revision}-${modal.areaKey}`} check={modal.check} items={modal.source.state.componentBox.items}
-      entries={entries} busy={busy} onClose={close} onPlan={(ids, items) => executeSearch(ids, modal.source, items)} />}
+      entries={entries} mode={planMode} topN={topN} budget={budget} onTopNChange={value => { setTopN(value); setPlanning(null); }}
+      onBudgetChange={value => { setBudget(value); setPlanning(null); }} busy={busy} onClose={close} onPlan={(ids, items) => executeSearch(ids, modal.source, items)} />}
     {modal?.type === 'batchNodes' && <BatchNodeEditor ids={modal.ids} areaKey={area} catalog={catalog} onClose={close} onSave={saveModal} busy={busy} />}
     {modal?.type === 'upload' && <UploadDialog key={modal.file?.name || modal.assetInfo?.assetId} {...modal} loaded={modal.source} catalog={catalog} entries={entries} startJob={startJob} onConfirm={confirmRecognition} onClose={close} busy={busy} notify={notify} onAsset={setLastAsset} />}
     {modal?.type === 'capture' && <CaptureDialog onClose={close} notify={notify} onCaptured={assetInfo => setModal({ type: 'upload', source: modal.source, assetInfo })} />}
@@ -366,7 +382,8 @@ export default function App() {
     {modal?.type === 'relicRecognition' && <RelicRecognitionDialog loaded={modal.source} entries={entries} assetInfo={modal.assetInfo} onAsset={setLastAsset}
       startJob={startJob} onConfirm={confirmRelics} onClose={close} busy={busy} notify={notify} />}
     {modal?.type === 'components' && <ComponentEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
-    {modal?.type === 'operators' && <OperatorEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
+    {modal?.type === 'operators' && <OperatorEditor adding={modal.adding} loaded={modal.source} areaKey={area} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
+    {modal?.type === 'combatBonuses' && <CombatBonusDialog loaded={modal.source} areaKey={area} entries={entries} onClose={close} />}
     {modal?.type === 'resources' && <ResourceEditor state={modal.source.state} instance={currentInstance(modal.source.state, area)} catalog={catalog} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'quickResource' && <QuickResourceEditor field={modal.field} state={modal.source.state} instance={currentInstance(modal.source.state, area)} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'goals' && <GoalEditor loaded={modal.source} onSave={saveModal} onClose={close} busy={busy} />}
@@ -384,12 +401,12 @@ function SidebarSection({ title, defaultOpen = true, children }) {
     <h3>{title}</h3>{open ? <ChevronDown size={15} /> : <ChevronRight size={15} />}</button>{open && <div className="sidebar-content">{children}</div>}</section>;
 }
 function ReserveEditor({ instance, busy, onSave }) {
-  const saved = instance?.strategy.scoringOptions?.merchantReserve ?? 20;
+  const saved = instance?.strategy.scoringOptions?.merchantReserve ?? 0;
   const [value, setValue] = useState(String(saved));
   const valid = value.trim() !== '' && Number.isSafeInteger(Number(value)) && Number(value) >= 0;
-  return <div className="reserve-editor"><label className="field"><span>规划预留源石锭</span><input aria-label="本层留钱金额" type="number" min={0} step={1}
+  return <div className="reserve-editor"><label className="field"><span>路线规划预留源石锭</span><input aria-label="路线规划预留源石锭" type="number" min={0} step={1}
     value={value} disabled={!instance || busy} onChange={event => setValue(event.target.value)} /></label>
-    <IconButton icon={Check} label="保存本层留钱并重新评分" disabled={!instance || busy || !valid || Number(value) === saved} onClick={() => onSave(Number(value))} /></div>;
+    <IconButton icon={Check} label="保存路线规划预留源石锭并重新评分" disabled={!instance || busy || !valid || Number(value) === saved} onClick={() => onSave(Number(value))} /></div>;
 }
 function InventoryStrip({ title, subtitle, icon: Icon, onEdit, onAdd, actions, disabled, children, contentClass = '', warning = '' }) {
   return <section className={`inventory-section ${warning ? 'over-capacity' : ''}`}><header><h3><Icon size={15} />{title}</h3><span className={warning ? 'capacity-warning' : ''}>{subtitle}{warning && <strong role="status">{warning}</strong>}</span><div className="inventory-actions">{actions}<IconButton icon={Pencil} label={`编辑${title}`} onClick={onEdit} disabled={disabled} /><IconButton icon={Plus} label={`添加${title}`} onClick={onAdd} disabled={disabled} /></div></header><div className={`inventory-content ${contentClass}`}>{children}</div></section>;
@@ -399,9 +416,9 @@ function MemoEditor({ value, onSave, onClose, busy }) {
   return <Modal title="本局备忘" onClose={onClose} footer={<SaveButton busy={busy} onClick={() => onSave([{ type: 'memo', value: text }])} />}>
     <textarea className="memo-editor" aria-label="本局备忘内容" value={text} onChange={e => setText(e.target.value)} /></Modal>;
 }
-function StepBreakdown({ step, nodeValues, catalog, onClose }) {
+function StepBreakdown({ step, nodes, nodeValues, catalog, onClose }) {
   const breakdown = step.scoreBreakdown;
-  return <section className="step-breakdown"><div className="section-heading"><h3>({step.entered}) · {num(step.weightedValue)} 分</h3><IconButton icon={X} label="关闭步骤得分" onClick={onClose} /></div>
+  return <section className="step-breakdown"><div className="section-heading"><h3 title={`(${step.entered})`}>{routeNodeName(step.entered, nodes, catalog.labels.nodeTypes)} · {num(step.weightedValue)} 分</h3><IconButton icon={X} label="关闭步骤得分" onClick={onClose} /></div>
     <div className="step-totals"><span>节点 {num(breakdown?.nodeValue)}</span><span>揭示 {num(breakdown?.revealValue)}</span><span>招募 {num(breakdown?.recruitmentValue)}</span>
       {breakdown?.referenceLossPoints < 0 && <span className="reference-loss-inline">上贡参考 {num(breakdown.referenceLossPoints)}</span>}
       <span>预期现金 {num(step.expectedPrefixCashAfter)}</span><span>预期估价 {num(step.expectedPrefixAppraisalAfter)}</span></div>

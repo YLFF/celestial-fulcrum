@@ -94,6 +94,8 @@ class MapNode:
     marks: list[dict[str, Any]] = field(default_factory=list)
     mark_review_required: bool = True
     review_reasons: list[str] = field(default_factory=list)
+    category_source: str | None = None
+    text_observation: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -104,6 +106,8 @@ class MapNode:
             "categoryId": self.category_id,
             "categoryName": self.category_name,
             "categoryScore": self.category_score,
+            "categorySource": self.category_source,
+            "textObservation": self.text_observation,
             "categoryCandidates": self.category_candidates,
             "templateHint": self.template_hint,
             "visibility": self.visibility,
@@ -135,6 +139,7 @@ class MapResult:
     nodes: list[MapNode] = field(default_factory=list)
     edges: list[tuple[str, str]] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    node_text_observation: dict[str, Any] | None = None
 
     def to_dict(self) -> dict[str, Any]:
         return {
@@ -155,6 +160,7 @@ class MapResult:
             "templateCandidates": self.template_candidates,
             "matchQuality": self.match_quality,
             "dystopiaObservation": self.dystopia_observation,
+            "nodeTextObservation": self.node_text_observation,
             "coordinateSystem": "start=(0,0); +x right; +y up",
             "nodes": [node.to_dict() for node in self.nodes],
             "edges": [list(edge) for edge in self.edges],

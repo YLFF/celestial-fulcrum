@@ -6,7 +6,7 @@ from collections import deque
 from pathlib import Path
 
 
-DEFAULT_DATA_PATH = Path("data/blackstream_map_templates.json")
+DEFAULT_DATA_PATH = Path("data/blackflow_map_templates.json")
 
 
 def load_data(path: Path) -> dict:
@@ -113,7 +113,7 @@ def validate_all(data: dict) -> int:
 
 
 def interactive_shell(data: dict) -> None:
-    print("Blackstream template shell. Commands: regions, region <id>, template <id>, validate, quit")
+    print("Blackflow template shell. Commands: regions, region <id>, template <id>, validate, quit")
     while True:
         try:
             command = input("> ").strip()
@@ -137,7 +137,7 @@ def interactive_shell(data: dict) -> None:
 
 
 def main() -> int:
-    parser = argparse.ArgumentParser(description="Query blackstream map template rules.")
+    parser = argparse.ArgumentParser(description="Query blackflow map template rules.")
     parser.add_argument("--data", type=Path, default=DEFAULT_DATA_PATH)
     parser.add_argument("--list-regions", action="store_true")
     parser.add_argument("--region")

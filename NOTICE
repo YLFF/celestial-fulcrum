@@ -1,0 +1,35 @@
+Celestial Fulcrum - Arknights Rogue Assistant (CFARA)
+Copyright (C) 2026 YLFF
+
+Project source code
+-------------------
+SPDX-License-Identifier: GPL-3.0-only
+
+The original program source code and build scripts authored for this project
+are licensed under the GNU General Public License, version 3 only. A complete
+copy of that license is provided in LICENSE.
+
+This program is distributed WITHOUT ANY WARRANTY, including the implied
+warranties of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See LICENSE
+for the complete terms. Distribution of the program must comply with the GPL's
+corresponding-source requirements, even when distributed free of charge.
+
+Source repository: https://github.com/YLFF/celestial-fulcrum
+If access to that repository is restricted, recipients of a distributed build
+must still be provided access to its corresponding source by the distributor.
+
+Third-party material
+--------------------
+The project license does not relicense third-party dependencies, game artwork,
+game text, statistics, or reference data. Such material retains its own
+copyright, license terms, and any applicable permissions from its rights holder.
+
+Arknights game materials belong to their respective rights holders. Map,
+node, and event reference data includes material from Lubiao Archives
+(https://www.lubiao.wiki/) and PRTS Wiki (https://prts.wiki/).
+Their inclusion does not itself grant new rights to redistribute or relicense
+them under the GPL. This is a non-official companion application.
+
+Third-party dependency license texts are collected under licenses/ in the
+desktop distribution. Consult those notices and the original providers' terms
+when redistributing any third-party material.

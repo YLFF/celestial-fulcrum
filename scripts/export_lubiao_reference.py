@@ -1,4 +1,4 @@
-"""Refresh Blackstream catalog text and rendered icons without renumbering IDs."""
+"""Refresh Blackflow catalog text and rendered icons without renumbering IDs."""
 
 import argparse
 from datetime import datetime, timezone

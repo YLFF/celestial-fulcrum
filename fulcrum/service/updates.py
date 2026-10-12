@@ -241,7 +241,9 @@ def apply_commands(state, commands):
             from ..operator_catalog import find_operator
             entry = find_operator(operator["name"])
             if entry:
-                operator.update(operatorId=entry["id"], rarity=entry["rarity"])
+                operator["operatorId"] = entry["id"]
+                if not entry.get("rarityEditable"):
+                    operator["rarity"] = entry["rarity"]
                 if not entry.get("professionEditable"):
                     operator["profession"] = entry["profession"]
             elif "name" in command["changes"]:

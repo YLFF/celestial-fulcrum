@@ -264,7 +264,7 @@ class APITests(unittest.TestCase):
         data = self.client.get("/api/runs/api/maps/I").json()
         self.assertEqual(data["instance"]["playerPosition"], "0,0")
         self.assertTrue(data["instance"]["prediction"])
-        self.assertFalse(self.client.get("/api/capabilities").json()["relicEffectAggregation"])
+        self.assertTrue(self.client.get("/api/capabilities").json()["relicEffectAggregation"])
 
     def test_threshold_display_and_override_use_same_snapshot(self):
         before = self.client.get("/api/runs/api").json()
@@ -293,7 +293,7 @@ class APITests(unittest.TestCase):
         self.assertIn("nodeValues", row["result"])
         plan = self.wait_job(self.client.post("/api/runs/api/jobs/plan", json={"expectedRevision": 1, "topN": 2, "maxStates": 10000}))
         self.assertEqual(plan["status"], "completed", plan)
-        self.assertEqual(plan["result"]["mode"], "exit")
+        self.assertEqual(plan["result"]["mode"], "global")
         self.assertEqual(self.client.get("/api/runs/api").json()["state"], before)
         self.client.patch("/api/runs/api", json={"expectedRevision": 1, "commands": [{"type": "memo", "value": "test"}]})
         self.assertTrue(self.client.get(f"/api/jobs/{row['jobId']}").json()["stale"])

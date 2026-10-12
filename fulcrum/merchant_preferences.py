@@ -64,7 +64,7 @@ def merchant_entry_preferences(
         "reserveShortfall": max(0.0, reserve - cash),
         "unreservedCash": max(0.0, cash - reserve), "eventCashRequirements": requirements,
         "unreservedEconomy": max(0.0, wealth - reserve),
-        "reservePolicy": "sum_player_selected_entries_default_yellow_20",
+        "reservePolicy": "sum_player_selected_entries_or_configured_default",
         "yellow": {
             "categoryId": "node_type_013", "firstLayerVisit": not yellow_visited,
             "cashPlusEstimatedValue": wealth, "stronglyPreferred": yellow_preferred,

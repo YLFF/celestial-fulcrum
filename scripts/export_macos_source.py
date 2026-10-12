@@ -10,11 +10,13 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[1]
 FOLDERS = ("fulcrum", "frontend/src", "frontend/tests", "frontend/public", "assets")
 FILES = (
-    "desktop_launcher.py", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "eng.traineddata",
+    "LICENSE", "NOTICE",
+    "desktop_launcher.py", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "eng.traineddata", "chi_sim.traineddata",
+    "packaging/tessdata_fast.LICENSE",
     "requirements-vision.txt", "requirements-service.txt", "requirements-desktop.txt", "requirements-desktop-macos.txt",
     "frontend/package.json", "frontend/pnpm-lock.yaml", "frontend/pnpm-workspace.yaml", "frontend/index.html", "frontend/vite.config.js",
     "packaging/fulcrum-macos.spec", "packaging/MACOS_TEST.md",
-    "scripts/build_macos.py", "scripts/build_desktop.py", "scripts/ocr_hud_batch.mjs", "scripts/export_macos_source.py",
+    "scripts/build_macos.py", "scripts/build_desktop.py", "scripts/ocr_hud_batch.mjs", "scripts/ocr_node_labels.mjs", "scripts/export_macos_source.py",
 )
 EXCLUDED_DATA = {"arkrog_blackflowmap_findings.json", "lubiao_reference_catalog.v1.json"}
 
@@ -25,7 +27,8 @@ def source_files(root=ROOT):
     for folder in FOLDERS:
         paths.update(path for path in (root / folder).rglob("*") if path.is_file()
                      and "__pycache__" not in path.parts and path.suffix not in {".pyc", ".pyo"})
-    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json"),
+                  *(root / "data/relic_effects").rglob("*.json")]
     paths.update(path for path in data_paths if path.name not in EXCLUDED_DATA)
     missing = [str(path.relative_to(root)) for path in paths if not path.is_file()]
     if missing:

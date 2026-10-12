@@ -6,7 +6,8 @@ import sys
 import tempfile
 import unittest
 
-from scripts.screen_relic_effects import build_review, parse_relics, render_review, screen_effect
+from scripts.screen_relic_effects import (CALIBRATION_FIELDS, EFFECT_FIELDS, build_review,
+                                         parse_relics, render_calibration, render_review, screen_effect)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -14,7 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class RelicEffectsReviewTests(unittest.TestCase):
     def test_all_current_relics_have_one_review_entry_and_original_text(self):
-        text = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        text = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         parsed = parse_relics(text)
         review = build_review(text)
         self.assertEqual(len(review["entries"]), 243)
@@ -34,6 +35,34 @@ class RelicEffectsReviewTests(unittest.TestCase):
         for effect in ("目标生命上限+2，希望+2", "护盾值+4", "希望+2，可同时部署人数+1"):
             self.assertEqual(screen_effect(effect)["group"], "noncombat")
         self.assertEqual(screen_effect("所有我方单位在部署时获得2层护盾")["group"], "combat_special")
+
+    def test_calibration_preserves_all_effects_and_leaves_editable_fields_blank(self):
+        review = build_review((ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8"))
+        rendered = render_calibration(review)
+        for row in review["entries"]:
+            self.assertEqual(rendered.count(f"### {row['id']} "), 1)
+            self.assertIn(f"- 原始效果：{row['effect']}", rendered)
+        for field in (*CALIBRATION_FIELDS, *EFFECT_FIELDS):
+            self.assertEqual(rendered.count(f"| {field} |  |"), len(review["entries"]))
+        self.assertEqual(rendered.count("| 校准状态 | 待确认 |"), len(review["entries"]))
+        self.assertIn("空白表示尚未填写，不代表 0", rendered)
+        self.assertIn("多元奇物的品质变体", rendered)
+
+    def test_calibration_cli_keeps_review_only_and_refuses_overwrite(self):
+        source = ROOT / "BLACKFLOW_REFERENCE.md"
+        before = source.read_bytes()
+        with tempfile.TemporaryDirectory() as directory:
+            json_path = Path(directory) / "review.json"
+            md_path = Path(directory) / "calibration.md"
+            command = [sys.executable, str(ROOT / "scripts/screen_relic_effects.py"),
+                       "--json", str(json_path), "--markdown", str(md_path), "--calibration"]
+            subprocess.run(command, check=True, capture_output=True)
+            self.assertIn("附魔规则", md_path.read_text(encoding="utf-8"))
+            md_path.write_text("player calibration", encoding="utf-8")
+            retry = subprocess.run(command, capture_output=True)
+            self.assertNotEqual(retry.returncode, 0)
+            self.assertEqual(md_path.read_text(encoding="utf-8"), "player calibration")
+        self.assertEqual(source.read_bytes(), before)
 
     def test_mixed_effects_preserve_both_domains(self):
         self.assertEqual(screen_effect("我方单位的攻击力+40%，指挥经验+20%")["group"], "mixed")
@@ -70,7 +99,7 @@ class RelicEffectsReviewTests(unittest.TestCase):
             parse_relics("## 8. 藏品池\n### relic_001 名称\n- 效果：希望+2\n### relic_001 名称\n- 效果：希望+2\n")
 
     def test_export_never_changes_source_or_overwrites_existing_review(self):
-        source = ROOT / "BLACKSTREAM_REFERENCE.md"
+        source = ROOT / "BLACKFLOW_REFERENCE.md"
         before = source.read_bytes()
         with tempfile.TemporaryDirectory() as directory:
             json_path = Path(directory) / "review.json"

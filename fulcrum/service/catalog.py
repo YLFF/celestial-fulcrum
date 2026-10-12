@@ -31,7 +31,7 @@ def editor_catalog():
     result["relicCategories"] = presentation()["categories"]
     from ..reward_browser import browser_catalog
     result["rewardBrowser"] = browser_catalog()
-    result["encounters"] = json.loads((ROOT / "data/blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+    result["encounters"] = json.loads((ROOT / "data/blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
     result["squads"] = SQUAD_NAMES
     result["cocoons"] = COCOON_NAMES
     result["initialSupports"] = INITIAL_SUPPORTS

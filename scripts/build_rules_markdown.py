@@ -6,8 +6,8 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
-RULES = ROOT / "data" / "blackstream_node_generation_rules.json"
-DOCUMENT = ROOT / "BLACKSTREAM_RULEBOOK.md"
+RULES = ROOT / "data" / "blackflow_node_generation_rules.json"
+DOCUMENT = ROOT / "BLACKFLOW_RULEBOOK.md"
 
 
 def format_value(value: dict | None) -> str:

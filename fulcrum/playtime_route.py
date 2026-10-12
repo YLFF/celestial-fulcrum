@@ -105,6 +105,7 @@ def route_inputs(
         state["scoringContext"] = deepcopy({
             "areaKey": area_key, "resources": playtime["resources"],
             "opening": playtime.get("opening", {}), "operators": playtime.get("operators", []),
+            "squad": playtime.get("squad", []), "grantedEffects": playtime.get("grantedEffects", []),
             "goals": playtime.get("goals", {}), "relics": playtime.get("relics", []),
             "recruitmentTickets": playtime.get("recruitmentTickets", []), "componentBox": box,
             "prediction": instance["prediction"], "globalEncounterPool": playtime.get("globalEncounterPool", []),

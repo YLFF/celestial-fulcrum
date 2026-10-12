@@ -64,6 +64,12 @@ class PatchRun(RevisionRequest):
     commands: list[dict[str, Any]] = Field(min_length=1, max_length=200)
 
 
+class CombatBonusesRequest(RevisionRequest):
+    context: dict[str, Any] | None = None
+    operatorInstanceId: str | None = None
+    areaKey: str | None = None
+
+
 class RecognizeRequest(RevisionRequest):
     assetId: str
     areaKey: str | None = None
@@ -82,6 +88,7 @@ class ConfirmRelics(RevisionRequest):
 
 
 class PlanRequest(RevisionRequest):
+    mode: Literal["global", "advice"] = "global"
     areaKey: str | None = None
     pursuit: bool = False
     topN: int = Field(default=PROFILE["search"]["defaultTopN"], ge=1, le=50)
@@ -234,7 +241,7 @@ def create_app(storage_root=None, *, allowed_origins=None):
         from ..runtime import ocr_available
         return {"snapshotEditing": True, "mapRecognition": True, "resourceOCR": ocr_available(),
                 "nodePrediction": True, "routePlanning": True, "scoreBreakdown": True,
-                "endingGoalRecording": True, "endingGoalOptionScoring": True, "endingGoalRanking": True, "relicEffectAggregation": False,
+                "endingGoalRecording": True, "endingGoalOptionScoring": True, "endingGoalRanking": True, "relicEffectAggregation": True,
                 "windowCapture": sys.platform == "win32" and local_client(request), "utopiaRangeRecognition": True,
                 "imageUpload": True, "relicRecognition": True,
                 "exampleRun": (ROOT / "runs/true-run-001/playtime.json").is_file(),
@@ -317,13 +324,14 @@ def create_app(storage_root=None, *, allowed_origins=None):
     def get_run(run_id: str):
         loaded = store.load(run_id)
         from ..team_status import team_status
+        from ..combat_bonuses import summarize_combat_bonuses
         state = loaded["state"]
+        attributes = summarize_combat_bonuses(state, include_operator_views=False)["global"]["attributeSummary"]
         thresholds = {}
         for area_key, slot in state["areas"].items():
             instance = next((row for row in slot["instances"] if row["instanceId"] == slot["activeInstanceId"]), None)
-            floor = ("I", "II", "III", "IV", "V", "VI").index(area_key.split("-")[0]) + 1
-            thresholds[area_key] = team_status(state["operators"], floor, state["opening"].get("squadId"),
-                instance.get("strategy", {}).get("scoringOptions", {}) if instance else {})
+            thresholds[area_key] = team_status(state["operators"], area_key, state["opening"].get("squadId"),
+                instance.get("strategy", {}).get("scoringOptions", {}) if instance else {}, attribute_summary=attributes)
         return {**loaded, "goalSummary": goal_summary(state), "teamThresholds": thresholds}
 
     @app.patch("/api/runs/{run_id}", dependencies=auth)
@@ -334,6 +342,22 @@ def create_app(storage_root=None, *, allowed_origins=None):
     @app.post("/api/runs/{run_id}/undo", dependencies=auth)
     def undo(run_id: str, body: RevisionRequest):
         return store.undo(run_id, body.expectedRevision)
+
+    @app.post("/api/runs/{run_id}/combat-bonuses", dependencies=auth)
+    def combat_bonuses(run_id: str, body: CombatBonusesRequest):
+        from ..combat_bonuses import describe_layer_environment, render_combat_bonuses, summarize_combat_bonuses
+        from .catalog import entries
+        loaded = loaded_at_revision(run_id, body.expectedRevision)
+        report = summarize_combat_bonuses(loaded["state"], context=body.context,
+                                          operator_instance_id=body.operatorInstanceId)
+        area_key = body.areaKey or loaded["state"]["currentAreaKey"]
+        if area_key is not None and area_key not in AREA_SPECS:
+            raise ValueError("地图槽位不存在")
+        slot = loaded["state"]["areas"].get(area_key)
+        instance = active_instance(loaded["state"], area_key) if slot and slot["activeInstanceId"] else None
+        report["environment"] = describe_layer_environment(instance, report["difficulty"], entries())
+        return {"runId": run_id, "revision": loaded["revision"], "report": report,
+                "markdown": render_combat_bonuses(report)}
 
     @app.post("/api/runs/{run_id}/redo", dependencies=auth)
     def redo(run_id: str, body: RevisionRequest):

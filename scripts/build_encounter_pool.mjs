@@ -58,6 +58,6 @@ const output = {
   eventPool: pool,
 };
 
-writeFileSync("data/blackstream_encounter_pool.json", `${JSON.stringify(output, null, 2)}\n`, "utf8");
+writeFileSync("data/blackflow_encounter_pool.json", `${JSON.stringify(output, null, 2)}\n`, "utf8");
 console.log(`wrote ${pool.length} encounter events`);
 console.log(pool.map((event) => `${event.name} [${event.floors.join(",") || "?"}]`).join("\n"));

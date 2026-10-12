@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "status": "backend_combat_summary_only",
+  "batches": [
+    {"file": "calibration_10.json", "reviewStatus": "confirmed"},
+    {"file": "calibration_20.json", "reviewStatus": "confirmed"},
+    {"file": "calibration_remaining.json", "reviewStatus": "confirmed"}
+  ]
+}

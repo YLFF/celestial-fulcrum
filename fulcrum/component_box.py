@@ -22,6 +22,7 @@ APPRAISAL_EVENTS = {
     "recruit": {"component_004": 3},
     "battle": {"component_002": 2, "component_006": 4},
     "acquire": {"component_007": 1, "component_009": 4},
+    "reveal": {"component_003": 1},
     "soilMove": {f"component_{index:03d}": 2 for index in range(1, 13)},
 }
 

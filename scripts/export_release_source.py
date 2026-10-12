@@ -11,10 +11,11 @@ from export_macos_source import FILES, EXCLUDED_DATA
 ROOT = Path(__file__).resolve().parents[1]
 EXTRA_FILES = (
     ".gitignore", ".github/workflows/desktop-release.yml",
-    "ROADMAP.md",
+    "docs/ROADMAP.md",
     "packaging/fulcrum.spec", "requirements-desktop-windows.txt",
     "scripts/export_release_source.py", "scripts/new_run.py",
     "experiments/__init__.py", "experiments/node_prediction_beta.py",
+    "tests/fixtures/arkrog_30.json",
 )
 TREES = {
     "fulcrum": {".py"},
@@ -25,6 +26,7 @@ TREES = {
     "tests": {".py"},
     "scripts": {".py", ".mjs"},
 }
+EXCLUDED_FILES = {"tests/test_decision_advisor.py", "tests/test_rolling_route_probe.py"}
 
 
 def publication_files(root=ROOT):
@@ -34,12 +36,13 @@ def publication_files(root=ROOT):
         paths.update(path for path in (root / folder).rglob("*") if path.is_file()
                      and "__pycache__" not in path.parts
                      and (extensions is None or path.suffix.lower() in extensions))
-    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+    data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json"),
+                  *(root / "data/relic_effects").rglob("*.json")]
     paths.update(path for path in data_paths if path.name not in EXCLUDED_DATA)
     missing = [str(path.relative_to(root)) for path in paths if not path.is_file()]
     if missing:
         raise RuntimeError(f"Required publication inputs are missing: {missing}")
-    return sorted(paths)
+    return sorted(path for path in paths if path.relative_to(root).as_posix() not in EXCLUDED_FILES)
 
 
 def remove_obsolete_files(destination, current_names):

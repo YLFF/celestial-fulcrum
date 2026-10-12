@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { Trash2, ChevronsUp, UserRoundPlus, Swords, PackagePlus, Footprints, TreeDeciduous, WandSparkles } from 'lucide-react';
+import { Trash2, ChevronsUp, UserRoundPlus, Swords, PackagePlus, Eye, Footprints, TreeDeciduous, WandSparkles, ChartNoAxesCombined } from 'lucide-react';
 import { EntryImage, IconButton, Modal, NumberField, SaveButton } from './common';
-import { componentCommands, operatorProgressLabel, operatorProgressOptions, PROFESSIONS, uid } from './model';
+import { componentAppraisalTotal, componentCommands, num, orderedOperatorRoster, operatorProgressLabel, operatorProgressOptions, PROFESSIONS, uid } from './model';
 import CatalogPicker from './CatalogPicker';
 import { SOURCE_CHOICES, sourceChoice } from './picker';
 import { acquireDraft, appraisalDraft } from './componentAppraisal';
 import { canEnchant, enchantCommands, manualTrainingPromotion, relicActive } from './relicPresentation';
+import CombatBonusDialog from './CombatBonusDialog';
 
 export function RelicEditor({ state, catalog, entries, onSave, onClose, busy, adding = false }) {
   const [items, setItems] = useState(structuredClone(state.relics));
@@ -30,18 +31,22 @@ export function ComponentEditor({ state, catalog, entries, onSave, onClose, busy
   const [box, setBox] = useState(structuredClone(state.componentBox));
   const [error, setError] = useState(''), [confirmTrees, setConfirmTrees] = useState(false);
   const trees = box.items.filter(row => row.componentId === 'component_006').length;
+  const unknownAppraisals = box.items.filter(row => row.estimatedValue == null).length;
   const change = (index, changes) => setBox({ ...box, items: box.items.map((row, i) => i === index ? { ...row, ...changes } : row) });
   return <Modal title={`零件箱 · ${box.items.length}/${box.capacity}`} onClose={onClose} wide
     footer={<SaveButton busy={busy || confirmTrees} onClick={() => onSave(componentCommands(state.componentBox, box))} />}>
-    <div className="box-header"><NumberField label="容量上限" value={box.capacity} onChange={value => setBox({ ...box, capacity: value })} />
+    <div className="box-header"><div className="box-summary"><NumberField label="容量上限" value={box.capacity} onChange={value => setBox({ ...box, capacity: value })} />
+      <div className="box-appraisal" role="status" aria-label="零件箱总估价"><span>总估价</span><b>{num(componentAppraisalTotal(box.items))}</b>
+        {unknownAppraisals > 0 && <small>{unknownAppraisals} 件未估价</small>}</div></div>
       <div className="appraisal-actions">{[
         ['recruit', '招募干员+1', UserRoundPlus, '每件回声玉米估价+3；新增干员不会自动结算'],
         ['battle', '战斗胜利+1', Swords, '按完美胜利：血蕈+2、霜晶树+4；非完美战斗请使用“我树碎了？！”'],
         ['acquire', '获得零件+1', PackagePlus, '每件多生苔藓+1、板藤+4；新增零件已自动结算'],
+        ['reveal', '揭示节点+1', Eye, '每件雾滚草估价+1'],
         ['soilMove', '沃土移动+1', Footprints, '途经希望的沃土增益区域：所有自然物+2'],
       ].map(([event, label, Icon, title]) => <button key={event} title={title} disabled={busy} onClick={() => setBox(appraisalDraft(box, event, catalog))}><Icon size={14} />{label}</button>)}
       <button className="tree-break-button" disabled={busy || !trees} onClick={() => setConfirmTrees(true)}><TreeDeciduous size={14} />我树碎了？！</button></div>
-      <span>总估价 {box.items.reduce((sum, row) => sum + (row.estimatedValue || 0), 0)}</span></div>
+    </div>
     {error && <div className="form-error" role="alert">{error}</div>}
     {confirmTrees && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除霜晶树"><h3>移除全部霜晶树？</h3><p>将从零件箱移除 {trees} 件霜晶树。</p><div><button autoFocus onClick={() => setConfirmTrees(false)}>取消</button><button className="primary" onClick={() => { setBox({ ...box, items: box.items.filter(row => row.componentId !== 'component_006') }); setConfirmTrees(false); }}>确认移除</button></div></section></div>}
     <div className="picker-layout component-layout"><CatalogPicker components autoFocus={adding} rows={catalog.component} onAdd={entry => {
@@ -57,15 +62,16 @@ export function ComponentEditor({ state, catalog, entries, onSave, onClose, busy
   </Modal>;
 }
 
-export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy, adding = false }) {
-  const [items, setItems] = useState(() => structuredClone(state.operators).map(row => {
+export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy, adding = false, loaded, areaKey }) {
+  const [items, setItems] = useState(() => orderedOperatorRoster(structuredClone(state.operators), state.squad).map(row => {
     const entry = catalog.operators.find(entry => entry.name === row.name);
-    return { ...row, ...(entry ? { operatorId: entry.id, profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarity } : {}),
+    return { ...row, ...(entry ? { operatorId: entry.id, profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarityEditable ? row.rarity : entry.rarity } : {}),
       elite: row.elite ?? ((entry?.rarity ?? row.rarity) >= 3 ? 1 : 0) };
   }));
   const [squad, setSquad] = useState(state.squad || []);
   const [settle, setSettle] = useState(false);
   const [pendingDelete, setPendingDelete] = useState(null);
+  const [bonusOperator, setBonusOperator] = useState(null);
   const [enchantOperator, setEnchantOperator] = useState(null), [assignments, setAssignments] = useState({});
   const change = (id, changes) => setItems(items.map(row => row.instanceId === id ? { ...row, ...changes } : row));
   async function save() {
@@ -89,6 +95,8 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
     commands.push(...enchantCommands(Object.fromEntries(Object.entries(assignments).filter(([, id]) => live.has(id)))));
     await onSave(commands);
   }
+  if (bonusOperator) return <CombatBonusDialog loaded={loaded} areaKey={areaKey} entries={entries}
+    operatorInstanceId={bonusOperator} onClose={() => setBonusOperator(null)} />;
   return <Modal title={`干员与编队 · ${items.length} 人`} onClose={onClose} wide footer={<SaveButton busy={busy || !!pendingDelete} onClick={save} />}>
     {pendingDelete && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除干员">
       <h3>移除 {pendingDelete.name}？</h3><p>该干员也将从当前编队移除，保存后生效。</p><div><button autoFocus onClick={() => setPendingDelete(null)}>取消</button>
@@ -102,17 +110,19 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
       <label className="checkbox-field"><input type="checkbox" checked={squad.includes(row.instanceId)} onChange={e => setSquad(e.target.checked ? [...squad, row.instanceId] : squad.filter(id => id !== row.instanceId))} />编队</label>
       <label className="field"><span>干员名称</span><input value={row.name} onChange={e => {
         const entry = catalog.operators.find(entry => entry.name === e.target.value);
-        change(row.instanceId, { name: e.target.value, operatorId: entry?.id, ...(entry ? { profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarity } : {}) });
+        change(row.instanceId, { name: e.target.value, operatorId: entry?.id, ...(entry ? { profession: entry.professionEditable ? row.profession : entry.profession, rarity: entry.rarityEditable ? row.rarity : entry.rarity } : {}) });
       }} /></label>
       <label className="field"><span>职业</span><select aria-label="职业" disabled={catalog.operators.some(entry => entry.name === row.name && !entry.professionEditable)} value={row.profession || ''} onChange={e => change(row.instanceId, { profession: e.target.value || null })}>
         <option value="" disabled>选择职业</option>{PROFESSIONS.map(text => <option key={text}>{text}</option>)}</select></label>
-      <NumberField label="星级" readOnly={catalog.operators.some(entry => entry.name === row.name)} value={row.rarity} min={1} max={6} nullable onChange={value => change(row.instanceId, { rarity: value })} />
+      <NumberField label="星级" readOnly={catalog.operators.some(entry => entry.name === row.name && !entry.rarityEditable)} value={row.rarity} min={1} max={6} nullable onChange={value => change(row.instanceId, { rarity: value })} />
       <label className="field"><span>进阶状态</span><select aria-label="进阶状态" value={row.elite} onChange={e => change(row.instanceId, { elite: Number(e.target.value) })}>
         {operatorProgressOptions(row.rarity, row.elite).map(value => <option key={value} value={value}>{operatorProgressLabel(value)}</option>)}</select></label>
       <label className="field"><span>来源</span><select aria-label="来源" value={sourceChoice(row.source)} onChange={e => change(row.instanceId, { source: e.target.value })}>
         {Object.entries(SOURCE_CHOICES).map(([id, text]) => <option value={id} key={id}>{text}</option>)}</select></label>
       {settle && <NumberField label="希望费用" value={row.hopeCost} nullable onChange={value => change(row.instanceId, { hopeCost: value })} />}
-      <div className="operator-row-actions"><IconButton icon={WandSparkles} label={`附魔 ${row.name}`} disabled={busy || !state.relics.some(relic => canEnchant(relic, row, entries))} onClick={() => setEnchantOperator(enchantOperator === row.instanceId ? null : row.instanceId)} />
+      <div className="operator-row-actions operator-bonus-actions"><IconButton icon={ChartNoAxesCombined} label={`查看 ${row.name} 加成（已保存状态）`}
+        disabled={busy || !loaded || !state.operators.some(item => item.instanceId === row.instanceId)} onClick={() => setBonusOperator(row.instanceId)} />
+        <IconButton icon={WandSparkles} label={`附魔 ${row.name}`} disabled={busy || !state.relics.some(relic => canEnchant(relic, row, entries))} onClick={() => setEnchantOperator(enchantOperator === row.instanceId ? null : row.instanceId)} />
         <IconButton icon={ChevronsUp} label={`进阶 ${row.name}`} disabled={busy || row.elite === 2 || !operatorProgressOptions(row.rarity, row.elite).includes(2)} onClick={() => change(row.instanceId, { elite: 2 })} />
         <IconButton icon={Trash2} label={`移除干员 ${row.name}`} disabled={busy} onClick={() => setPendingDelete(row)} /></div>
       {(enchantOperator === row.instanceId || Object.values(assignments).includes(row.instanceId) || state.relics.some(relic => relic.enchantment?.operatorInstanceId === row.instanceId)) &&

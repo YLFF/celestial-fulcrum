@@ -71,6 +71,13 @@ export const uid = prefix => `${prefix}-${Date.now().toString(36)}-${Math.random
 
 export const operatorProgressLabel = elite => elite == null ? '待确认' : elite === 2 ? '已进阶' : '未进阶';
 
+export function orderedOperatorRoster(operators, squad = []) {
+  const newestFirst = [...operators].reverse();
+  const selected = new Set(squad);
+  return [...newestFirst.filter(row => selected.has(row.instanceId)),
+    ...newestFirst.filter(row => !selected.has(row.instanceId))];
+}
+
 export function operatorProgressOptions(rarity, elite) {
   const unpromoted = elite === 0 || rarity != null && rarity < 3 ? 0 : 1;
   return rarity == null || rarity >= 4 || elite === 2 ? [unpromoted, 2] : [unpromoted];
@@ -82,6 +89,16 @@ export function currentInstance(state, areaKey) {
 }
 
 export function nodeCategory(node) { return node.resolvedCategoryId || node.observedCategoryId || 'unknown_mystery'; }
+
+export function routeNodeName(id, nodes = {}, nodeTypes = {}) {
+  const node = nodes?.[id];
+  const category = node?.resolvedCategoryId || node?.observedCategoryId;
+  return nodeTypes[category] || (category === 'start' ? '起点' : '未确认节点');
+}
+
+export function componentAppraisalTotal(items = []) {
+  return items.reduce((sum, row) => sum + (Number.isFinite(row.estimatedValue) ? row.estimatedValue : 0), 0);
+}
 
 export function componentCommands(before, draft) {
   const commands = [];

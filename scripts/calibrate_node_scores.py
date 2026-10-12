@@ -75,7 +75,7 @@ def encounter_probe(
     """III-layer calibration from the saved selector weights, with explicit missing terms."""
     source_path = ROOT / "work" / "lubiao_encounter_selector" / "report.json"
     source = json.loads(source_path.read_text(encoding="utf-8"))
-    definitions = json.loads((ROOT / "data" / "blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+    definitions = json.loads((ROOT / "data" / "blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
     by_name = {row["name"]: row for row in definitions}
     scorer = relic_scorer if relic_scorer is not None else RelicScorer(catalog=pools)
     scene_to_event = {}

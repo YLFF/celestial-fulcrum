@@ -11,7 +11,7 @@ import re
 
 
 ROOT = Path(__file__).resolve().parents[1]
-SOURCE = ROOT / "BLACKSTREAM_REFERENCE.md"
+SOURCE = ROOT / "BLACKFLOW_REFERENCE.md"
 GROUP_LABELS = {
     "combat": "战斗数值或条件效果",
     "combat_special": "战斗特殊效果",
@@ -26,6 +26,34 @@ COMBAT_SIGNALS = {
     "skill": r"技力|弹药|技能会自动开启|无法开启技能",
     "special": r"治疗|屏障|护盾|闪避|阻挡|重量|晕眩|寒冷|冻结|束缚|浮空|失重|迷彩|再部署|起飞|降落|召唤|免疫异常|在高台部署|在低地部署|便携式补给站|干扰地雷|轰隆隆先生|安全起重机|防暴桩|舞台雾机|战斗.*失败|灾厄之口",
 }
+SIGNAL_LABELS = {
+    "attributes": "单位属性",
+    "damage": "伤害／元素损伤",
+    "cost": "部署费用／费用回复",
+    "skill": "技力／技能",
+    "special": "战术或特殊效果",
+}
+CALIBRATION_FIELDS = (
+    "确认分类",
+    "展示类型（普通型／层数型／生效型／附魔型，可多选）",
+    "层数／阶段规则（初始值、上限、增减条件、各阶段差异）",
+    "生效／失效规则（触发时机、持续范围、是否消耗）",
+    "附魔规则（受益对象数量、选择方式、绑定及保留条件）",
+    "效果文字修订（留空沿用原文）",
+    "其他备注",
+)
+EFFECT_FIELDS = (
+    "效果类别（我方／敌方／资源／战斗特殊／探索特殊）",
+    "具体指标",
+    "生效对象与范围（职业、子职业、近远程、指定干员等）",
+    "伤害类型（物理／法术／真实／元素损伤／元素伤害／不适用）",
+    "计算区（局外／局内／不适用／待确认）",
+    "计算方式（固定值／百分比／动态表达式／特殊）",
+    "数值、单位或表达式",
+    "生效条件与触发时机",
+    "持续时间、次数或上限",
+    "同类叠加方式与例外（相加／相乘／覆盖／其他）",
+)
 NONCOMBAT_SIGNAL = re.compile(
     r"目标生命|护盾值|指挥经验|战斗经验|希望|可携带干员|可同时部署人数|"
     r"可同时部署人|可同时部署数量|招募(?:券|所需)|临时招募|立即进阶|零件箱容量|行动力|"
@@ -110,14 +138,55 @@ def render_review(review: dict) -> str:
     return "\n".join(lines)
 
 
+def render_calibration(review: dict) -> str:
+    lines = ["# 黑流树海藏品效果：人工校准表", "",
+             "本表供玩家校准，不接入现有评分、战力门槛或加成汇总。以当前手工数据手册中的 ID、名称和完整效果为底稿，保留已有文本初筛；初筛分类不是已确认结论。", "",
+             f"- 来源：`{review['source']}` 的第 8 章。",
+             f"- 来源内容 SHA-256：`{review['sourceSha256']}`。",
+             f"- 收录：{len(review['entries'])} 件藏品，每个基础 ID 一项；多阶段效果保留在同一项中。", "",
+             "## 填写口径", "",
+             "- 只校准本 Markdown 文件，不需要同时编辑生成时的初筛 JSON。现有数据手册、程序藏品表和评分配置保持不变；后续根据确认内容另行结构化。",
+             "- 空白表示尚未填写，不代表 0、无效果、全体适用或已生效。可以先填展示类型和分类，再逐步补完效果。",
+             "- 展示类型：普通型为不需额外状态的效果；层数型需维护层数或阶段；生效型需维护触发前后状态；附魔型需绑定受益干员。这些标签可以同时使用。",
+             "- 层数或阶段请写明初始值、上限、增减条件及不同阶段效果；不要把多元奇物的品质变体默认当成可累计层数。",
+             "- 一个藏品有多个指标、作用对象或乘区时，复制其“效果 1”表，改名为效果 2、效果 3，分别填写；混合效果中的探索或资源部分也要保留。",
+             "- 生效范围逐效果填写，可包含全体／指定干员／我方或敌方／职业／子职业／近战或远程／精英化／召唤物等，并保留额外条件。",
+             "- 局内／局外指你要确认的加成计算区；即时资源奖励等可填“不适用”。条件、动态表达式、百分比的叠加方式另行填写，不从初筛自动推定。",
+             "- 具体指标可填：我方生命、防御、法抗、攻击、攻速；敌方生命、防御、法抗；部署费用、费用回复、再部署、技力、伤害、治疗、阻挡等；非战斗项如经验、希望、编队位、部署位、现金、零件箱或事件效果。",
+             "- 附魔请写清受益人数、对象选择与触发时机、藏品是否保留，以及附魔后状态；本表不会自动执行干员进阶。",
+             "- 完成一项后将“校准状态”改为“已确认”；可以只确认分类并写明仍待核实的字段。此导出工具拒绝覆盖已有文件，避免丢失你的校准。", "",
+             "## 初筛概览", "", "| 初筛分类 | 数量 |", "| --- | ---: |"]
+    lines.extend(f"| {label} | {review['counts'][group]} |" for group, label in GROUP_LABELS.items())
+    lines.extend([f"| 合计 | {len(review['entries'])} |", ""])
+    for group, label in GROUP_LABELS.items():
+        lines.extend([f"## {label}", ""])
+        for row in review["entries"]:
+            if row["group"] != group:
+                continue
+            signals = "、".join(SIGNAL_LABELS[signal] for signal in row["combatSignals"]) or "未匹配直接战斗信号"
+            lines.extend([f"### {row['id']} {row['name']}", "",
+                          f"- 原始效果：{row['effect']}",
+                          f"- 初筛分类：{GROUP_LABELS[row['group']]}；方向：{signals}。",
+                          f"- 初筛依据：{row['reason']}",
+                          f"- 来源位置：数据手册第 {row['sourceLine']} 行。", "",
+                          "| 校准字段 | 填写内容 |", "| --- | --- |", "| 校准状态 | 待确认 |"])
+            lines.extend(f"| {field} |  |" for field in CALIBRATION_FIELDS)
+            lines.extend(["", "#### 效果 1（多个效果请复制此表）", "",
+                          "| 效果字段 | 填写内容 |", "| --- | --- |"])
+            lines.extend(f"| {field} |  |" for field in EFFECT_FIELDS)
+            lines.append("")
+    return "\n".join(lines)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=SOURCE)
     parser.add_argument("--json", type=Path, default=ROOT / "work/relic_effects/review.json")
     parser.add_argument("--markdown", type=Path, default=ROOT / "work/relic_effects_review/report.md")
+    parser.add_argument("--calibration", action="store_true", help="Add editable calibration fields to Markdown")
     args = parser.parse_args()
     protected = {args.source.resolve(), *(ROOT / name for name in
-                 ("BLACKSTREAM_REFERENCE.md", "BLACKSTREAM_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md"))}
+                 ("BLACKFLOW_REFERENCE.md", "BLACKFLOW_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md"))}
     outputs = [args.json.resolve(), args.markdown.resolve()]
     if len(set(outputs)) != len(outputs) or any(path in protected for path in outputs):
         parser.error("outputs must be distinct and must not overwrite source or maintained handbooks")
@@ -128,7 +197,8 @@ def main() -> None:
     for path in outputs:
         path.parent.mkdir(parents=True, exist_ok=True)
     outputs[0].write_text(json.dumps(review, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    outputs[1].write_text(render_review(review), encoding="utf-8")
+    renderer = render_calibration if args.calibration else render_review
+    outputs[1].write_text(renderer(review), encoding="utf-8")
     print(json.dumps({"total": len(review["entries"]), **review["counts"]}, ensure_ascii=True))
 
 

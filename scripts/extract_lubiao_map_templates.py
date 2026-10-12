@@ -11,7 +11,7 @@ from urllib.parse import urljoin
 
 
 PAGE_URL = "https://www.lubiao.wiki/tools/blackstream-route"
-OUT_PATH = Path("data/blackstream_map_templates.json")
+OUT_PATH = Path("data/blackflow_map_templates.json")
 
 
 REGION_BY_INTERNAL_LAYER = {

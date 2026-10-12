@@ -16,7 +16,7 @@ from playwright_browser import chromium_executable
 ROOT = Path(__file__).resolve().parents[1]
 PRTS_DATA = ROOT / "data" / "prts_relic_effects.json"
 DEFAULT_OUTPUT = ROOT / "work/relic_catalog_comparison/report.md"
-DEFAULT_DATA_OUTPUT = ROOT / "data" / "blackstream_relic_texts.json"
+DEFAULT_DATA_OUTPUT = ROOT / "data" / "blackflow_relic_texts.json"
 LUBIAO_URL = "https://www.lubiao.wiki/archives/blackstream"
 
 
@@ -148,7 +148,7 @@ def main() -> None:
         f"来源：[PRTS 拟造物质编目]({prts_data['source']})、[路标档案馆]({LUBIAO_URL})。",
         "比较方式：名称按 Unicode NFC 并去除空白后匹配；效果比较时另去除空白和分号。下面保留原始效果文字，不裁定哪站正确。",
         f"计数：PRTS {len(prts_rows)} 个名称，路标 {len(lubiao_rows)} 张卡片/{len(lubiao_by_name)} 个名称。普通藏品一致 {len(agreed_records)}，仅 PRTS {len(prts_only_records)}，仅路标 {len(lubiao_only_records)}，同名效果不同 {len(different_records)}。襁褓特殊藏品 {len(inherited_records)} 个名称，其中双方都有 {len(inherited_both)} 个、仅路标有 {len(inherited_lubiao_only)} 个。",
-        "襁褓系列暂保留各站各版本文本与路标同名卡片数，不参与一般藏品一致性判定。全部原始效果文字已存入 data/blackstream_relic_texts.json。",
+        "襁褓系列暂保留各站各版本文本与路标同名卡片数，不参与一般藏品一致性判定。全部原始效果文字已存入 data/blackflow_relic_texts.json。",
         "",
         f"## 仅 PRTS 有（{len(prts_only_records)}）",
         "",

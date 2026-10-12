@@ -6,12 +6,12 @@
   "editableUIEnabled": false,
   "reloadPolicy": "application_restart",
   "files": {
-    "defaults": "data/scoring/blackstream/default.json",
-    "relicPoolValues": "data/scoring/blackstream/relics.json"
+    "defaults": "data/scoring/blackflow/default.json",
+    "relicPoolValues": "data/scoring/blackflow/relics.json"
   },
   "relatedReadOnlyData": {
     "nodeGeneration": "data/lubiao_prediction_data.json",
-    "eventEligibility": "data/blackstream_encounter_pool.json",
+    "eventEligibility": "data/blackflow_encounter_pool.json",
     "eventFrequencies": "data/blackflow_encounter_weights.json",
     "gameRewardRules": "data/blackflow_reward_rules.json",
     "battleRewards": "data/blackflow_battle_rewards.json",

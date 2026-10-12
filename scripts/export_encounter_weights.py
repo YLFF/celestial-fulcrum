@@ -49,7 +49,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, default=ROOT / "data/blackflow_encounter_weights.json")
     args = parser.parse_args()
     source = json.loads(args.source.read_text(encoding="utf-8"))
-    events = json.loads((ROOT / "data/blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+    events = json.loads((ROOT / "data/blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
     result = convert(source, events)
     args.out.parent.mkdir(parents=True, exist_ok=True)
     pending = args.out.with_suffix(args.out.suffix + ".pending")

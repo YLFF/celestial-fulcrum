@@ -109,9 +109,9 @@ try {
     const zoomed = await page.locator('.map-guidance-row').boundingBox();
     assert.deepEqual(zoomed, overlay);
     await page.getByRole('button', { name: '重置地图缩放', exact: true }).click();
-    const input = page.getByLabel('本层留钱金额', { exact: true });
-    const save = page.getByRole('button', { name: '保存本层留钱并重新评分', exact: true });
-    assert.equal(await input.inputValue(), '20');
+    const input = page.getByLabel('路线规划预留源石锭', { exact: true });
+    const save = page.getByRole('button', { name: '保存路线规划预留源石锭并重新评分', exact: true });
+    assert.equal(await input.inputValue(), '0');
     await input.fill('-1');
     assert.ok(await save.isDisabled());
     await input.fill('1.5');

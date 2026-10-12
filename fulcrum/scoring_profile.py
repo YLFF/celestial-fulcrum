@@ -6,7 +6,7 @@ import json
 import math
 from pathlib import Path
 
-PROFILE_PATH = Path(__file__).resolve().parents[1] / "data/scoring/blackstream/default.json"
+PROFILE_PATH = Path(__file__).resolve().parents[1] / "data/scoring/blackflow/default.json"
 
 
 def load_profile(path: Path = PROFILE_PATH) -> dict:
@@ -59,6 +59,12 @@ def load_profile(path: Path = PROFILE_PATH) -> dict:
         or not row[0] <= row[1] <= row[2] for row in thresholds
     ):
         raise ValueError("战力门槛应为六层的进阶六星、全部六星、人数三项")
+    weights = data.get("teamPower", {}).get("operatorWeights", {})
+    if set(weights) != {"6", "5", "other"} or any(
+        not isinstance(row, dict) or set(row) != {"promoted", "unpromoted"}
+        or any(type(value) not in (int, float) or value < 0 for value in row.values()) for row in weights.values()
+    ):
+        raise ValueError("函数式战力门槛缺少六星、五星、其他干员的非负权重")
     search = data["search"]
     if any(type(search.get(key)) is not int or search[key] < 1 for key in ("defaultTopN", "defaultMaxStates", "scoreScale")):
         raise ValueError("搜索数量、上限和分数精度必须为正整数")

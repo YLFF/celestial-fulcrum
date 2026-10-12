@@ -1,4 +1,4 @@
-"""Query the local Blackstream text-and-image catalog by category or ID."""
+"""Query the local Blackflow text-and-image catalog by category or ID."""
 
 import argparse
 import json

@@ -42,6 +42,18 @@ class NativeHudTests(unittest.TestCase):
             if node.category_id is None:
                 self.assertTrue(any(f"({node.coord.key})" in warning and "类型未识别" in warning for warning in result.warnings))
 
+    @unittest.skipUnless(shutil.which("node"), "Node required for local OCR")
+    def test_low_contrast_screenshot_keeps_uncertain_currency_for_review(self):
+        image = cv2.imread(str(ROOT / "samples/maps/desktop_floor2_lookout_revealed.png"))
+        fields = HudRecognizer().recognize_image(image)["fields"]
+        self.assertEqual((fields["life"]["current"], fields["life"]["max"]), (6, 6))
+        self.assertEqual((fields["experience"]["current"], fields["experience"]["max"]), (3, 24))
+        for key, expected in {"level": 2, "shield": 2, "hope": 4, "action_points": 6}.items():
+            self.assertEqual(fields[key]["value"], expected, key)
+            self.assertEqual(fields[key]["status"], "recognized", key)
+        self.assertEqual(fields["originium_ingot"]["value"], 9)
+        self.assertEqual(fields["originium_ingot"]["status"], "needs_review")
+
     def test_full_native_map(self):
         result = MapRecognizer().recognize(ROOT / "samples/maps/desktop_native_3840.png")
         self.assertTrue(result.success)

@@ -1,0 +1,67 @@
+.combat-bonuses { --combat-muted: var(--muted, #62786d); --combat-line: var(--border, #dbe4de); --combat-accent: var(--accent, #18745c); max-width: 900px; margin: 0 auto; }
+.combat-context { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 16px; color: var(--combat-muted); font-size: 11px; margin-bottom: 14px; }
+.combat-attributes { border-top: 1px solid var(--combat-line); border-bottom: 1px solid var(--combat-line); }
+.combat-attribute-heading, .combat-attribute-row { display: grid; grid-template-columns: minmax(72px, .65fr) repeat(2, minmax(0, 1fr)); align-items: center; gap: 12px; }
+.combat-attribute-heading { padding: 10px 8px; color: var(--combat-muted); font-size: 11px; }
+.combat-attribute-row { padding: 13px 8px; min-height: 56px; }
+.combat-attribute-row + .combat-attribute-row { border-top: 1px solid var(--combat-line); }
+.combat-attribute-row > span { display: flex; align-items: center; gap: 9px; font-weight: 600; }
+.combat-attribute-row > b { font-size: 23px; color: var(--combat-accent); overflow-wrap: anywhere; font-variant-numeric: tabular-nums; }
+.combat-attribute-row > b.negative { color: var(--danger, #a75349); }
+.combat-environment { padding: 18px 8px; border-bottom: 1px solid var(--combat-line); }
+.combat-environment > header { display: flex; align-items: center; flex-wrap: wrap; gap: 7px; }
+.combat-environment small { margin-left: auto; color: var(--combat-muted); font-size: 10px; }
+.combat-environment-name { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.combat-environment-name > span { color: var(--combat-muted); font-size: 11px; }
+.combat-environment-icon { width: 28px; height: 28px; object-fit: contain; }
+.combat-environment p { margin: 7px 0 0; line-height: 1.6; overflow-wrap: anywhere; }
+.combat-muted, .combat-empty { color: var(--combat-muted); }
+.combat-category, .combat-indicator { border: 0; border-radius: 0; padding: 0; }
+.combat-category { border-bottom: 1px solid var(--combat-line); }
+.combat-category > summary, .combat-indicator > summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 10px; padding: 14px 8px; color: inherit; }
+.combat-category > summary::-webkit-details-marker, .combat-indicator > summary::-webkit-details-marker { display: none; }
+.combat-category > summary > span { color: var(--combat-muted); font-size: 11px; margin-left: auto; }
+.combat-chevron { flex-shrink: 0; color: var(--combat-muted); transition: transform .15s; }
+details[open] > summary > .combat-chevron { transform: rotate(180deg); }
+.combat-category > summary:hover, .combat-indicator > summary:hover { background: var(--surface-soft, #f2f7f3); }
+.combat-indicator + .combat-indicator { border-top: 1px solid var(--combat-line); }
+.combat-indicator-section { margin: 0; padding: 10px 16px 5px 36px; color: var(--combat-muted); font-size: 11px; font-weight: 600; }
+.combat-indicator > summary { padding: 9px 16px 9px 36px; gap: 12px; min-height: 40px; }
+.combat-indicator > summary > div { min-width: 0; display: grid; gap: 5px; }
+.combat-indicator > summary > .combat-indicator-heading { flex: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.combat-indicator-heading > b { font-size: 12px; }
+.combat-indicator-heading > small { overflow-wrap: anywhere; }
+.combat-indicator small { color: var(--combat-muted); font-size: 10px; }
+.combat-indicator-value { text-align: right; flex-shrink: 0; max-width: 42%; }
+.combat-indicator-value > b { font-size: 12px; color: var(--combat-accent); overflow-wrap: anywhere; }
+.combat-effect-details { padding: 12px 16px 14px 36px; border-top: 1px solid var(--combat-line); }
+.combat-effect-result { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 14px; line-height: 1.6; overflow-wrap: anywhere; }
+.combat-effect-result > span { color: var(--combat-muted); font-size: 10px; }
+.combat-condition { color: var(--combat-muted); margin: 6px 0; font-size: 12px; line-height: 1.7; overflow-wrap: anywhere; }
+.combat-zone-list { display: flex; flex-wrap: wrap; gap: 6px 20px; margin-top: 9px; color: var(--combat-muted); font-size: 11px; }
+.combat-source-list { padding: 0; margin: 8px 0 0; list-style: none; }
+.combat-source-list > li { display: flex; align-items: start; gap: 10px; padding: 10px 0; }
+.combat-source-list > li + li { border-top: 1px solid var(--combat-line); }
+.combat-source-icon { width: 34px; height: 34px; flex-shrink: 0; object-fit: contain; color: var(--combat-muted); }
+.combat-source-list > li > div { flex: 1; min-width: 0; }
+.combat-source-heading { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; }
+.combat-source-heading > span { color: var(--combat-accent); font-size: 11px; }
+.combat-source-list small { display: block; margin-top: 4px; }
+.combat-source-list p { color: var(--combat-muted); font-size: 11px; line-height: 1.65; margin: 5px 0 0; overflow-wrap: anywhere; }
+.combat-empty { margin: 0; padding: 0 8px 14px 36px; }
+.combat-notices { border: 0; margin-top: 14px; font-size: 11px; color: var(--combat-muted); }
+.combat-notices > summary { cursor: pointer; color: inherit; }
+.combat-notices li { margin: 7px 0; line-height: 1.5; }
+.combat-footnote { margin: 18px 8px 0; color: var(--combat-muted); font-size: 11px; line-height: 1.6; }
+.combat-loading, .combat-error { min-height: 280px; display: flex; align-items: center; justify-content: center; gap: 12px; }
+.combat-error { flex-direction: column; color: var(--danger, #a75349); text-align: center; }
+.operator-row-actions.operator-bonus-actions { display: grid; grid-template-columns: repeat(2, 32px); justify-content: end; min-width: 0; }
+@media (max-width: 600px) {
+  .combat-attribute-heading, .combat-attribute-row { grid-template-columns: 64px repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .combat-attribute-row > b { font-size: 18px; }
+  .combat-environment small { width: 100%; margin-left: 23px; }
+  .combat-indicator > summary { padding-left: 8px; }
+  .combat-indicator-section { padding-left: 8px; }
+  .combat-effect-details { padding-left: 8px; padding-right: 8px; }
+  .combat-source-icon { width: 28px; height: 28px; }
+}

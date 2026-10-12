@@ -1,7 +1,8 @@
 {
   "name": "celestial-fulcrum-player-ui",
-  "description": "Celestial Fulcrum — Arknights Integrated Strategies Assistant",
+  "description": "Celestial Fulcrum — Arknights Rogue Assistant (CFARA)",
   "private": true,
+  "license": "GPL-3.0-only",
   "version": "0.1.0",
   "type": "module",
   "scripts": {"dev": "vite --host 127.0.0.1", "build": "vite build", "test": "node --test tests/*.test.mjs"},

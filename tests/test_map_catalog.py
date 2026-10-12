@@ -34,7 +34,7 @@ class MapCatalogTests(unittest.TestCase):
 
     def test_visual_labels_match_reference_headings(self) -> None:
         root = Path(__file__).resolve().parents[1]
-        reference = (root / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        reference = (root / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         labels = json.loads((root / "data" / "vision_labels.json").read_text(encoding="utf-8"))
         for section, pattern in (
             ("nodeTypes", r"^### (node_type_\d{3}) (.+)$"),

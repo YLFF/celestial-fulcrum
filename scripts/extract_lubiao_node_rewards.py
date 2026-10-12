@@ -22,7 +22,7 @@ BATTLE_OBSERVATION_STAGES = ("ro6_n_1_1", "ro6_e_1_1", "ro6_t_5", "ro6_e_t_5")
 DEFAULT_SOURCE_DIR = ROOT / "work" / "lubiao_node_rewards"
 DEFAULT_OUTPUT = ROOT / "data" / "blackflow_node_reward_pools.json"
 PROTECTED = {ROOT / name for name in (
-    "BLACKSTREAM_REFERENCE.md", "BLACKSTREAM_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md",
+    "BLACKFLOW_REFERENCE.md", "BLACKFLOW_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md",
 )}
 
 

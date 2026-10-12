@@ -52,11 +52,12 @@ try {
     assert.equal(await page.getByRole('button', { name: '编辑总估价', exact: true }).count(), 0);
   });
   await check('Top 5 and 10 reach backend and return distinct paths', async () => {
-    assert.equal(await page.getByLabel('Top N', { exact: true }).inputValue(), '5');
     for (const top of [5, 10]) {
-      await page.getByLabel('Top N', { exact: true }).fill(String(top));
-      assert.equal(await page.locator('.route-row').count(), 0);
       await page.getByRole('button', { name: '规划', exact: true }).click();
+      if (top === 5) assert.equal(await dialog().getByLabel('显示Top K路线', { exact: true }).inputValue(), '5');
+      await dialog().getByLabel('显示Top K路线', { exact: true }).fill(String(top));
+      assert.equal(await page.locator('.route-row').count(), 0);
+      await dialog().getByRole('button', { name: '开始规划', exact: true }).click();
       await page.locator('.route-row').first().waitFor({ timeout: 60000 });
       assert.equal(await page.locator('.route-row').count(), top);
       assert.equal(planRequests.at(-1).topN, top); assert.equal(planRequests.at(-1).maxStates, 50000);

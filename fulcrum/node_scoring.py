@@ -47,14 +47,14 @@ def _catalogs():
 
 @lru_cache(maxsize=2)
 def _cached_events(stamps):
-    definitions = json.loads((ROOT / "data/blackstream_encounter_pool.json").read_text(encoding="utf-8"))
+    definitions = json.loads((ROOT / "data/blackflow_encounter_pool.json").read_text(encoding="utf-8"))
     weights = json.loads((ROOT / "data/blackflow_encounter_weights.json").read_text(encoding="utf-8"))
     return {row["id"]: row for row in definitions["eventPool"]}, weights
 
 
 def _events():
     return _cached_events(tuple((ROOT / "data" / name).stat().st_mtime_ns
-                               for name in ("blackstream_encounter_pool.json", "blackflow_encounter_weights.json")))
+                               for name in ("blackflow_encounter_pool.json", "blackflow_encounter_weights.json")))
 
 
 def _finite(value: Any, name: str, *, nonnegative: bool = False) -> float:
@@ -123,28 +123,24 @@ class SnapshotScorer:
         permanent = [op for op in self.operators if op.get("source") in PERMANENT_SOURCES
                      and op.get("remainingBattles") is None]
         unknown_rarity = [op["name"] for op in permanent if op.get("rarity") is None]
-        self.threshold = team_status(self.operators, self.floor, self.squad, self.options)
+        self.threshold = team_status(self.operators, self.area, self.squad, self.options, combat_state=self.context)
         self.threshold["unknownRarityOperators"] = unknown_rarity
-        if unknown_rarity and "teamCounts" not in self.options:
-            self.warnings.add("Unknown operator rarity: threshold uses confirmed six-stars only; add rarity or teamCounts")
+        if unknown_rarity:
+            self.warnings.add("干员星级未确认：函数式战力暂按其他星级权重计算，请补充星级")
         self.below = not self.threshold["met"]
         self.reference_cost = _finite(self.options.get("referenceSixStarHopeCost", 7 if self.squad in DUAL_SQUADS else 10),
                                       "referenceSixStarHopeCost", nonnegative=True)
         if self.reference_cost == 0:
             raise ValueError("referenceSixStarHopeCost must be positive")
-        missing = self.threshold["deficits"]
-        recruits = missing["sixStars"]
-        promotions = missing["elite2SixStars"]
-        recruit_cost = self.reference_cost - (2 if self.squad in DUAL_SQUADS else 3)
         hope = self.resources.get("hope")
         _finite(hope, "hope", nonnegative=True)
-        self.hope_deficit = _finite(self.options.get("hopeDeficit", max(0, recruits * recruit_cost
-                                    + promotions * (2 if self.squad in DUAL_SQUADS else 3) - hope)),
+        self.hope_deficit = _finite(self.options.get("hopeDeficit", max(0,
+                                    self.threshold["deficits"]["weightedOperators"] * self.reference_cost - hope)),
                                     "hopeDeficit", nonnegative=True)
         self.exit_hope_floor = _finite(self.options.get("exitHopePointFloor", RESOURCE_POINTS["exitHopePointFloor"]),
                                        "exitHopePointFloor", nonnegative=True)
         self.threshold["hopeDeficit"] = self.hope_deficit
-        self.threshold["hopeCostAssumption"] = "missing six-stars/promotion only; other roster slots may use free recruits; dual-squad home cost proxy"
+        self.threshold["hopeCostAssumption"] = "战力缺口按完整体六星等效数量和本分队希望费用折算，扣除当前希望；连续估值，不模拟具体招募或进阶"
         self.mechanist = next((op for op in permanent if op["name"] == "机械师"), None)
         self.heavy_needed = 0 if self.mechanist and self.mechanist.get("elite") == 2 else 1 if self.mechanist else 2
         self.held_tickets = [({"name": row} if isinstance(row, str) else row)

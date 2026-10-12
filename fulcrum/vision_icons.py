@@ -111,7 +111,7 @@ class IconMatcher:
                 xi, yi = round(x), round(y)
                 patch = image[max(0, yi - 22):yi + 23, max(0, xi - 22):xi + 23]
                 hsv = cv2.cvtColor(patch, cv2.COLOR_BGR2HSV)
-                colorful = (hsv[:, :, 1] > 70) & (hsv[:, :, 2] > 75)
+                colorful = (hsv[:, :, 1] > 70) & (hsv[:, :, 2] > 60)
                 if int(np.count_nonzero(colorful)) < 80:
                     return 1.0 if radius <= 13 else 0.9
         templates = self.connector_templates + ([self.empty_template] if self.empty_template is not None else [])
@@ -119,6 +119,24 @@ class IconMatcher:
             return -1.0
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         score = max(self._score(gray, pixel, 60, template, (0.65, 0.8, 0.9, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5)) for template in templates)
+        if .60 <= score < .72:
+            # A dim connector under the player's crosshair can evade the full-map circle detector.
+            xi, yi = round(x), round(y)
+            left, top = max(0, xi - 24), max(0, yi - 24)
+            patch = image[top:yi + 25, left:xi + 25]
+            local = cv2.HoughCircles(cv2.GaussianBlur(cv2.cvtColor(patch, cv2.COLOR_BGR2GRAY), (3, 3), .5),
+                                     cv2.HOUGH_GRADIENT, dp=1, minDist=15, param1=60, param2=15,
+                                     minRadius=5, maxRadius=13)
+            if local is not None:
+                for cx, cy, radius in local[0]:
+                    if np.hypot(left + cx - x, top + cy - y) > 13:
+                        continue
+                    yy, xx = np.ogrid[:patch.shape[0], :patch.shape[1]]
+                    core = (xx - cx) ** 2 + (yy - cy) ** 2 <= (radius + 2) ** 2
+                    hsv = cv2.cvtColor(patch, cv2.COLOR_BGR2HSV)
+                    colorful = core & (hsv[:, :, 1] > 70) & (hsv[:, :, 2] > 60)
+                    if np.count_nonzero(colorful) / np.count_nonzero(core) < .08:
+                        return .9
         return score if score >= 0.72 else -1.0
 
     def classify_node(
@@ -138,7 +156,7 @@ class IconMatcher:
             return match, [match]
         scores: dict[str, float] = {}
         for node_id, icon in self.node_templates:
-            scales = (0.55, 0.65, 0.75, 0.85, 1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0)
+            scales = (0.55, 0.60, 0.65, 0.75, 0.85, 1.0, 1.15, 1.3, 1.45, 1.6, 1.8, 2.0)
             value = self._score(image, pixel, step, icon, scales)
             scores[node_id] = max(value, scores.get(node_id, -1.0))
         for node_id, score in texture_scores:
@@ -154,6 +172,25 @@ class IconMatcher:
             return None, []
         node_id, score = ranked[0]
         second = ranked[1][1] if len(ranked) > 1 else -1.0
+        if (not dystopia and score >= 0.70 and score - second < 0.035
+                and {item_id for item_id, _ in ranked[:2]} == {"node_type_001", "node_type_002"}):
+            # Ordinary and emergency fights share a silhouette; exclude the dark background for the close tie.
+            foreground_scores = {}
+            for item_id, icon in self.node_templates:
+                if item_id not in {"node_type_001", "node_type_002"}:
+                    continue
+                color = icon[:, :, :3]
+                mask = (np.max(color, axis=2) > 35).astype(np.uint8) * 255
+                foreground = np.dstack((color, mask))
+                value = self._score(image, pixel, step, foreground, scales)
+                foreground_scores[item_id] = max(value, foreground_scores.get(item_id, -1.0))
+            foreground_ranked = sorted(foreground_scores.items(), key=lambda item: item[1], reverse=True)
+            if (foreground_ranked[0][1] >= 0.80
+                    and foreground_ranked[0][1] - foreground_ranked[1][1] >= 0.05):
+                scores.update(foreground_scores)
+                ranked = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+                node_id, score = ranked[0]
+                second = ranked[1][1]
         if empty_score >= 0.72 and score < 0.60:
             match = IconMatch("node_type_020", self.node_labels["node_type_020"], round(empty_score, 4), round(score, 4))
             return match, [match]
@@ -169,6 +206,23 @@ class IconMatcher:
         if score < 0.46 or (score - second < 0.035 and not (score >= 0.80 and score - second >= 0.025)):
             return None, candidates
         return IconMatch(node_id, self.node_labels[node_id], round(score, 4), round(second, 4)), candidates
+
+    def confirm_text_candidate(self, image, pixel, step, category_id):
+        scores = []
+        for node_id, icon in self.node_templates:
+            if node_id != category_id:
+                continue
+            color = cv2.cvtColor(icon, cv2.COLOR_GRAY2BGR) if icon.ndim == 2 else icon[:, :, :3]
+            mask = (np.max(color, axis=2) > 35).astype(np.uint8) * 255
+            if icon.ndim == 3 and icon.shape[2] == 4:
+                mask = cv2.bitwise_and(mask, icon[:, :, 3])
+            if not np.count_nonzero(mask):
+                continue
+            foreground = np.dstack((color, mask))
+            scores.append(self._score(image, pixel, step, foreground,
+                                      (.55, .60, .65, .75, .85, 1., 1.15, 1.3, 1.45, 1.6, 1.8, 2.)))
+        score = max(scores, default=-1)
+        return IconMatch(category_id, self.node_labels[category_id], round(score, 4), 0.0) if score >= .60 else None
 
     def detect_marks(self, image: np.ndarray, pixel: tuple[float, float], step: float, *,
                      area: str | None = None, floor: int | None = None) -> list[dict[str, object]]:

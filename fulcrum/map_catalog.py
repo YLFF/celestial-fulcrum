@@ -6,7 +6,7 @@ from pathlib import Path
 from .map_model import MapTemplate
 
 
-DEFAULT_TEMPLATES = Path(__file__).resolve().parents[1] / "data" / "blackstream_map_templates.json"
+DEFAULT_TEMPLATES = Path(__file__).resolve().parents[1] / "data" / "blackflow_map_templates.json"
 
 
 class TemplateCatalog:

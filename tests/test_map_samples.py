@@ -130,6 +130,61 @@ class ArchivedMapSamplesTests(unittest.TestCase):
         self.assertGreater(nodes["1,1"].category_score, .8)
         self.assertEqual(nodes["-1,-1"].category_id, "node_type_020")
 
+    def test_low_contrast_second_floor_map_and_node_categories(self) -> None:
+        result = self.recognizer.recognize(SAMPLES / "desktop_floor2_lookout_revealed.png", difficulty=5)
+        self.assertTrue(result.success)
+        self.assertEqual(result.template_id, "floor-2-04")
+        self.assertEqual(len(result.nodes), 19)
+        self.assertEqual(result.match_quality["coverage"], 1.0)
+        self.assertFalse(result.match_quality["clippedNodeIds"])
+        by_coord = {node.coord.key: node for node in result.nodes}
+        expected = {
+            "-2,3": "node_type_020", "-2,2": "node_type_001", "-2,1": "node_type_006",
+            "-2,0": "unknown_mystery", "-1,3": "node_type_007", "-1,2": "node_type_018",
+            "-1,1": "node_type_020", "-1,0": "node_type_020", "0,3": "node_type_008",
+            "0,2": "node_type_020", "0,1": "node_type_001", "0,0": "start",
+            "1,3": "unknown_mystery", "1,2": "node_type_009", "1,1": "node_type_020",
+            "2,3": "unknown_mystery", "2,2": "node_type_015", "2,1": "unknown_ferocity",
+            "2,0": "unknown_mystery",
+        }
+        self.assertEqual({key: node.category_id for key, node in by_coord.items()}, expected)
+        self.assertEqual(result.player_position_observation["status"], "recognized")
+        self.assertEqual(result.player_position_observation["nodeId"], "0,0")
+        self.assertTrue(all(not node.marks for node in result.nodes))
+
+    def test_text_first_fourth_floor_with_highlights_and_two_exits(self) -> None:
+        result = self.recognizer.recognize(SAMPLES / "desktop_floor4_two_exits.png", difficulty=5)
+        self.assertTrue(result.success)
+        self.assertEqual(result.template_id, "floor-4-11")
+        expected = {
+            "-6,1": "unknown_mystery", "-6,0": "node_type_014", "-6,-1": "node_type_005",
+            "-5,1": "node_type_015", "-5,0": "node_type_001", "-5,-1": "node_type_018", "-5,-2": "node_type_004",
+            "-4,1": "unknown_mystery", "-4,0": "node_type_008", "-4,-1": "node_type_002", "-4,-2": "node_type_015",
+            "-3,1": "unknown_mystery", "-3,0": "node_type_020", "-3,-2": "node_type_020", "-3,-3": "unknown_ferocity",
+            "-2,0": "node_type_001", "-2,-1": "unknown_mystery", "-2,-2": "node_type_020", "-2,-3": "node_type_019",
+            "-1,1": "node_type_011", "-1,0": "node_type_020", "-1,-1": "node_type_020", "-1,-2": "node_type_020", "-1,-3": "unknown_mystery",
+            "0,1": "node_type_014", "0,0": "start", "0,-1": "node_type_006", "0,-2": "node_type_013", "0,-3": "node_type_020",
+            "1,1": "node_type_020", "1,0": "node_type_017", "1,-1": "node_type_020",
+        }
+        self.assertEqual({node.coord.key: node.category_id for node in result.nodes}, expected)
+        self.assertEqual(result.player_position_observation["nodeId"], "-1,0")
+        self.assertGreaterEqual(result.node_text_observation["acceptedCount"], 10)
+        self.assertTrue(all(node.completion == "unknown" for node in result.nodes))
+
+    def test_treehole_question_mark_with_merged_dot_and_highlighted_choice(self) -> None:
+        result = self.recognizer.recognize(SAMPLES / "desktop_treehole_single_row.png", difficulty=5)
+        self.assertTrue(result.success)
+        self.assertEqual(result.area, "treehole")
+        self.assertIsNone(result.floor)
+        self.assertEqual(result.template_id, "treehole-08")
+        self.assertEqual({node.coord.key: node.category_id for node in result.nodes}, {
+            "0,0": "start", "1,0": "node_type_011", "2,0": "unknown_mystery",
+            "3,0": "unknown_mystery", "4,0": "unknown_mystery", "5,0": "node_type_020",
+        })
+        self.assertEqual(result.player_position_observation["nodeId"], "0,0")
+        choice = next(node for node in result.nodes if node.coord.key == "1,0")
+        self.assertEqual(choice.category_source, "text_and_icon")
+
     def test_blank_lattice_does_not_guess_player(self) -> None:
         nodes = [MapNode(Coord(0, 0), (0, 0), (60, 60)), MapNode(Coord(1, 0), (1, 0), (160, 60))]
         observed = recognize_player_position(np.zeros((240, 300, 3), dtype=np.uint8), nodes)

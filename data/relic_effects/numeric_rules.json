@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 1,
+  "source": "用户校准 2026-10-11；难度阶段对照PRTS多元化展现",
+  "combatAggregation": {
+    "source": "https://arkrog.com/tool",
+    "implementationStatus": "backend_combat_summary",
+    "flatTermsBeforePercentages": true,
+    "percentageTermsWithinZone": "sum",
+    "independentZones": "multiply",
+    "finalRounding": "floor_once_when_base_provided",
+    "insideBattleStages": "not_subdivided",
+    "groups": {
+      "outside_attribute": "科技与同一对象、同一指标的局外属性百分比先加算；固定增减在百分比之前处理",
+      "enemy_damage_taken_bonus": "物理、法术、真实易伤按各伤害类型在同一组内加算，不混入脆弱或其他增伤区",
+      "relic_factor": "未调整的独立因子保留乘算；不能仅因同指标就改为加算",
+      "enemy_difficulty_floor": "逐个计入区域的难度因子叠乘",
+      "dystopia": "范围条件满足时独立应用实托邦因子"
+    },
+    "note": "先筛选对象和条件，再合并同组。汇总保留multiplicationZones；不计算干员基础属性、技能、天赋或模组。"
+  },
+  "dynamicCurves": {
+    "hp_ratio": {
+      "startHpRatio": 1,
+      "startValue": 0,
+      "maximumAtHpRatio": 0.3,
+      "interpolation": "linear",
+      "clampBelowMaximumHpRatio": true,
+      "aggregation": "separate",
+      "note": "热辣可可与止痛片保留函数词条，不合并为固定攻击或技力数值"
+    }
+  },
+  "spRecovery": {
+    "maintainOperatorSkillRecoveryType": false,
+    "channels": {
+      "natural": {
+        "base": 1,
+        "unit": "sp_per_second"
+      },
+      "attack": {
+        "base": 1,
+        "unit": "sp_per_attack"
+      },
+      "being_hit": {
+        "base": null,
+        "unit": "sp_per_hit",
+        "note": "本轮未指定受击回复基础值，不擅自补数"
+      }
+    },
+    "mergeAcrossChannels": false,
+    "universalMetrics": [
+      "skill_sp_cost",
+      "skill_auto_activation",
+      "direct_sp_grant"
+    ],
+    "note": "按藏品词条区分适用回复类型；直接给予技力不是改变回复速率，不与自然/攻击/受击速率混算"
+  },
+  "squadCapacity": {
+    "maximum": 13,
+    "settlement": "acquisition_event",
+    "revokeOnLoss": false
+  },
+  "deploymentCapacity": {
+    "settlement": "initial_plus_upgrades_plus_current_held_relics",
+    "revokeOnLoss": true,
+    "maximum": null
+  },
+  "barrier": {
+    "operation": "sum_actual_granted_values",
+    "note": "每次按当时最大生命等条件计算授予数值，再加算；不同于按次数阻挡伤害的护盾层数"
+  },
+  "structuralStages": [
+    {
+      "maximumDifficulty": 2,
+      "stage": "structured"
+    },
+    {
+      "maximumDifficulty": 5,
+      "stage": "semi_structured"
+    },
+    {
+      "maximumDifficulty": 8,
+      "stage": "unstructured"
+    },
+    {
+      "maximumDifficulty": null,
+      "stage": "chaotic"
+    }
+  ],
+  "structuralStageSource": "https://prts.wiki/w/沉沦者的黑流树海#开始探索",
+  "evasion": {
+    "strategy": "complement_product",
+    "formula": "1-product(1-p_i)",
+    "probabilityUnit": "fraction",
+    "separateDamageTypes": true,
+    "resolveConditionsBeforeCombining": true,
+    "implementationStatus": "backend_combat_summary"
+  },
+  "vulnerability": {
+    "strategy": "same_name_ratio_sum",
+    "multiplier": "1+sum(ratios)",
+    "multiplicationZone": "vulnerability",
+    "independentOfOtherDamageZones": true,
+    "separateDamageTypes": true,
+    "maintainOperatorSkillEffects": false,
+    "implementationStatus": "backend_combat_summary"
+  },
+  "randomBattleRecipient": {
+    "relicIds": [
+      "relic_061",
+      "relic_197"
+    ],
+    "timing": "each_battle_start",
+    "candidates": "in_squad",
+    "count": 1,
+    "sharedRecipientWithinRelic": true,
+    "persistBinding": false,
+    "maintainActualRecipient": false,
+    "display": "conditional_not_global_total",
+    "implementationStatus": "backend_combat_summary"
+  },
+  "currentCounters": {
+    "countSource": "maintained_current_state",
+    "predictFutureGrowth": false,
+    "rule": "initial_plus_per_stack_times_current_count",
+    "outsideBattlePercentResolution": "先按当前层数计算单件增量，再与对象、指标和条件相容的同组局外百分比加算；不同乘区才叠乘，不逐层乘算，不假定随机受益者或条件相同。",
+    "relicOverrides": {
+      "relic_035": {
+        "initialCount": 1,
+        "minimum": 1,
+        "maximum": 7,
+        "countFirstMainLayer": true,
+        "countRecollectionFloor4": false,
+        "countFirstTreehole": true,
+        "countLaterTreeholes": false
+      },
+      "relic_197": {
+        "initialRatio": 0.05,
+        "perStackRatio": 0.05,
+        "maximumStacks": 10
+      },
+      "relic_218": {
+        "initialRatio": 0.02,
+        "perStackRatio": 0.002,
+        "maximumTotalRatio": 2
+      },
+      "relic_212": {
+        "countingUnit": "shop_entry",
+        "countRepeatedNodeVisits": true,
+        "transformAt": 2
+      }
+    },
+    "implementationStatus": "backend_combat_summary"
+  },
+  "descriptionOnly": {
+    "relicIds": [
+      "relic_036",
+      "relic_134",
+      "relic_211",
+      "relic_229"
+    ],
+    "displayNullAsNumber": false,
+    "excludeFromNumericTotals": true,
+    "implementationStatus": "backend_combat_summary"
+  },
+  "distanceEffects": {
+    "relicIds": [
+      "relic_098",
+      "relic_099"
+    ],
+    "quantifyDistance": false,
+    "maximumDamageIncreaseRatio": 1,
+    "mergeOnlySameDirectionAndConditions": true,
+    "noOtherSameKindEffectsInCurrentCatalog": true,
+    "includeMaximumInConstantTotals": false,
+    "implementationStatus": "backend_combat_summary"
+  },
+  "pursuitActionPoints": {
+    "owner": "region_transition_rule",
+    "condition": "previous_region_completed_pursuit",
+    "notRelicEffect": true,
+    "relicId": "relic_142",
+    "implementationStatus": "design_only_no_transition_changes"
+  }
+}

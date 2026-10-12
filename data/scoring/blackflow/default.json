@@ -1,0 +1,155 @@
+{
+  "schemaVersion": 1,
+  "name": "沉沦者手册 · 默认评分",
+  "description": "当前应用实际使用的默认权重。修改后重启生效；玩家自选模板与编辑界面尚未开放。游戏规则和奖励数量不属于权重。",
+  "parameterNotes": {
+    "usage": "本节仅供阅读，不参与计算。下面同名配置字段才是实际参数；数值调高通常会提高对应收益的节点分和路线吸引力，不改变游戏奖励。修改后重启应用或服务；Playtime中的局内覆盖项优先生效。",
+    "resources": {
+      "relicPoints": "普通随机藏品的基础价值，也用于尚未按特定池细分的藏品收益；特定藏品池的分数另见relics.json。",
+      "cashPoints": "每点源石锭的资源分，影响战斗、事件现金收益及现金损失参考分；两种商店另有机会价值参数。",
+      "completeSixStarPoints": "培养一名完整体六星所需希望的价值标尺，结合分队招募与进阶费用折算希望和经验。当前只在战力不够且希望缺口大于0时给经验得分；强制不够不会自动增加人数或希望缺口。",
+      "belowThresholdFactor": "战力不够时提高有价值的经验及招募券分；没有希望缺口时，经验原本为0，增加此系数也不会产生基础分。",
+      "exitHopePointFloor": "险路尽头离层时，每点剩余行动力转换为希望的最低分；即使战力已够也保留此分，以区分直接离层与无收益绕路。",
+      "carryAPPoints": "险路小径将剩余行动力带到下一层的基础价值；本层核心节点尚未走完时还受小径折扣影响。",
+      "lifePoints": "生命资源的预留参数，当前没有接入独立的生命收益评分；只改此值不会启用生命计分。",
+      "shieldPoints": "护盾资源的预留参数，当前没有接入独立的护盾收益评分；只改此值不会启用护盾计分。"
+    },
+    "teamThresholds": "按一至六层依次设置参考门槛。现行函数式判定仅使用每行第三项作为战力目标；前两项保留作旧版校准数据，不参与判定。树洞按所属主层，追忆按四层。",
+    "dualSquadThresholdAdditions": "旧版人数门槛的校准资料，不再参与现行函数式自动战力判定。",
+    "teamPower": "常驻干员按星级与是否进阶折算人数，再乘当前全体干员已生效的局外生命、局内生命、局外攻击、局内攻击四个倍率；应急助力不计入。限定范围、未确认及技能触发效果不视作全体常驻倍率，实托邦和乌托邦也不纳入。战力缺口换算为完整体六星等效数量，再结合分队希望费用估计培养缺口；强制不够不额外制造缺口。",
+    "components": {
+      "fixedPoints": "自然物、概念体和种子的单件基础分。各零件名称见componentNames；提高某项会提高包含该物品的奖励池及节点的期望分，不等于调整它的游戏估价。",
+      "movementPoints": "加工品每次使用的移动价值，结合剩余次数及额外行动力估分；影响获取加工品的奖励收益，不直接改变已有加工品的合法移动范围。",
+      "actionUnitPoints": "离线校准加工品价值时的固定行动力单价；实际地图评分中的额外行动力按当前地图尚余节点价值估算，不固定使用本值。",
+      "sameItemFactorIncrement": "已持有同类零件时，每件对下一件同类奖励增加的收益系数，仅作用于synergyIds指定的种类。",
+      "synergyIds": "启用同类累加收益的零件名单；未列出的零件不会因为持有多件而自动提高获取分。"
+    },
+    "componentNames": {
+      "component_001": "种子", "component_002": "血蕈", "component_003": "雾滚草", "component_004": "回声玉米",
+      "component_005": "浪花", "component_006": "霜晶树", "component_007": "多生苔藓", "component_008": "枯苔藓球",
+      "component_009": "板藤", "component_010": "恋家果", "component_011": "光彩松露", "component_012": "笼控器",
+      "component_013": "报废轮子", "component_014": "报废假肢", "component_015": "标准引擎", "component_016": "重弹簧",
+      "component_017": "气垫底座", "component_018": "试作外骨骼", "component_019": "小八界", "component_020": "一次性喷气背包",
+      "component_021": "老妈妈的融雪", "component_022": "坎诺特的触须", "component_023": "结构性原理", "component_024": "“简易遥控器”",
+      "component_025": "白模鸟", "component_026": "白模狗", "component_027": "白模鱼", "component_028": "涂装黎博利",
+      "component_029": "涂装佩洛", "component_030": "涂装阿戈尔"
+    },
+    "tickets": {
+      "ordinaryPoints": "普通单职业招募券的基准分；其他券种和特殊需求在这个基准上增加权重。",
+      "homeFactor": "四个双职业战术分队的本家单职业券及对应协议券加成，其他职业队不自动适用。",
+      "mechanistHeavyFactor": "机械师尚未招募或尚未进阶时，仍需使用的前若干张重装券加成；机械师状态改变后重新计算。",
+      "temporarySixStarFactor": "临时中介所获得随机临时招募六星时，相对于普通招募券的价值倍数。",
+      "duelTemporaryElitePoints": "狭路相逢高档奖励里的临时招募干员参考分；战力不够时还使用战力不足加成。",
+      "weights": "按券名称调整相对普通券的价值；复合职业、资深、直升等区别在此表中体现，可与本家及战力不足系数共同生效。"
+    },
+    "events": {
+      "delayDiscount": "先行一步等事件中，下层才兑现的希望和加工品的折扣；提高后更重视延迟发育。",
+      "dispatchPromotionFactor": "先行一步普通派遣的进阶价值倍数；固定使用战力不足的招募参考分，不随当前是否达标取消。",
+      "exchangeOpportunityPoints": "普通失与得的交换机会价值；作为结局上贡时不保留此普通交换分。",
+      "hopefulSoilOpportunityPoints": "呼吸的红苔在满足条件时，获取下一层希望的沃土的机会分；需消耗种子时另扣种子的价值。",
+      "remembrancePoints": "能合法获取追忆时的价值，事件会与其他合法选项比较并采用最高分。",
+      "eventRelicScores": "指定事件的藏品奖励覆盖分：encounter_006为血衣之下，encounter_007为擒与缚。",
+      "extraScores": "按事件ID额外加分或减分，用来校准资源奖励之外的特殊事件偏好；不会修改事件的出现概率。",
+      "emptyEventPenaltyPoints": "事件无法取得奖励时的额外惩罚；null表示尚未定值，当前保留缺项而不是假定惩罚为0。",
+      "contractLowValuePenaltyPoints": "低剩余收益树洞中沉重的契约的惩罚预留项；当前尚未接入条件判定，仅改数值不会自动生效。",
+      "safeCorner": {
+        "advancedSupplyWithElite1Points": "存在未进阶六星时，安全的角落高级物资配给券选项的价值。",
+        "advancedSupplyOtherwisePoints": "没有未进阶六星时，该配给券选项的价值。",
+        "boxCapacityPoints": "安全的角落增加零件箱容量选项的价值；当前不随零件箱空余格数折抵。"
+      }
+    },
+    "merchants": {
+      "yellowPointsPerEconomy": "秘境行商对现金加估价的机会价值强度；越大越倾向在有经济时进入，达到封顶后不再增长。",
+      "yellowMaxPoints": "秘境行商首次进入机会分的上限，不限制实际消费或可获得零件数量。",
+      "greenLogScale": "诡意行商基础机会分的整体强度；提高后相同可用经济的商店分更高。",
+      "greenLogOffset": "诡意行商基础机会分的增长速度调节；相同经济下调大后增长更缓，调小后低经济阶段增长更快。",
+      "defaultReserve": "未在Playtime中设置时的预留源石锭默认值。只从诡意行商的经济入参中扣除，不降低秘境行商分，不改变不期而遇按实际现金判断的条件。",
+      "repeatFallbackFactor": "未传入具体货柜状态时重复商店的后备比例；实际路径搜索优先按每个节点已查看货柜面数计算剩余比例。",
+      "withdrawalCashPoints": "诡意行商本次可取钱额的独立单价；不受货柜剩余比例影响，也不因预留金额扣成0。"
+    },
+    "information": {
+      "revealCoefficient": "首次揭示未知节点的信息价值比例；提高后更偏好开视野，同一条路线不会反复奖励同一次揭示。",
+      "pathStepIngotExpectation": "每次移动增加的预测现金，用于后续商店等经济预测；不会写回实际现金，也不直接当作每步的资源加分。"
+    },
+    "exits": {
+      "treeholeEntryAPProxy": "误入奇境的暂用收益标尺，以获得若干本层行动力的期望价值衡量；不会给当前搜索增加真实可执行行动力。",
+      "pathCarryDeficitPenalty": "险路小径在本层行动力不足以覆盖剩余核心节点时的携带价值折扣力度；越大越不倾向过早离层。",
+      "finalBattlePoints": "六层终战当前无奖励的默认分；未来奖励规则改变时再更新，不影响终点的合法性。"
+    },
+    "overlays": {
+      "fruitMark": {
+        "contextId": "藏果地的零件奖励池，池内统计频次决定期望收益。",
+        "cashEquivalents": "对板藤、恋家果、光彩松露暂用的源石锭等价值，只覆盖藏果地奖励估分，不改变零件箱中的实际估价。"
+      },
+      "utopiaCash": "树洞增益乌托邦在符合类别的节点附加现金收益；utopia_007为通用现金收益，utopia_009只作用于配置的失与得类别。",
+      "hopefulSoil": {
+        "ideologyId": "希望的沃土实托邦类型标识，用于匹配现有规则，不是权重。",
+        "componentContextId": "沃土覆盖范围内战斗、居民和派生战斗等额外零件奖励使用的池。",
+        "componentCount": "这些合格场景附加零件收益的数量；自然物每步估价增长另按游戏规则计算。"
+      },
+      "unconfirmedTreeholeBattle": {
+        "entryLayerProbability": "树洞未知战斗按进入层奖励估分的暂用占比。",
+        "nextLayerProbability": "树洞未知战斗按下一层奖励估分的暂用占比；两项需合计为1。"
+      }
+    },
+    "search": {
+      "defaultTopN": "每次规划默认显示的路线数；显示更多路线不等于扩大搜索上限。",
+      "defaultMaxStates": "默认最多展开的搜索状态数；调高可能找到更好路线，但耗时和内存增加，达到上限时不保证全局最优。",
+      "scoreScale": "搜索内部表示分数的精度；调高可区分更小的分差，可能增加需保留的状态，不改变页面分数的资源标尺。",
+      "defaultMode": "target为日常使用的目的节点合并搜索，reference为保留较多原始移动分支的对照模式；都受搜索上限限制。",
+      "allocationDominance": "是否剔除已验证不会比其他方案更好的加工品分配；开启可减少重复状态，关闭主要用于对照排查。"
+    },
+    "policies": "下面的policies是当前算法边界的说明，不是可执行公式；修改说明文字本身不会改变搜索行为。"
+  },
+  "resources": {"relicPoints": 100, "cashPoints": 8, "completeSixStarPoints": 500, "belowThresholdFactor": 1.25, "exitHopePointFloor": 10, "carryAPPoints": 200, "lifePoints": 0, "shieldPoints": 0},
+  "teamThresholds": [[0, 0, 0], [1, 2, 5], [2, 4, 6], [3, 6, 8], [5, 8, 10], [7, 9, 13]],
+  "teamPower": {"operatorWeights": {"6": {"promoted": 1, "unpromoted": 0.7}, "5": {"promoted": 0.5, "unpromoted": 0.3}, "other": {"promoted": 0.2, "unpromoted": 0.2}}},
+  "dualSquadThresholdAdditions": {"2": [1, 1, 0], "3": [1, 2, 0]},
+  "components": {
+    "fixedPoints": {"component_001": 250, "component_002": 125, "component_003": 150, "component_004": 500, "component_005": 150, "component_006": 250, "component_007": 200, "component_008": 15, "component_009": 2000, "component_010": 200, "component_011": 250, "component_012": 250, "component_025": 125, "component_026": 100, "component_027": 25, "component_028": 10, "component_029": 250, "component_030": 500},
+    "movementPoints": {"component_013": 10, "component_014": 10, "component_015": 10, "component_016": 20, "component_017": 20, "component_018": 15, "component_019": 20, "component_020": 100, "component_021": 50, "component_022": 40, "component_023": 100, "component_024": 10},
+    "actionUnitPoints": 200,
+    "sameItemFactorIncrement": 0.05,
+    "synergyIds": ["component_004", "component_006", "component_007", "component_029", "component_030"]
+  },
+  "tickets": {
+    "ordinaryPoints": 50,
+    "homeFactor": 1.5,
+    "mechanistHeavyFactor": 3,
+    "temporarySixStarFactor": 2,
+    "duelTemporaryElitePoints": 75,
+    "weights": {"先锋招募券": 1, "近卫招募券": 1, "重装招募券": 1, "狙击招募券": 1, "术师招募券": 1, "医疗招募券": 1, "辅助招募券": 1, "特种招募券": 1, "突击协议招募券": 1.5, "堡垒协议招募券": 1.5, "远程协议招募券": 1.5, "破坏协议招募券": 1.5, "前线统合招募券": 2, "后方协调招募券": 2, "高级人事调度函": 3.5, "前线统合资深招募券": 2.5, "后方协调资深招募券": 2.5, "高级人事资深招募券": 4, "精英突击招募券": 3, "精英堡垒招募券": 3, "精英远程招募券": 3, "精英破坏招募券": 3}
+  },
+  "events": {
+    "delayDiscount": 0.7,
+    "dispatchPromotionFactor": 1.5,
+    "exchangeOpportunityPoints": 200,
+    "hopefulSoilOpportunityPoints": 600,
+    "remembrancePoints": 1000,
+    "eventRelicScores": {"encounter_006": 200, "encounter_007": 150},
+    "extraScores": {},
+    "emptyEventPenaltyPoints": null,
+    "contractLowValuePenaltyPoints": null,
+    "safeCorner": {"advancedSupplyWithElite1Points": 150, "advancedSupplyOtherwisePoints": 75, "boxCapacityPoints": 100}
+  },
+  "merchants": {"yellowPointsPerEconomy": 30, "yellowMaxPoints": 1000, "greenLogScale": 301.87354704659674, "greenLogOffset": 21.28357517084065, "defaultReserve": 0, "repeatFallbackFactor": 0.8, "withdrawalCashPoints": 8},
+  "information": {"revealCoefficient": 0.2, "pathStepIngotExpectation": 1},
+  "exits": {"treeholeEntryAPProxy": 3, "pathCarryDeficitPenalty": 0.2, "finalBattlePoints": 0},
+  "overlays": {
+    "fruitMark": {"contextId": "pool_scrap_7", "cashEquivalents": {"component_009": 50, "component_010": 24, "component_011": 32}},
+    "utopiaCash": {"utopia_007": {"ingots": 10}, "utopia_009": {"ingots": 5, "categoryId": "node_type_008"}},
+    "hopefulSoil": {"ideologyId": "dystopia_008", "componentContextId": "hopeful_fruits", "componentCount": 1},
+    "unconfirmedTreeholeBattle": {"entryLayerProbability": 0.5, "nextLayerProbability": 0.5}
+  },
+  "search": {"defaultTopN": 5, "defaultMaxStates": 50000, "scoreScale": 20, "defaultMode": "target", "allocationDominance": true},
+  "policies": {
+    "actionValue": "冻结当前节点队列，不包含揭示分，不递归计入行动力奖励；不追猎预留一步离层。",
+    "ordinaryConditions": "节点类别、事件分布及普通奖励条件按确认快照估算；商店经济沿路线预测更新。",
+    "prerequisites": "本层用户选择的目标参与软优先与相关性筛选；指定上贡的损失仅展示参考，但扣减预测商店经济。",
+    "merchantForecast": "到店先取钱并计分，预测现金和估价归零；货柜余量、取钱预算保留。未知商店按概率加权更新平均经济。",
+    "selection": "玩家可选分支取最高分合法选项；随机二选一来自同池的不同物品，缺少联合样本时按经验权重依次不放回抽取，再取较高分。安全角落的同次菜单候选不重复，十种组合等概率是建模假设，不代表整局不能重复节点。",
+    "movement": "按目的节点合并路线，保留影响未来可达性、腾空和资源副作用的库存方案；同耗优先徒步，其次按加工品使用规则。",
+    "terminal": "树洞强制返回主层无额外奖励；当前六层终战直接结算，无奖励。",
+    "scope": "权重不会改写实际Playtime。追猎、结局目标、本层留钱、门槛强制判定仍是局内设置，不属于高级评分模板。"
+  }
+}

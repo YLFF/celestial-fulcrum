@@ -82,11 +82,14 @@ def _connector_circles(gray: np.ndarray, offset: tuple[int, int]) -> list[Circle
 
 
 def detect_circles(
-    image: np.ndarray, viewport: tuple[int, int, int, int] | None = None
+    image: np.ndarray, viewport: tuple[int, int, int, int] | None = None,
+    *, enhance_contrast: bool = False,
 ) -> list[Circle]:
     height, width = image.shape[:2]
     x0, y0, x1, y1 = viewport or (0, 0, width, height)
     gray = cv2.cvtColor(image[y0:y1, x0:x1], cv2.COLOR_BGR2GRAY)
+    if enhance_contrast:
+        gray = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(16, 16)).apply(gray)
     gray = cv2.GaussianBlur(gray, (7, 7), 1.5)
     found = cv2.HoughCircles(
         gray,

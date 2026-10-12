@@ -9,8 +9,8 @@ from reference_catalog import CATEGORY_ORDER, id_number, normalized_name
 
 ROOT = Path(__file__).resolve().parents[1]
 CATALOG = ROOT / "data" / "lubiao_reference_catalog.json"
-ENCOUNTERS = ROOT / "data" / "blackstream_encounter_pool.json"
-DOCUMENT = ROOT / "BLACKSTREAM_REFERENCE.md"
+ENCOUNTERS = ROOT / "data" / "blackflow_encounter_pool.json"
+DOCUMENT = ROOT / "BLACKFLOW_REFERENCE.md"
 
 
 def main() -> None:

@@ -17,8 +17,9 @@ from scripts.export_encounter_weights import convert
 def context(area="III", *, options=None):
     playtime = new_playtime("utility-test")
     playtime["resources"].update(level=4, hope=30, originiumIngot=10, life={"current": 12, "max": 12})
-    return {**playtime, "areaKey": area, "options": {"teamCounts": {
-        "totalOperators": 13, "sixStars": 9, "elite2SixStars": 7}, **(options or {})}}
+    playtime["operators"] = [{"instanceId": f"test-{i}", "name": f"test-{i}", "source": "normal",
+        "rarity": 6 if i < 9 else 3, "elite": 2 if i < 7 else 1, "remainingBattles": None} for i in range(13)]
+    return {**playtime, "areaKey": area, "options": {**(options or {})}}
 
 
 class SnapshotScoringTests(unittest.TestCase):
@@ -78,7 +79,7 @@ class SnapshotScoringTests(unittest.TestCase):
         nodes = [{"id": "e", "categoryId": "node_type_015"}]
         a = SnapshotScorer(nodes, c, state(1))
         self.assertEqual(a.ticket_total, 350)
-        c["operators"].append({"name": "机械师", "source": "normal", "elite": 2, "rarity": 6, "remainingBattles": None})
+        c["operators"].append({"instanceId": "mechanist", "name": "机械师", "source": "normal", "elite": 2, "rarity": 6, "remainingBattles": None})
         b = SnapshotScorer(nodes, c, state(1))
         self.assertEqual(b.ticket_total, 150)
 
@@ -103,7 +104,7 @@ class SnapshotScoringTests(unittest.TestCase):
         self.assertNotIn("remainingHope", scorer.terminal("e", 0, pursuit=True)["parts"])
 
     def test_exit_hope_need_bonus_replaces_baseline_for_needed_portion(self):
-        c = context("II", options={"teamCounts": {"totalOperators": 1, "sixStars": 0, "elite2SixStars": 0},
+        c = context("II", options={"teamThresholdOverride": "insufficient",
                                    "hopeDeficit": 2})
         scorer = SnapshotScorer([{"id": "e", "categoryId": "node_type_015"}], c, state(4))
         self.assertEqual(scorer.terminal("e", 3, pursuit=False)["parts"]["remainingHope"], 110)

@@ -12,7 +12,7 @@ from .diagnostics import message
 
 ROOT = Path(__file__).resolve().parents[1]
 PREDICTION_DATA_PATH = ROOT / "data" / "lubiao_prediction_data.json"
-TEMPLATES_PATH = ROOT / "data" / "blackstream_map_templates.json"
+TEMPLATES_PATH = ROOT / "data" / "blackflow_map_templates.json"
 FLOORS = ("I", "II", "III", "IV", "V")
 MYSTERY_TYPES = (
     "encounter", "wish", "first-step", "rogue-trader", "secret-trader", "safe-corner",

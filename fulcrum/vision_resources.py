@@ -294,6 +294,9 @@ class HudRecognizer:
                 if currency["status"] == "recognized":
                     parsed = {"value": currency["value"]}
                     status = "recognized"
+                elif parsed is None and currency["status"] == "needs_review":
+                    parsed = {"value": currency["value"]}
+                    status = "needs_review"
                 elif parsed and currency["digitCount"] and len(str(parsed["value"])) != currency["digitCount"]:
                     parsed = {"value": currency["value"]}
                     status = "needs_review" if parsed["value"] is not None else "unreadable"

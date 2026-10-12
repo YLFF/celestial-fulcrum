@@ -1,4 +1,4 @@
-"""Stable IDs and reconciliation for the local Blackstream catalog."""
+"""Stable IDs and reconciliation for the local Blackflow catalog."""
 
 from collections import defaultdict
 import re

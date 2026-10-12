@@ -45,7 +45,7 @@ open dist/CelestialFulcrum.app
 
 该测试包只有本地 ad-hoc 签名，没有公证。如果你自己构建的文件仍被系统拦截，在“系统设置 → 隐私与安全性”中检查并允许这份你信任的应用，不需要关闭全局安全设置。
 
-应用使用 macOS 自带 WebKit；用户运行这个完整 `.app` 时不需要另外安装 Python、Node 或 OpenCV。不要只取出 `Contents/MacOS` 里的执行文件。存档、上传图片及日志位于 `~/Library/Application Support/Fulcrum`，不写进应用包，原来只有 `BlackFlow` 存档目录时继续兼容读取。
+应用使用 macOS 自带 WebKit；用户运行这个完整 `.app` 时不需要另外安装 Python、Node 或 OpenCV。不要只取出 `Contents/MacOS` 里的执行文件。新构建的存档、上传图片及日志位于 `~/Library/Application Support/CFARA`（`/Users/<用户名>/Library/Application Support/CFARA`），不写进应用包。旧版 `BlackFlow`、`Fulcrum` 存档目录不自动回退读取或迁移，请从旧版导出并手动导入；`--data-dir`、`CFARA_APP_DATA` 和旧显式环境变量仍可指定存储位置。
 
 首轮请检查新建/恢复对局、图片上传、识图预览与合并、节点概率和分数、路线规划、数据编辑、关闭再打开。**Mac 暂不支持 Windows 的进程/窗口截图功能，请用图片上传或拖入截图。** macOS 原生窗口和实际截图回归仍需在你的 Mac 上验证，Windows 上的测试不能替代这一步。
 
@@ -56,6 +56,6 @@ dist/CelestialFulcrum.app/Contents/MacOS/CelestialFulcrum \
   --window-test --data-dir work/macos-window-test --report work/macos-window-test.json
 ```
 
-构建失败时保留终端最后一段输出；启动失败查看 `~/Library/Application Support/Fulcrum/logs/desktop.log`。本材料不含你的实际对局、上传图片、开发环境或正在编辑的根目录 README。公开发布前还需处理数据授权、正式签名和公证，本轮不做。
+构建失败时保留终端最后一段输出；新构建启动失败查看 `~/Library/Application Support/CFARA/logs/desktop.log`。本材料不含你的实际对局、上传图片、开发环境或正在编辑的根目录 README。公开发布前还需处理数据授权、正式签名和公证，本轮不做。
 
 参考：[PyWebView macOS 安装要求](https://pywebview.flowrl.com/guide/installation)、[PyInstaller 各平台分别构建和 arm64 参数](https://pyinstaller.org/en/stable/usage.html)。

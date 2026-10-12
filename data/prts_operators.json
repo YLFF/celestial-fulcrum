@@ -3,7 +3,7 @@
   "sources": [
     {
       "url": "https://prts.wiki/w/%E5%B9%B2%E5%91%98%E4%B8%80%E8%A7%88",
-      "count": 431
+      "count": 434
     }
   ],
   "statsBasis": "PRTS干员一览展示的参考基础值，保留原始文本；不是本局当前精英化/等级/信赖/潜能/模组后的实际属性。",
@@ -8638,6 +8638,37 @@
       ]
     },
     {
+      "id": "char_393_toledo",
+      "name": "德·托莱多",
+      "code": "II13",
+      "englishName": "de Toledo",
+      "profession": "辅助",
+      "subprofession": "削弱者",
+      "position": "远程位",
+      "rarity": 5,
+      "stats": {
+        "hp": 1555,
+        "attack": 435,
+        "defense": 110,
+        "resistance": 25,
+        "redeploySeconds": 70,
+        "block": 1,
+        "attackIntervalSeconds": 1.6,
+        "deploymentCosts": [10, 12]
+      },
+      "rawStats": {
+        "hp": "1555",
+        "atk": "435",
+        "def": "110",
+        "res": "25",
+        "re-deploy": "70s",
+        "block": "1",
+        "interval": "1.6s",
+        "cost": "10→12"
+      },
+      "trustBonuses": [300, 35, 0]
+    },
+    {
       "id": "char_394_hadiya",
       "name": "哈蒂娅",
       "code": "SG28",
@@ -14483,6 +14514,68 @@
         60,
         60
       ]
+    },
+    {
+      "id": "char_4231_clemnt",
+      "name": "克莱门莎",
+      "code": "AE01",
+      "englishName": "Clementia",
+      "profession": "近卫",
+      "subprofession": "本源近卫",
+      "position": "近战位",
+      "rarity": 6,
+      "stats": {
+        "hp": 2720,
+        "attack": 920,
+        "defense": 371,
+        "resistance": 10,
+        "redeploySeconds": 70,
+        "block": 2,
+        "attackIntervalSeconds": 1.2,
+        "deploymentCosts": [19, 21, 23]
+      },
+      "rawStats": {
+        "hp": "2720",
+        "atk": "920",
+        "def": "371",
+        "res": "10",
+        "re-deploy": "70s",
+        "block": "2",
+        "interval": "1.2s",
+        "cost": "19→21→23"
+      },
+      "trustBonuses": [0, 110, 0]
+    },
+    {
+      "id": "char_4232_hbound",
+      "name": "旅骨",
+      "code": "II12",
+      "englishName": "Homebound",
+      "profession": "特种",
+      "subprofession": "炼金师",
+      "position": "远程位",
+      "rarity": 5,
+      "stats": {
+        "hp": 1160,
+        "attack": 461,
+        "defense": 100,
+        "resistance": 30,
+        "redeploySeconds": 80,
+        "block": 1,
+        "attackIntervalSeconds": 1.5,
+        "deploymentCosts": [15, 17, 19]
+      },
+      "rawStats": {
+        "hp": "1160",
+        "atk": "461",
+        "def": "100",
+        "res": "30",
+        "re-deploy": "80s",
+        "block": "1",
+        "interval": "1.5s",
+        "cost": "15→17→19"
+      },
+      "trustBonuses": [200, 30, 0]
     },
     {
       "id": "char_4234_pedro",

@@ -1,0 +1,1203 @@
+{
+  "schemaVersion": 1,
+  "status": "confirmed_not_connected",
+  "sampling": {
+    "method": "Python random.Random(20261012).sample(remaining_233_relics, 20)",
+    "seed": 20261012,
+    "source": "data/blackflow_relic_texts.json",
+    "excludedBatch": "calibration_10.json",
+    "eligibleCount": 233,
+    "note": "种子只是固定抽样标识，不代表生成日期；无重复，不按类别替换样本。"
+  },
+  "relics": [
+    {
+      "id": "relic_112",
+      "name": "“剑锤”",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 112,
+        "originalText": "所有干员的部署费用+3，但攻击力、防御力和生命+50%"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "112.cost",
+          "category": "combat",
+          "combatCategory": "cost",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "deployment_cost",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 3,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "112.attack",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.5,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "112.defense",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "defense",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.5,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "112.max_hp",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "max_hp",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.5,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "费用负面与攻击、防御、生命正面分开列出，不做净值抵消。"
+      ]
+    },
+    {
+      "id": "relic_003",
+      "name": "橙味风暴",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 3,
+        "originalText": "【结构化】可携带干员+1，所有我方单位的攻击力+1%\n【半结构化】可携带干员+1，所有我方单位的攻击力+3%\n【非结构化】可携带干员+1，所有我方单位的攻击力+5%\n【混沌化】可携带干员+1，所有我方单位的攻击力+7%"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": {
+        "kind": "structural_stage",
+        "options": [
+          "structured",
+          "semi_structured",
+          "unstructured",
+          "chaotic"
+        ],
+        "selection": "difficulty_from_numeric_rules"
+      },
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "003.squad",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "squad_capacity",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed",
+          "maximum": 13,
+          "revokeOnLoss": false
+        },
+        {
+          "id": "003.attack.structured",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.01,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "003.attack.semi_structured",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.03,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "semi_structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "003.attack.unstructured",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.05,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "unstructured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "003.attack.chaotic",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.07,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "chaotic"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "携带位获取后永久结算；战斗倍率只取当前难度对应的一档。"
+      ]
+    },
+    {
+      "id": "relic_213",
+      "name": "高级物联终端",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 213,
+        "originalText": "干员部署后与攻击范围内一名干员用高级物联终端连接，敌人触碰高级物联终端时停顿，每0.5秒受到所有相连的干员攻击力之和50%的法术伤害"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "213.slow",
+          "category": "combat",
+          "combatCategory": "control",
+          "domain": "inside_battle",
+          "target": {
+            "side": "enemy",
+            "metric": "sluggish",
+            "scope": {}
+          },
+          "operation": "mechanism",
+          "value": {
+            "durationSeconds": null
+          },
+          "stackingGroup": null,
+          "conditions": [
+            {
+              "field": "touches_operator_link",
+              "operator": "eq",
+              "value": true
+            }
+          ],
+          "trigger": "on_link_contact",
+          "lifetime": "while_contact",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "213.damage",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "inside_battle",
+          "target": {
+            "side": "enemy",
+            "metric": "extra_damage",
+            "scope": {
+              "damageType": "arts"
+            }
+          },
+          "operation": "grant",
+          "value": {
+            "basis": "sum_linked_operators_attack",
+            "ratio": 0.5,
+            "periodSeconds": 0.5
+          },
+          "stackingGroup": null,
+          "conditions": [
+            {
+              "field": "touches_operator_link",
+              "operator": "eq",
+              "value": true
+            }
+          ],
+          "trigger": "periodic_while_contact",
+          "lifetime": "while_contact",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "连接是伤害/停顿效果的生效条件，不另记机制词条；只显示条件，不维护连接对象、断线或接触状态。"
+      ]
+    },
+    {
+      "id": "relic_016",
+      "name": "蓝色丝巾",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 16,
+        "originalText": "希望+2，可携带干员+1"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "016.hope",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "hope",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 2,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "016.squad",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "squad_capacity",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed",
+          "maximum": 13,
+          "revokeOnLoss": false
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "relic_001",
+      "name": "精选兽肉罐头",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 1,
+        "originalText": "【结构化】可携带干员+1，所有我方单位每秒回复3点生命\n【半结构化】可携带干员+1，所有我方单位每秒回复5点生命\n【非结构化】可携带干员+1，所有我方单位每秒回复8点生命\n【混沌化】可携带干员+1，所有我方单位每秒回复10点生命"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": {
+        "kind": "structural_stage",
+        "options": [
+          "structured",
+          "semi_structured",
+          "unstructured",
+          "chaotic"
+        ],
+        "selection": "difficulty_from_numeric_rules"
+      },
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "001.squad",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "squad_capacity",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed",
+          "maximum": 13,
+          "revokeOnLoss": false
+        },
+        {
+          "id": "001.regen.structured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "hp_regeneration_per_second",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 3,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "001.regen.semi_structured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "hp_regeneration_per_second",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 5,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "semi_structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "001.regen.unstructured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "hp_regeneration_per_second",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 8,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "unstructured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "001.regen.chaotic",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "hp_regeneration_per_second",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 10,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "chaotic"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "生命回复是连续速率，不调用整数资源的向下取整；不是医疗治疗攻击倍率。"
+      ]
+    },
+    {
+      "id": "relic_014",
+      "name": "热水壶",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 14,
+        "originalText": "目标生命上限+2，希望+2"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "014.hp",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "objective_max_hp",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 2,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "014.hope",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "hope",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 2,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "即时资源类但维护类型为普通；目标生命上限不是干员最大生命。真实重新获得时可再次结算，重复OCR不是新获取事件。"
+      ]
+    },
+    {
+      "id": "relic_154",
+      "name": "医者-妙手",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 154,
+        "originalText": "所有【医疗】干员的攻击速度+70"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "154.aspd",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "attack_speed",
+            "scope": {
+              "profession": "医疗"
+            }
+          },
+          "operation": "flat_delta",
+          "value": 70,
+          "stackingGroup": "relic_additive",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "攻速为独立能力指标；医疗通常体现为治疗频率提升，不另编造一个治疗倍率重复计入。"
+      ]
+    },
+    {
+      "id": "relic_220",
+      "name": "支援地雷组",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 220,
+        "originalText": "每次战斗中携带3个干扰地雷"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "220.mines",
+          "category": "combat",
+          "combatCategory": "support",
+          "domain": "outside_battle",
+          "target": {
+            "side": "battle",
+            "metric": "support_item",
+            "scope": {
+              "item": "干扰地雷"
+            }
+          },
+          "operation": "grant",
+          "value": 3,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_battle_start",
+          "lifetime": "this_battle_inventory",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "每场携带3个，不是整局用完一次的藏品；地雷本体伤害、控制和使用条件留给支援道具定义。"
+      ]
+    },
+    {
+      "id": "relic_205",
+      "name": "林中小手",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 205,
+        "originalText": "立刻获得3个随机的普通自然物"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "205.natural",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "component",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": {
+            "count": 3,
+            "componentClass": "natural",
+            "pool": "random_ordinary_natural"
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "仅获取时授予自然物，不为此藏品生成持续战斗倍率；具体自然物池映射单独复用奖励池定义。"
+      ]
+    },
+    {
+      "id": "relic_146",
+      "name": "折戟-浴血",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 146,
+        "originalText": "所有【近卫】干员在攻击后获得2点技力"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "146.sp",
+          "category": "combat",
+          "combatCategory": "skill_cycle",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "direct_sp_grant",
+            "scope": {
+              "profession": "近卫"
+            }
+          },
+          "operation": "grant",
+          "value": 2,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "after_attack",
+          "lifetime": "instant",
+          "reviewStatus": "confirmed",
+          "notes": "每次攻击后直接给2技力，不等同于攻击回复速率+2；不与自然恢复速率混算。"
+        }
+      ],
+      "notes": [
+        "无需维护该干员选用技能的回复类型；直接给予技力独立展示。是否受技能期间技力锁等限制留给后续校准。"
+      ]
+    },
+    {
+      "id": "relic_182",
+      "name": "疗养礼品卡",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 182,
+        "originalText": "下一个招募或进阶的干员攻击速度+50"
+      },
+      "management": {
+        "kind": "one_shot",
+        "bindOperator": true,
+        "maxRecipients": 1,
+        "promotionEffect": false,
+        "autoPromote": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "182.aspd",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "bound_operator",
+            "metric": "attack_speed",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 50,
+          "stackingGroup": "relic_additive",
+          "conditions": [],
+          "trigger": "next_recruit_or_promote",
+          "lifetime": "granted_operator_buff",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "一次性触发后记为已使用，绑定一名受益干员；长期攻速效果仍保留，不自动进阶，也不能再次附魔。"
+      ]
+    },
+    {
+      "id": "relic_021",
+      "name": "玻璃小鸟",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 21,
+        "originalText": "希望+4，可携带干员+1"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "021.hope",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "hope",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 4,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "021.squad",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "squad_capacity",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed",
+          "maximum": 13,
+          "revokeOnLoss": false
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "relic_060",
+      "name": "洁白的舞鞋",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 60,
+        "originalText": "可以在低地部署远程位干员"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "060.deploy",
+          "category": "combat",
+          "combatCategory": "mechanism",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "allowed_deployment_tiles",
+            "scope": {
+              "position": "ranged"
+            }
+          },
+          "operation": "mechanism",
+          "value": {
+            "addTileType": "low_ground"
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "扩展可部署地形，不改变干员原近远程分类，也不转换成攻击、防御百分比。"
+      ]
+    },
+    {
+      "id": "relic_108",
+      "name": "传芳雕版",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 108,
+        "originalText": "干员开启弹药类技能后，每次造成伤害时，攻击力+2%（最多叠加30层）"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "108.atk",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.6,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "active_skill_type",
+              "operator": "eq",
+              "value": "ammo"
+            }
+          ],
+          "trigger": "after_damage_while_ammo_skill",
+          "lifetime": "ammo_skill_context",
+          "reviewStatus": "confirmed",
+          "aggregation": "separate",
+          "valueRole": "maximum_not_constant",
+          "valueRule": {
+            "kind": "descriptive_condition",
+            "description": "弹药技能开启后，每次伤害攻击+2%，最多30层",
+            "resolution": "display_only"
+          }
+        }
+      ],
+      "notes": [
+        "仅显示条件与单层/上限，不维护弹药、伤害次数、重置时间等战斗过程。"
+      ]
+    },
+    {
+      "id": "relic_047",
+      "name": "异铁小圆盾",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 47,
+        "originalText": "所有我方单位的防御力+15%"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "047.def",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "defense",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.15,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": []
+    },
+    {
+      "id": "relic_062",
+      "name": "药枚",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 62,
+        "originalText": "所有我方单位在部署时获得2层护盾"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "062.shields",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "damage_block_layers",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 2,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_deploy",
+          "lifetime": "until_layers_consumed",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "2层阻挡伤害护盾，不是按生命值计数的屏障；本轮的屏障数值加算规则不直接套用于该层数。"
+      ]
+    },
+    {
+      "id": "relic_153",
+      "name": "医者-自医",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 153,
+        "originalText": "所有【医疗】干员的技力恢复+0.3/秒"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "153.sp",
+          "category": "combat",
+          "combatCategory": "skill_cycle",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "sp_recovery_per_second",
+            "scope": {
+              "profession": "医疗",
+              "skillRecoveryType": "natural"
+            }
+          },
+          "operation": "flat_delta",
+          "value": 0.3,
+          "stackingGroup": "relic_additive",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "自然恢复基准1sp/秒，在适用自然恢复时为+0.3sp/秒；不能叠给攻击回复、受击回复，无需维护干员具体技能类型。"
+      ]
+    },
+    {
+      "id": "relic_238",
+      "name": "彩虹瓮",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 238,
+        "originalText": "每次敌人进入保护目标点时，使随机一名再部署中的单位当前再部署时间减为0"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "238.redeploy",
+          "category": "combat",
+          "combatCategory": "mechanism",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "remaining_redeployment_time",
+            "scope": {
+              "selection": "one_random_redeploying_operator"
+            }
+          },
+          "operation": "mechanism",
+          "value": {
+            "setTo": 0
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "enemy_enters_objective",
+          "lifetime": "instant",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "漏怪触发将一名正在再部署干员计时置零，不是全员再部署时间常驻-100%。"
+      ]
+    },
+    {
+      "id": "relic_236",
+      "name": "人事部铜印",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 236,
+        "originalText": "随机临时招募1名5星干员，且直接就是已进阶的状态"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "236.operator",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "operator",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": {
+            "count": 1,
+            "rarity": 5,
+            "recruitmentSource": "temporary",
+            "elite": 2,
+            "selection": "random"
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "获取事件招募一名随机、已进阶五星；精英化由实际干员记录维护，不将这件藏品视为持续攻速/攻击加成。"
+      ]
+    },
+    {
+      "id": "relic_063",
+      "name": "凯旋号角",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 63,
+        "originalText": "敌人受到的一次性晕眩、寒冷、冻结等异常效果影响时间提高75%"
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "063.cc",
+          "category": "combat",
+          "combatCategory": "control",
+          "domain": "outside_battle",
+          "target": {
+            "side": "enemy",
+            "metric": "status_duration",
+            "scope": {
+              "statusApplication": "discrete",
+              "explicitStatuses": [
+                "stunned",
+                "cold",
+                "frozen"
+              ]
+            }
+          },
+          "operation": "factor",
+          "value": 1.75,
+          "stackingGroup": "relic_factor",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": [
+        "只针对晕眩、寒冷、冻结三种明确异常，不扩展到其他状态。"
+      ]
+    }
+  ]
+}

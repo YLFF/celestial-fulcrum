@@ -3,15 +3,15 @@
 import os
 from pathlib import Path
 
+from .product import PROJECT
 LEGACY_TOKEN_HEADER = "X-Blackflow-Token"
 
 
 def configured_app_data(environ=None):
     values = os.environ if environ is None else environ
-    return values.get("FULCRUM_APP_DATA") or values.get("BLACKFLOW_APP_DATA")
+    return values.get("CFARA_APP_DATA") or values.get("FULCRUM_APP_DATA") or values.get("BLACKFLOW_APP_DATA")
 
 
 def default_data_directory(base):
     base = Path(base)
-    preferred, legacy = base / "Fulcrum", base / "BlackFlow"
-    return legacy if not preferred.exists() and legacy.is_dir() else preferred
+    return base / PROJECT["dataDirectoryName"]

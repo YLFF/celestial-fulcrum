@@ -173,7 +173,7 @@ class LocalRewardPoolTests(unittest.TestCase):
         self.assertIn("未列独立物品池；见节点效果", draft)
         self.assertIn("不是这两项占完整IV层藏品池的比例", draft)
         self.assertIn("| `component_013` | 报废轮子 |", draft)
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         reward_section = handbook.split("## 12. 节点奖励候选池与统计分布", 1)[1]
         ids = re.findall(r"(?m)^#### ([a-z_0-9]+) ", reward_section)
         self.assertEqual(len(ids), len(set(ids)))
@@ -213,7 +213,7 @@ class LocalRewardPoolTests(unittest.TestCase):
                 write_json(path, {})
             self.assertEqual(path.read_bytes(), before)
         result = subprocess.run([sys.executable, str(ROOT / "scripts/extract_lubiao_node_rewards.py"),
-                                 "--markdown-draft", str(ROOT / "BLACKSTREAM_REFERENCE.md")],
+                                 "--markdown-draft", str(ROOT / "BLACKFLOW_REFERENCE.md")],
                                 capture_output=True, text=True, encoding="utf-8")
         self.assertEqual(result.returncode, 2)
         self.assertIn("Manually maintained Markdown cannot be overwritten", result.stderr)

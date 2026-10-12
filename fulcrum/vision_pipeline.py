@@ -9,7 +9,8 @@ import numpy as np
 from .map_catalog import TemplateCatalog
 from .map_model import MapNode, MapResult, TemplateMatch
 from .vision_geometry import detect_circles, detect_map_viewport, match_templates, working_image, differing_edge_evidence
-from .vision_icons import IconMatcher
+from .vision_icons import IconMatch, IconMatcher
+from .vision_node_text import NodeLabelRecognizer
 from .vision_layer import recognize_layer
 from .vision_player import recognize_player_position
 from .vision_resources import HudRecognizer
@@ -43,9 +44,11 @@ def match_quality(match, viewport, observed_coverage=None):
 
 
 class MapRecognizer:
-    def __init__(self, catalog: TemplateCatalog | None = None, icons: IconMatcher | None = None) -> None:
+    def __init__(self, catalog: TemplateCatalog | None = None, icons: IconMatcher | None = None, *,
+                 use_node_text: bool = True) -> None:
         self.catalog = catalog or TemplateCatalog()
         self.icons = icons or IconMatcher()
+        self.node_text = NodeLabelRecognizer(self.icons.node_labels) if use_node_text else None
 
     def recognize(
         self,
@@ -114,6 +117,13 @@ class MapRecognizer:
                     circles.append(point)
         matches = match_templates(circles, candidates, (work.shape[1], work.shape[0]), image=work,
                                   refine_connectors=bool(dystopia.get("active")))
+        if not matches or matches[0].score < MIN_TEMPLATE_SCORE or matches[0].coverage < MIN_NODE_COVERAGE:
+            # Dark icon rims can disappear in grayscale; add contrast-enhanced evidence before rejecting the layout.
+            for circle in detect_circles(work, viewport, enhance_contrast=True):
+                if all(np.hypot(circle.x - old.x, circle.y - old.y) >= 12 for old in circles):
+                    circles.append(circle)
+            matches = match_templates(circles, candidates, (work.shape[1], work.shape[0]), image=work,
+                                      refine_connectors=bool(dystopia.get("active")))
         result.template_candidates = [match.summary() for match in matches[:5]]
         if not matches:
             result.warnings.append("未找到与截图节点布局匹配的地图模板；请上传完整地图。")
@@ -124,6 +134,32 @@ class MapRecognizer:
             if selected is None:
                 raise ValueError(f"当前区域没有可匹配的指定地图模板：{template_override}")
         classified = {}
+        text_observations = {}
+        if self.node_text is not None and selected.score >= .50 and not match_quality(selected, viewport)["clippedNodeIds"]:
+            positions = {selected.template.coord(slot).key: tuple(value / scale for value in selected.pixel_at(slot))
+                         for slot in selected.template.occupied_slots if slot != selected.template.start_slot}
+            result.node_text_observation = self.node_text.recognize(image, positions, selected.grid_step / scale,
+                                                                   result.map_viewport)
+            text_observations = result.node_text_observation["observations"]
+
+        def classify(slot):
+            if slot not in classified:
+                text = text_observations.get(selected.template.coord(slot).key)
+                if text and text.get("categoryId"):
+                    chosen = IconMatch(text["categoryId"], self.icons.node_labels[text["categoryId"]],
+                                       round(text["confidence"] / 100, 4), 0.0)
+                    classified[slot] = chosen, [chosen]
+                else:
+                    classified[slot] = self.icons.classify_node(work, selected.pixel_at(slot), selected.grid_step, circles,
+                                                               dystopia=bool(dystopia.get("active")))
+                    if text and text.get("candidateCategoryId") and text.get("confidence", 0) >= 50 and text.get("status") != "conflict":
+                        confirmed = self.icons.confirm_text_candidate(work, selected.pixel_at(slot), selected.grid_step,
+                                                                      text["candidateCategoryId"])
+                        if confirmed:
+                            text["confirmedByIcon"] = True
+                            classified[slot] = confirmed, [confirmed] + [item for item in classified[slot][1] if item.id != confirmed.id]
+            return classified[slot]
+
         supported = selected.matched_slots
         # Completed small nodes and irregular combat icons can escape circle detection.
         # Only image evidence supplements coverage, never a template's fixed-node hints.
@@ -132,7 +168,7 @@ class MapRecognizer:
                 pixel = selected.pixel_at(slot)
                 if any(np.hypot(pixel[0] - circle.x, pixel[1] - circle.y) <= min(20, selected.grid_step * .20) for circle in circles):
                     continue
-                classified[slot] = self.icons.classify_node(work, pixel, selected.grid_step, circles, dystopia=bool(dystopia.get("active")))
+                classify(slot)
                 if classified[slot][0] is not None:
                     supported += 1
         result.match_quality = match_quality(selected, viewport, supported / len(selected.template.occupied_slots))
@@ -208,8 +244,10 @@ class MapRecognizer:
                 node.category_name = self.icons.node_labels["start"]
                 node.category_score = 1.0
                 node.visibility = "revealed"
+                node.category_source = "template_start"
             else:
-                chosen, alternatives = classified[slot] if slot in classified else self.icons.classify_node(work, (wx, wy), selected.grid_step, circles, dystopia=bool(dystopia.get("active")))
+                node.text_observation = text_observations.get(coord.key)
+                chosen, alternatives = classify(slot)
                 node.category_candidates = [
                     {"id": item.id, "name": item.name, "score": item.score} for item in alternatives
                 ]
@@ -218,10 +256,13 @@ class MapRecognizer:
                     node.category_name = chosen.name
                     node.category_score = chosen.score
                     node.visibility = "hidden" if chosen.id.startswith("unknown_") else "revealed"
+                    node.category_source = ("text" if node.text_observation and node.text_observation.get("categoryId") else
+                                            "text_and_icon" if node.text_observation and node.text_observation.get("confirmedByIcon") else "icon")
                 elif node.template_hint in FIXED_NODE_TYPES and node.template_hint not in ambiguous_hints:
                     node.category_id = FIXED_NODE_TYPES[node.template_hint]
                     node.category_name = self.icons.node_labels[node.category_id]
                     node.review_reasons.append("category_from_template_not_image")
+                    node.category_source = "template_hint"
                 else:
                     node.review_reasons.append("category_ambiguous")
             node.marks = self.icons.detect_marks(work, (wx, wy), selected.grid_step, area=area, floor=floor)

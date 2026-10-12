@@ -1,4 +1,4 @@
-"""Extract relic names and effects from the PRTS blackstream catalog."""
+"""Extract relic names and effects from the PRTS blackflow catalog."""
 
 import argparse
 from datetime import datetime, timezone

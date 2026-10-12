@@ -73,8 +73,8 @@ def main() -> None:
         .replace("{{CREATED_AT}}", timestamp)
         .replace("{{UPDATED_AT}}", timestamp)
         .replace(
-            "(BLACKSTREAM_REFERENCE.md)",
-            f"({os.path.relpath(ROOT / 'BLACKSTREAM_REFERENCE.md', output_dir).replace(os.sep, '/')})",
+            "(BLACKFLOW_REFERENCE.md)",
+            f"({os.path.relpath(ROOT / 'BLACKFLOW_REFERENCE.md', output_dir).replace(os.sep, '/')})",
         )
     ) if TEMPLATE.is_file() else render_standalone(state)
     content = replace_runtime_sections(content, state)

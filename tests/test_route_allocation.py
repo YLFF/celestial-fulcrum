@@ -135,7 +135,7 @@ class RouteAllocationTests(unittest.TestCase):
 
     def test_terminal_cache_is_reset_when_confirmed_snapshot_changes(self):
         m = make_map([(0, 0, "start"), (1, 0, "node_type_001")], [("0,0", "1,0")])
-        c = context(options={"teamCounts": {"totalOperators": 0, "sixStars": 0, "elite2SixStars": 0}, "hopeDeficit": 20})
+        c = context(options={"teamThresholdOverride": "insufficient", "hopeDeficit": 20})
         planner = RoutePlanner(m)
         first = planner.plan(state(1, pursuit=True, scoringContext=c))
         c["resources"]["level"] = 10

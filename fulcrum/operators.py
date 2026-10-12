@@ -89,8 +89,8 @@ def add_operator(
     entry = find_operator(name)
     if entry:
         profession = profession if entry.get("professionEditable") else entry["profession"]
-        rarity = entry["rarity"]
-        entry = {**entry, "profession": profession}
+        rarity = rarity if entry.get("rarityEditable") and rarity is not None else entry["rarity"]
+        entry = {**entry, "profession": profession, "rarity": rarity}
     if instance_id is not None and (not isinstance(instance_id, str) or not instance_id):
         raise ValueError("operator instance ID must be a nonempty string")
     if type(record_only) is not bool or (record_only and (hope_cost not in (None, 0) or ingot_cost != 0)):
@@ -160,6 +160,8 @@ def promote_operator(
         entry = find_operator(operator["name"])
         if entry and entry.get("professionEditable"):
             entry = {**entry, "profession": operator.get("profession")}
+        if entry and entry.get("rarityEditable"):
+            entry = {**entry, "rarity": operator.get("rarity")}
         opening = state.get("opening", {})
         hope_cost = hope_price(entry, squad_id=opening.get("squadId"), promotion=True, source=operator.get("source")) if entry and not record_only else 0
     _pay(draft, "hope", hope_cost)

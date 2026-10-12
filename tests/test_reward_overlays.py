@@ -65,7 +65,7 @@ class RewardOverlayTests(unittest.TestCase):
         self.assertEqual(len(score["legalOptions"]), 3)
 
     def test_treehole_unknown_battle_averages_both_scores_and_cash(self):
-        c = context("III-treehole", options={"teamCounts": {"totalOperators": 1, "sixStars": 0, "elite2SixStars": 0}})
+        c = context("III-treehole", options={"teamThresholdOverride": "insufficient"})
         scorer = SnapshotScorer([], c, state(2))
         for mode in ("normal", "emergency"):
             combined = scorer.battle(mode)

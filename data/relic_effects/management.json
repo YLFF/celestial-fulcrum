@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "source": "用户确认的维护范围优先于网站标记",
+  "oneShotOperatorRelics": ["relic_174", "relic_175", "relic_176", "relic_177", "relic_178", "relic_179", "relic_180", "relic_181", "relic_182", "relic_183", "relic_184", "relic_185", "relic_186", "relic_187", "relic_188"],
+  "oneShotOtherRelics": ["relic_216", "relic_233"],
+  "promotionEffectRelics": ["relic_174", "relic_175", "relic_176", "relic_177", "relic_178", "relic_179", "relic_180", "relic_181"],
+  "autoPromote": false,
+  "defaultMaxRecipients": 1,
+  "recipientOverrides": {"relic_188": 2},
+  "endingRelics": ["relic_225", "relic_226", "relic_227", "relic_228", "relic_229", "relic_230"],
+  "confirmedStacking": {"relic_034": {"counter": "entered_map_layers", "ineffectiveAt": 3, "retainCounterAfterExpiry": true}},
+  "unreviewedManagement": null,
+  "acquisitionScoring": "独立沿用 data/scoring/blackflow/relics.json；即时资源已结算不清零获取分；移除持有项后可再次进入奖励池",
+  "settlementIdentity": "每次真实获取的 acquisitionId；不是 relicId；重复识别不得自动视为重新获取"
+}

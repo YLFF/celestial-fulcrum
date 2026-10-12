@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "models": [
+    {
+      "file": "chi_sim.traineddata",
+      "purpose": "离线识别地图节点的简体中文名称；完整名称且置信度达标时优先采用，否则回退图标识别",
+      "source": "https://github.com/tesseract-ocr/tessdata_fast",
+      "downloadUrl": "https://raw.githubusercontent.com/tesseract-ocr/tessdata_fast/main/chi_sim.traineddata",
+      "sha256": "a5fcb6f0db1e1d6d8522f39db4e848f05984669172e584e8d76b6b3141e1f730",
+      "sizeBytes": 2469156,
+      "license": "Apache-2.0",
+      "licenseFile": "packaging/tessdata_fast.LICENSE"
+    }
+  ]
+}

@@ -66,6 +66,7 @@ jobs:
           tests.test_ending_prediction tests.test_node_prediction_beta tests.test_desktop
           tests.test_macos_packaging tests.test_release_publication
           tests.test_scoring_profile tests.test_snapshot_scoring
+          tests.test_arkrog_comparison tests.test_team_power tests.test_combat_bonuses
           tests.test_scoring_calibration.CalibrationMathTests
       - name: Test frontend
         run: |
@@ -90,6 +91,8 @@ jobs:
           name: diagnostics-${{ matrix.platform }}
           path: |
             build/desktop-self-test.json
+            build/desktop-window-test.json
+            build/desktop-window-test-data/logs/desktop.log
             work/macos-self-test.json
             build/pyinstaller/**/warn-*.txt
             build/pyinstaller/**/xref-*.html
@@ -130,4 +133,4 @@ jobs:
           gh release create "$RELEASE_TAG" ./*.zip ./*.zip.sha256 \
             --target "$SOURCE_REVISION" --prerelease \
             --title "Celestial Fulcrum $RELEASE_TAG" \
-            --notes "Private test build. Windows x64 and Apple Silicon macOS arm64. Both packages passed offline OCR, catalog image and map asset checks. Unsigned Windows build; ad-hoc signed, non-notarized Mac app. Source: $SOURCE_REVISION."
+            --notes "Private test build. Windows x64 and Apple Silicon macOS arm64. Both packages passed offline OCR, catalog image and map asset checks; Windows also passed native WebView2 window startup. Windows: after confirming this trusted project source, unblock the downloaded ZIP in Properties before extracting. Unsigned Windows build; ad-hoc signed, non-notarized Mac app. Source: $SOURCE_REVISION."

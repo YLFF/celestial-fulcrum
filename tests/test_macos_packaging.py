@@ -21,9 +21,14 @@ class MacBuildMaterialsTests(unittest.TestCase):
         self.assertTrue(all(not name.startswith(("work/", "runs/", ".git/", ".venv/", "node_modules/")) for name in names))
         self.assertIn("frontend/pnpm-workspace.yaml", names)
         self.assertIn("eng.traineddata", names)
+        self.assertIn("chi_sim.traineddata", names)
+        self.assertIn("scripts/ocr_node_labels.mjs", names)
+        self.assertIn("packaging/tessdata_fast.LICENSE", names)
         self.assertIn("packaging/MACOS_TEST.md", names)
-        self.assertIn("data/scoring/blackstream/default.json", names)
-        self.assertIn("data/scoring/blackstream/relics.json", names)
+        self.assertIn("data/scoring/blackflow/default.json", names)
+        self.assertIn("data/scoring/blackflow/relics.json", names)
+        for path in (ROOT / "data/relic_effects").rglob("*.json"):
+            self.assertIn(path.relative_to(ROOT).as_posix(), names)
         for entry in entries().values():
             if entry.get("imagePath"):
                 self.assertIn(image_path(entry["id"]), paths, entry["id"])
@@ -41,7 +46,12 @@ class MacBuildMaterialsTests(unittest.TestCase):
                 "COLLECT": lambda *args, **kwargs: None, "BUNDLE": lambda *args, **kwargs: kwargs,
             })
         bundled = {Path(source).resolve() for source, _ in spec["datas"]}
+        self.assertIn(ROOT / "chi_sim.traineddata", bundled)
+        self.assertIn(ROOT / "scripts/ocr_node_labels.mjs", bundled)
+        self.assertIn(ROOT / "packaging/tessdata_fast.LICENSE", bundled)
         for path in (ROOT / "data/scoring").rglob("*.json"):
+            self.assertIn((str(path), str(path.relative_to(ROOT).parent)), spec["datas"])
+        for path in (ROOT / "data/relic_effects").rglob("*.json"):
             self.assertIn((str(path), str(path.relative_to(ROOT).parent)), spec["datas"])
         for entry in entries().values():
             if entry.get("imagePath"):

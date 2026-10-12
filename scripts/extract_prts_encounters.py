@@ -1,4 +1,4 @@
-"""Extract Blackstream encounter floors, choices, and repeat notes from PRTS."""
+"""Extract Blackflow encounter floors, choices, and repeat notes from PRTS."""
 
 from datetime import datetime, timezone
 import argparse
@@ -12,7 +12,7 @@ from playwright_browser import chromium_executable
 
 ROOT = Path(__file__).resolve().parents[1]
 URL = "https://prts.wiki/w/沉沦者的黑流树海/事件一览"
-OUTPUT = ROOT / "data" / "blackstream_encounter_pool.json"
+OUTPUT = ROOT / "data" / "blackflow_encounter_pool.json"
 CATALOG = ROOT / "data" / "lubiao_reference_catalog.json"
 
 

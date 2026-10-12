@@ -12,6 +12,7 @@ PROFESSIONS = ("先锋", "近卫", "重装", "狙击", "术师", "医疗", "辅�
 LOCAL_OPERATORS = [
     {"id": "local_rhodes_reserve", "name": "罗德岛预备干员", "rarity": 3},
     {"id": "local_rhodes_elite", "name": "罗德岛精英干员", "rarity": 5},
+    {"id": "local_new_operator_placeholder", "name": "新干员临时占位", "rarity": 3, "rarityEditable": True},
 ]
 
 

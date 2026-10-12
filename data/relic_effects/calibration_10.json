@@ -1,0 +1,711 @@
+{
+  "schemaVersion": 1,
+  "status": "confirmed_not_connected",
+  "sampling": {
+    "method": "Python random.Random(20261011).sample(catalog.relics, 10)",
+    "seed": 20261011,
+    "source": "data/blackflow_relic_texts.json",
+    "note": "不为覆盖类型而替换随机样本；本批恰好没有一次性/层数藏品。"
+  },
+  "relics": [
+    {
+      "id": "relic_126",
+      "name": "热辣可可",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 126
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "126.atk",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "attack",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 1.5,
+          "stackingGroup": "relic_additive",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed",
+          "valueRule": {
+            "kind": "condition_curve",
+            "input": "hp_ratio",
+            "startHpRatio": 1,
+            "startValue": 0,
+            "maximum": 1.5,
+            "maximumAtHpRatio": 0.3,
+            "interpolation": "linear",
+            "clampBelowMaximumHpRatio": true
+          },
+          "notes": "生命100%时增量0，100%-30%间线性增长，30%及以下达到上限；作为独立函数词条展示，不并入其他藏品固定数值。",
+          "aggregation": "separate",
+          "valueRole": "maximum_not_constant"
+        }
+      ]
+    },
+    {
+      "id": "relic_089",
+      "name": "“阿猛”",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 89
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "089.elemental",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "enemy",
+            "metric": "damage_taken",
+            "scope": {
+              "damageType": "elemental_damage"
+            }
+          },
+          "operation": "factor",
+          "value": 2,
+          "stackingGroup": "relic_factor",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ]
+    },
+    {
+      "id": "relic_127",
+      "name": "止痛片",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 127
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "127.sp",
+          "category": "combat",
+          "combatCategory": "skill_cycle",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "sp_recovery_per_second",
+            "scope": {
+              "skillRecoveryType": "natural"
+            }
+          },
+          "operation": "flat_delta",
+          "value": 2,
+          "stackingGroup": "relic_additive",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed",
+          "valueRule": {
+            "kind": "condition_curve",
+            "input": "hp_ratio",
+            "startHpRatio": 1,
+            "startValue": 0,
+            "maximum": 2,
+            "maximumAtHpRatio": 0.3,
+            "interpolation": "linear",
+            "clampBelowMaximumHpRatio": true
+          },
+          "notes": "生命100%时增量0，100%-30%间线性增长，30%及以下达到上限；作为独立函数词条展示，不并入其他藏品固定数值。",
+          "aggregation": "separate",
+          "valueRole": "maximum_not_constant"
+        }
+      ]
+    },
+    {
+      "id": "relic_087",
+      "name": "活木甲",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 87
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "087.barrier",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "barrier",
+            "scope": {
+              "position": "melee"
+            }
+          },
+          "operation": "grant",
+          "value": {
+            "basis": "max_hp",
+            "ratio": 0.5
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_deploy",
+          "lifetime": "until_barrier_depleted",
+          "reviewStatus": "confirmed",
+          "notes": "每次按获得时最大生命计算授予数值，和已有屏障加算；不会将目标生命护盾或阻挡伤害层数混入。",
+          "stackingRule": "sum_actual_granted_values"
+        }
+      ]
+    },
+    {
+      "id": "relic_072",
+      "name": "涌动之餐",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 72
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "072.healing",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "healing_received",
+            "scope": {}
+          },
+          "operation": "factor",
+          "value": 1.4,
+          "stackingGroup": "relic_factor",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "072.regeneration",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "hp_recovery_received",
+            "scope": {}
+          },
+          "operation": "factor",
+          "value": 1.4,
+          "stackingGroup": "relic_factor",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "072.elemental",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "elemental_buildup_received",
+            "scope": {}
+          },
+          "operation": "factor",
+          "value": 0.7,
+          "stackingGroup": "relic_factor",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed",
+          "notes": "元素损伤积累量，不等同于元素伤害。"
+        }
+      ]
+    },
+    {
+      "id": "relic_015",
+      "name": "特级馥郁咖啡豆",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 15
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "015.squad",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "squad_capacity",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed",
+          "maximum": 13,
+          "revokeOnLoss": false
+        },
+        {
+          "id": "015.deploy",
+          "category": "development",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "deployment_capacity",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 1,
+          "stackingGroup": "deployment_capacity_held",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "015.shield",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "objective_shield",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 1,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": "编队位在获取时结算，上限13、失去不回收；部署位按当前持有增量计算；目标生命护盾为即时资源。"
+    },
+    {
+      "id": "relic_011",
+      "name": "古旧乐谱残章",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 11
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": {
+        "kind": "structural_stage",
+        "options": [
+          "structured",
+          "semi_structured",
+          "unstructured",
+          "chaotic"
+        ],
+        "selection": "difficulty_from_numeric_rules"
+      },
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "011.hope",
+          "category": "immediate_resource",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "hope",
+            "scope": {}
+          },
+          "operation": "grant",
+          "value": 4,
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_acquire",
+          "lifetime": "settled_resource",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "011.aspd.semi_structured",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack_speed",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 4,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "semi_structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "011.aspd.unstructured",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack_speed",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 5,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "unstructured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "011.aspd.chaotic",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "attack_speed",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 6,
+          "stackingGroup": "relic_additive",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "chaotic"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": "结构化没有攻速词条；四阶段互斥，不累计。"
+    },
+    {
+      "id": "relic_092",
+      "name": "悬丝傀儡",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 92
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "092.damage",
+          "category": "combat",
+          "combatCategory": "damage",
+          "domain": "inside_battle",
+          "target": {
+            "side": "enemy",
+            "metric": "extra_damage",
+            "scope": {
+              "damageType": "arts"
+            }
+          },
+          "operation": "grant",
+          "value": {
+            "amount": 1000,
+            "periodSeconds": 1
+          },
+          "stackingGroup": null,
+          "conditions": [
+            {
+              "any": [
+                {
+                  "field": "enemy_status",
+                  "operator": "contains",
+                  "value": "stunned"
+                },
+                {
+                  "field": "enemy_status",
+                  "operator": "contains",
+                  "value": "frozen"
+                },
+                {
+                  "field": "enemy_status",
+                  "operator": "contains",
+                  "value": "bound"
+                }
+              ]
+            }
+          ],
+          "trigger": "periodic_while_condition",
+          "lifetime": "while_condition",
+          "reviewStatus": "confirmed",
+          "notes": "这是异常状态下的额外伤害，不是控制时长加成；多个异常同时存在不因此重复结算。"
+        }
+      ]
+    },
+    {
+      "id": "relic_123",
+      "name": "他缚",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 123
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": null,
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "123.cost",
+          "category": "combat",
+          "combatCategory": "cost",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "deployment_cost",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": -0.5,
+          "stackingGroup": "outside_attribute",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "123.hp",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "inside_battle",
+          "target": {
+            "side": "friendly_operator",
+            "metric": "current_hp",
+            "scope": {}
+          },
+          "operation": "mechanism",
+          "value": {
+            "lossRatio": 0.7,
+            "basis": "current_hp"
+          },
+          "stackingGroup": null,
+          "conditions": [],
+          "trigger": "on_deploy",
+          "lifetime": "once_per_deployment",
+          "reviewStatus": "confirmed",
+          "notes": "每次部署到退场前仅一次，不是整局一次性藏品。"
+        }
+      ]
+    },
+    {
+      "id": "relic_010",
+      "name": "教堂救济餐券",
+      "source": {
+        "file": "data/blackflow_relic_texts.json",
+        "prtsNumber": 10
+      },
+      "management": {
+        "kind": "ordinary",
+        "bindOperator": false
+      },
+      "endingRelic": false,
+      "variant": {
+        "kind": "structural_stage",
+        "options": [
+          "structured",
+          "semi_structured",
+          "unstructured",
+          "chaotic"
+        ],
+        "selection": "difficulty_from_numeric_rules"
+      },
+      "reviewStatus": "confirmed",
+      "effects": [
+        {
+          "id": "010.deploy",
+          "category": "development",
+          "combatCategory": null,
+          "domain": "not_applicable",
+          "target": {
+            "side": "run",
+            "metric": "deployment_capacity",
+            "scope": {}
+          },
+          "operation": "flat_delta",
+          "value": 2,
+          "stackingGroup": "deployment_capacity_held",
+          "conditions": [],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "010.hp.structured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "max_hp",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.06,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "010.hp.semi_structured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "max_hp",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.07,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "semi_structured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "010.hp.unstructured",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "max_hp",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.08,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "unstructured"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        },
+        {
+          "id": "010.hp.chaotic",
+          "category": "combat",
+          "combatCategory": "survival",
+          "domain": "outside_battle",
+          "target": {
+            "side": "friendly_unit",
+            "metric": "max_hp",
+            "scope": {}
+          },
+          "operation": "base_ratio_delta",
+          "value": 0.1,
+          "stackingGroup": "outside_attribute",
+          "conditions": [
+            {
+              "field": "relic_variant",
+              "operator": "eq",
+              "value": "chaotic"
+            }
+          ],
+          "trigger": "while_held",
+          "lifetime": "while_held",
+          "reviewStatus": "confirmed"
+        }
+      ],
+      "notes": "部署位+2为持有时修正，失去即不再计入；最大生命倍率按难度选择唯一阶段。"
+    }
+  ]
+}

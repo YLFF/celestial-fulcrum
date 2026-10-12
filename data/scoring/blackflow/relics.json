@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "description": "沉沦者手册 · 藏品奖励评分。这里调整的是获取藏品的参考价值，不是藏品本身的战斗效果；修改后重启生效。",
+  "parameterNotes": {
+    "defaultPoints": "没有指定物品、场景或奖励池覆盖值时，一件藏品的后备分。",
+    "poolPoints": "按奖励池设置单件藏品的分数；影响对应战斗、事件及未知节点的加权期望分，不改变奖励池概率。",
+    "contextPoints": "按具体获取场景覆盖单件藏品分，优先于poolPoints，便于同一个池在不同事件中使用不同价值。",
+    "fixedRelicPoints": "指定藏品ID的独立参考分，供单件藏品评分使用；当前节点奖励仍按场景或池的单件分计算，不自动将这张表展开成奖励池的加权期望。",
+    "selection": "藏品节点收益当前按场景或池的单件分计算；展示候选藏品时会排除已持有的不可重复藏品。具体物品概率保存在奖励池数据中，不在本文件设置。",
+    "poolNames": {
+      "node_battle_normal": "普通作战", "node_battle_elite": "紧急作战", "pool_boss": "三层及五层Boss奖励",
+      "node_battle_savage": "居民据点", "node_wandering_resident_relic": "流窜居民",
+      "node_wandering_resident_convergence_relic": "流窜居民特殊关卡",
+      "node_battle_normal_invalid_autopsy": "无效验尸", "node_incident_lake_fairy": "湖中仙女",
+      "node_duel_right": "狭路相逢高档", "node_incident_cave_treasure": "洞中宝",
+      "node_wish_relic": "得偿所愿普通奖励", "node_wish_relic_advanced": "得偿所愿支付源石锭后的高级奖励",
+      "node_story_curiosity_and_death": "假命运所指：好奇心与死", "node_hidden_collectible": "隐藏藏品池"
+    }
+  },
+  "defaultPoints": 100,
+  "poolPoints": {
+    "node_battle_normal": 100, "node_battle_elite": 125, "pool_boss": 200,
+    "node_battle_savage": 150, "node_wandering_resident_relic": 100,
+    "node_wandering_resident_convergence_relic": 100,
+    "node_battle_normal_invalid_autopsy": 150, "node_incident_lake_fairy": 225,
+    "node_duel_right": 125, "node_incident_cave_treasure": 100,
+    "node_wish_relic": 100, "node_wish_relic_advanced": 150,
+    "node_story_curiosity_and_death": 150, "node_hidden_collectible": 100
+  },
+  "contextPoints": {},
+  "fixedRelicPoints": {}
+}

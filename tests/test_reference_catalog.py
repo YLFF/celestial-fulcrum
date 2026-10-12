@@ -61,7 +61,7 @@ class CatalogMergeTests(unittest.TestCase):
 
 class LocalCatalogTests(unittest.TestCase):
     def test_handbook_fields_match_category_policy(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         components = handbook.split("## 1. 零件", 1)[1].split("## 2. 实托邦完整效果", 1)[0]
         relics = handbook.split("## 8. 藏品池", 1)[1].split("## 9.额外支援选项：", 1)[0]
         component_ids = re.findall(r"(?m)^\| `(component_\d+)` \|", components)
@@ -84,11 +84,11 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertNotRegex(mistake_notes, r"(?m)^### ")
 
     def test_handbook_dystopia_and_encounter_rules(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
-        rulebook = (ROOT / "BLACKSTREAM_RULEBOOK.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
+        rulebook = (ROOT / "BLACKFLOW_RULEBOOK.md").read_text(encoding="utf-8")
         dystopias = handbook.split("## 2. 实托邦完整效果", 1)[1].split("## 3. 乌托邦完整效果", 1)[0]
         encounters = handbook.split("## 7. 不期而遇事件表", 1)[1].split("## 8. 藏品池", 1)[0]
-        pool = json.loads((ROOT / "data" / "blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+        pool = json.loads((ROOT / "data" / "blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
         self.assertIn("**理念（001-010）**", dystopias)
         self.assertIn("**方针（011-014）**", dystopias)
         self.assertIn("下一层才固定生成", dystopias)
@@ -109,7 +109,7 @@ class LocalCatalogTests(unittest.TestCase):
         peace = next(event for event in pool if event["name"] == "和平守卫者")
         self.assertEqual(peace["appearanceConditions"][0]["condition"], "当前层存在居民据点节点")
         self.assertIn("| 林间空地 | 0–3 | 0–7 | 5–11 | 3–13 | 10–17 |", rulebook)
-        rules = json.loads((ROOT / "data" / "blackstream_node_generation_rules.json").read_text(encoding="utf-8"))
+        rules = json.loads((ROOT / "data" / "blackflow_node_generation_rules.json").read_text(encoding="utf-8"))
         clearing = next(row for row in rules["countRanges"] if row["label"] == "林间空地")
         self.assertEqual(clearing["values"]["V"]["maximum"], 17)
         for document in (handbook, rulebook):
@@ -118,7 +118,7 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertNotIn("<!-- BEGIN GENERATED", document)
 
     def test_document_audits_are_read_only(self) -> None:
-        paths = [ROOT / name for name in ("BLACKSTREAM_REFERENCE.md", "BLACKSTREAM_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md")]
+        paths = [ROOT / name for name in ("BLACKFLOW_REFERENCE.md", "BLACKFLOW_RULEBOOK.md", "BLACKFLOW_PLAYTIME_TEMPLATE.md")]
         before = {path: path.read_bytes() for path in paths}
         for script in ("build_reference_markdown.py", "build_rules_markdown.py"):
             result = subprocess.run(
@@ -132,7 +132,7 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertEqual(path.read_bytes(), before[path])
 
     def test_node_mark_roles_distinguish_stacking_override_and_fixed_identity(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         marks = handbook.split("## 6. 节点标记与规则", 1)[1].split("## 7.", 1)[0]
         self.assertIn("藏果地完整叠加所在节点的效果", marks)
         self.assertIn("流窜“居民”部分叠加", marks)
@@ -144,12 +144,12 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertNotIn("已确认标记的额外收益另叠", handbook)
 
     def test_route_scoring_draft_covers_catalogs(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         draft = handbook.split("## 11. 路线评分数值草稿", 1)[1]
         nodes = draft.split("### 11.4", 1)[1].split("### 11.5", 1)[0]
         options = draft.split("### 11.6", 1)[1].split("### 11.7", 1)[0]
         definitions = handbook.split("## 5. 节点类别与效果", 1)[1].split("## 6.", 1)[0]
-        pool = json.loads((ROOT / "data" / "blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+        pool = json.loads((ROOT / "data" / "blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
         node_ids = re.findall(r"(?m)^\| `(node_type_\d+)` \|", nodes)
         self.assertEqual(len(node_ids), len(set(node_ids)))
         self.assertEqual(set(node_ids), set(re.findall(r"(?m)^### (node_type_\d+)\b", definitions)))
@@ -161,12 +161,12 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("10 级后普通升级价值为 0", draft)
         self.assertIn("按实际关卡所属层/特殊战斗", draft)
         self.assertIn("10 → 13", draft)
-        rulebook = (ROOT / "BLACKSTREAM_RULEBOOK.md").read_text(encoding="utf-8")
+        rulebook = (ROOT / "BLACKFLOW_RULEBOOK.md").read_text(encoding="utf-8")
         self.assertIn("## 7. 路线收益与决策评分", rulebook)
-        self.assertTrue((ROOT / "data/scoring/blackstream/default.json").is_file())
+        self.assertTrue((ROOT / "data/scoring/blackflow/default.json").is_file())
 
     def test_encounter_scoring_defaults_and_shadow_rounds_are_saved(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         scoring = handbook.split("### 11.6", 1)[1].split("### 11.7", 1)[0]
         for text in (
             "计分最高的合法选项", "所有伴生作战默认完美完成", "现金门槛只看当前源石锭",
@@ -187,19 +187,19 @@ class LocalCatalogTests(unittest.TestCase):
             numerator, _, denominator = probability.strip().partition("/")
             self.assertAlmostEqual(len(candidates.split(" / ")) * int(numerator) / int(denominator or 1), 1)
         self.assertNotIn("据点已清理时触发 | 无效果", scoring)
-        pool = json.loads((ROOT / "data" / "blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+        pool = json.loads((ROOT / "data" / "blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
         red_moss = next(event for event in pool if event["id"] == "encounter_010")
         self.assertIn("取得过笼控器", red_moss["appearanceConditions"][0]["condition"])
         self.assertIn("卖掉笼控器不影响", red_moss["appearanceConditions"][0]["condition"])
 
     def test_confirmed_event_repetition_and_reward_corrections_are_preserved(self) -> None:
-        pool = json.loads((ROOT / "data" / "blackstream_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
+        pool = json.loads((ROOT / "data" / "blackflow_encounter_pool.json").read_text(encoding="utf-8"))["eventPool"]
         by_name = {event["name"]: event for event in pool}
         self.assertEqual({event["name"] for event in pool if event["repeatability"] == "same_run_possible"},
                          {"色味不同源", "敲动杠杆", "货从口出"})
         self.assertEqual(by_name["洞中宝"]["repeatability"], "inside_and_outside_once")
         self.assertEqual(sum(event["repeatability"] == "once_per_run" for event in pool), 19)
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         event_table = handbook.split("## 7. 不期而遇事件表", 1)[1].split("## 8.", 1)[0]
         scoring = handbook.split("### 11.6", 1)[1].split("### 11.7", 1)[0]
         for section in (event_table, scoring):
@@ -219,7 +219,7 @@ class LocalCatalogTests(unittest.TestCase):
                 self.assertIn(term, effects)
 
     def test_slot_reward_upper_bounds_and_remaining_reward_gaps_are_documented(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         bounds = handbook.split("#### 编队位与部署位的收益上界", 1)[1].split("#### 统一标尺", 1)[0]
         for text in (
             "| 编队位 | C<13 | 1 |", "| 编队位 | C≥13 | 0 |",
@@ -232,7 +232,7 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertIn(text, gaps)
 
     def test_latest_node_rewards_and_dispatch_branches_are_preserved(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         nodes = handbook.split("## 5. 节点类别与效果", 1)[1].split("## 6.", 1)[0]
         for text in (
             "连续两次各1换1，总计失去2件、获得2件", "不能先交换零件再交换藏品",
@@ -244,7 +244,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("| 无效验尸 | 特殊挑战 | 36 → 47 | 暂按III领袖5 |", handbook)
 
     def test_opening_technology_and_mechanist_rules(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         opening_rules = handbook.split("### 账号解锁与开局修正", 1)[1].split("### 11.2", 1)[0]
         for text in (
             "初始未招募机械师时", "只能出战一场，随后离队", "希望费用少 4", "进阶费用少 2",
@@ -285,13 +285,13 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertTrue((ROOT / image_path).is_file(), image_path)
 
     def test_route_corrections_are_consistent_in_documents(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         mistake_notes = handbook.split("## 10. 错题本", 1)[1].split("## 11.", 1)[0]
         for term in ("沉重的契约", "5 行动力", "全知者盲区", "未亡者遗怨", "惩罚性减分"):
             self.assertIn(term, mistake_notes)
         self.assertIn("事件估值默认按这个选项处理", mistake_notes)
         self.assertIn("尽量避免触发该事件", mistake_notes)
-        for name in ("BLACKSTREAM_RULEBOOK.md", "BLACKSTREAM_REFERENCE.md", "ROADMAP.md"):
+        for name in ("BLACKFLOW_RULEBOOK.md", "BLACKFLOW_REFERENCE.md", "docs/ROADMAP.md"):
             document = (ROOT / name).read_text(encoding="utf-8")
             self.assertIn("不能重复进入", document)
             self.assertNotIn("两类行商与应急助力可", document)
@@ -381,7 +381,7 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertIn("IV-remembrance", state["areas"])
 
     def test_roadmap_records_current_state_and_llm_boundary(self) -> None:
-        design = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+        design = (ROOT / "docs/ROADMAP.md").read_text(encoding="utf-8")
         for module in ("Playtime", "节点预测", "路线规划", "藏品", "资源"):
             self.assertIn(module, design)
         self.assertIn("runs/<run_id>/playtime.json", design)
@@ -392,7 +392,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("大模型交互输出", design)
 
     def test_component_scoring_covers_all_thirty_catalog_items(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         section = handbook.split("### 11.15", 1)[1].split("### 11.16", 1)[0]
         ids = re.findall(r"(?m)^\| `(component_\d+)` \|", section)
         self.assertEqual(len(ids), 30)
@@ -404,7 +404,7 @@ class LocalCatalogTests(unittest.TestCase):
             self.assertIn(text, section)
 
     def test_level_table_has_nine_steps_and_preserves_experience_remainder(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         section = handbook.split("### 11.16", 1)[1].split("### 11.17", 1)[0]
         rows = re.findall(r"(?m)^\| (\d+)→(\d+) \| (\d+) \| (\d+) \| (\d+) \|", section)
         values = [tuple(map(int, row)) for row in rows]
@@ -418,7 +418,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertIn("4+4×3/24=4.5", section)
 
     def test_ticket_table_has_eighteen_entries_and_state_dependent_mechanist_weights(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         section = handbook.split("### 11.17", 1)[1].split("### 11.18", 1)[0]
         rows = re.findall(r"(?m)^\| ([^|]+) \| ([\d.]+) \| ([\d.]+) \|$", section)
         self.assertEqual(len(rows), 18)
@@ -454,7 +454,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertEqual(counts["component_024"], 6)
         result = Decimal(numerator) / sum(counts.values())
         self.assertEqual(result.quantize(Decimal("1"), rounding=ROUND_HALF_UP), 286)
-        section = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8").split("### 11.15", 1)[1].split("### 11.16", 1)[0]
+        section = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8").split("### 11.15", 1)[1].split("### 11.16", 1)[0]
         self.assertIn("每单位行动力200分，小八界自身移动能力20分", section)
         self.assertIn("固定默认250分", section)
         self.assertIn("四舍五入为286分", section)
@@ -463,7 +463,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertNotIn("343910 + 20M_小八界", section)
 
     def test_action_option_and_exit_formulas_remain_distinct_from_actual_budget(self) -> None:
-        handbook = (ROOT / "BLACKSTREAM_REFERENCE.md").read_text(encoding="utf-8")
+        handbook = (ROOT / "BLACKFLOW_REFERENCE.md").read_text(encoding="utf-8")
         section = handbook.split("### 11.18", 1)[1].split("## 12.", 1)[0]
         for text in ("已经持有的行动力只是当前预算输入", "不维护行动力价值账本",
                      "不取m倍同一个首项分", "不另外模拟特殊移动以修正n",
@@ -478,7 +478,7 @@ class LocalCatalogTests(unittest.TestCase):
         self.assertEqual(sum(values[2:4]), 160)
 
     def test_roadmap_phases_and_numeric_scope(self) -> None:
-        roadmap = (ROOT / "ROADMAP.md").read_text(encoding="utf-8")
+        roadmap = (ROOT / "docs/ROADMAP.md").read_text(encoding="utf-8")
         phases = (
             "## 第一阶段：结构化状态与客观功能",
             "## 第二阶段：应用化与前端测试",

@@ -1,6 +1,7 @@
 """Own a native window and its loopback service; keep saves outside the bundle."""
 
 import argparse
+from configparser import ConfigParser, Error as ConfigError
 from contextlib import contextmanager
 import json
 import logging
@@ -34,6 +35,48 @@ def data_directory(override=None):
 
 def desktop_engine():
     return "cocoa" if sys.platform == "darwin" else "edgechromium" if sys.platform == "win32" else None
+
+
+def check_windows_bundle_trust(root=ROOT):
+    if sys.platform != "win32" or not getattr(sys, "frozen", False):
+        return
+    assemblies = ("pythonnet/runtime/Python.Runtime.dll",
+                  "webview/lib/Microsoft.Web.WebView2.Core.dll",
+                  "webview/lib/Microsoft.Web.WebView2.WinForms.dll",
+                  "webview/lib/WebBrowserInterop.x64.dll")
+    for name in assemblies:
+        path = Path(root) / name
+        if not path.is_file():
+            continue
+        try:
+            with Path(str(path) + ":Zone.Identifier").open(encoding="utf-8", errors="replace") as stream:
+                text = stream.read(4096)
+        except FileNotFoundError:
+            continue
+        except OSError:
+            logging.warning("Could not inspect download zone for %s", path, exc_info=True)
+            continue
+        zone = ConfigParser(interpolation=None)
+        try:
+            zone.read_string(text.rstrip("\x00"))
+            blocked = zone.getint("ZoneTransfer", "ZoneId", fallback=0) in (3, 4)
+        except (ConfigError, ValueError):
+            continue
+        if blocked:
+            raise RuntimeError(
+                "下载的程序文件带有互联网标记，可能被 Windows 阻止加载桌面窗口组件。\n"
+                "请关闭程序，在原 ZIP 文件上右键 → 属性 → 勾选“解除锁定” → 应用，然后重新完整解压。\n"
+                "仅对确认来自本项目 GitHub 的程序包执行此操作，不必因本提示重装 WebView2。\n"
+                f"受影响组件：{path.name}")
+
+
+def startup_message(error, directory):
+    text = public_error(error)
+    if "Failed to resolve Python.Runtime.Loader.Initialize" in str(error):
+        text = "桌面 .NET 桥接组件加载失败，请确认完整解压程序包、文件未被锁定，且系统已安装 .NET Framework 4.8。"
+    elif "WebView2" in str(error) and not any("\u4e00" <= char <= "\u9fff" for char in str(error)):
+        text = "WebView2 窗口组件加载失败，请确认系统已安装 Microsoft WebView2 Runtime，并查看日志。"
+    return f"{text}\n\n日志位置：{directory / 'logs/desktop.log'}"
 
 
 @contextmanager
@@ -201,6 +244,7 @@ def main(argv=None):
     try:
         configure_logging(directory)
         with single_instance(directory):
+            check_windows_bundle_trust()
             if not (ROOT / "frontend/dist/index.html").is_file():
                 raise RuntimeError("前端尚未构建，请先执行打包脚本。")
             server = LocalServer(directory).start()
@@ -239,5 +283,5 @@ def main(argv=None):
             args.report.write_text(json.dumps({"ok": False, "error": str(error)}, ensure_ascii=False), encoding="utf-8")
         if not args.self_test and not args.window_test and sys.platform == "win32":
             import ctypes
-            ctypes.windll.user32.MessageBoxW(None, f"{public_error(error)}\n\n日志位置：{directory / 'logs/desktop.log'}\n如缺少浏览器运行库，请安装 Microsoft WebView2 Runtime。", PROJECT["shortName"], 0x10)
+            ctypes.windll.user32.MessageBoxW(None, startup_message(error, directory), PROJECT["shortName"], 0x10)
         return 1

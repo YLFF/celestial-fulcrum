@@ -84,7 +84,13 @@ def recognize_layer(image: np.ndarray) -> LayerObservation:
         and boxes[item, cv2.CC_STAT_TOP] >= left[2] + left[4] * 0.70
         and boxes[item, cv2.CC_STAT_TOP] <= left[2] + left[4]
     ]
-    if len(dots) >= 2:
+    question_heads = [box for box in boxes[1:]
+                      if left[1] + left[3] <= box[cv2.CC_STAT_LEFT]
+                      and box[cv2.CC_STAT_LEFT] + box[cv2.CC_STAT_WIDTH] <= right[1]
+                      and box[cv2.CC_STAT_WIDTH] >= left[4] * .25
+                      and box[cv2.CC_STAT_HEIGHT] >= left[4] * .45]
+    # Resizing can join one question mark to its lower dot; Roman numerals have no such detached dot.
+    if len(dots) >= 2 or (dots and len(question_heads) >= 2):
         label, area, floor = "treehole", "treehole", None
     else:
         glyphs = sorted(

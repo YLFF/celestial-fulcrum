@@ -21,7 +21,8 @@ version_resource = VSVersionInfo(ffi=FixedFileInfo(filevers=version, prodvers=ve
         StringStruct("InternalName", project["executableName"]),
         StringStruct("OriginalFilename", project["executableName"] + ".exe"),
     ])]), VarFileInfo([VarStruct("Translation", [2052, 1200])])])
-data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json")]
+data_paths = [*(root / "data").glob("*.json"), *(root / "data/scoring").rglob("*.json"),
+              *(root / "data/relic_effects").rglob("*.json")]
 datas = [(str(path), str(path.relative_to(root).parent)) for path in data_paths
          if path.name not in {"arkrog_blackflowmap_findings.json", "lubiao_reference_catalog.v1.json"}]
 datas += [(str(path), str(path.relative_to(root).parent))
@@ -29,7 +30,10 @@ datas += [(str(path), str(path.relative_to(root).parent))
           if path.is_file() and path.suffix in {".png", ".npz"}]
 datas += [(str(root / "frontend/dist"), "frontend/dist"),
           (str(root / "scripts/ocr_hud_batch.mjs"), "scripts"),
+          (str(root / "scripts/ocr_node_labels.mjs"), "scripts"),
           (str(root / "eng.traineddata"), "."),
+          (str(root / "chi_sim.traineddata"), "."),
+          (str(root / "packaging/tessdata_fast.LICENSE"), "licenses"),
           (str(prepared / "runtime"), "runtime"),
           (str(prepared / "build-info.json"), ".")]
 a = Analysis([str(root / "desktop_launcher.py")], pathex=[str(root)],

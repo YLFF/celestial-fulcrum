@@ -20,7 +20,7 @@ from .opening import (
 
 
 ROOT = Path(__file__).resolve().parents[1]
-EVENT_CATALOG = ROOT / "data" / "blackstream_encounter_pool.json"
+EVENT_CATALOG = ROOT / "data" / "blackflow_encounter_pool.json"
 AREA_SPECS = {
     "I": ("main", 1),
     "II": ("main", 2),

@@ -160,7 +160,12 @@ class JobManager:
                         if count % 100 == 0:
                             with self.lock:
                                 self.records[job_id]["progress"] = {"expandedStates": count}
-                    result = RoutePlanner(geometry).plan(route_state, on_expand=progress)
+                    if options.get("mode", "global") == "advice":
+                        from ..decision_advisor import advise
+                        result = advise(geometry, route_state, on_expand=progress)
+                    else:
+                        result = RoutePlanner(geometry).plan(route_state, on_expand=progress)
+                        result["mode"] = "global"
                 instance = active_instance(state, options.get("areaKey") or state["currentAreaKey"])
                 result["goalSummary"] = goal_summary(state)
                 result["nodeGoalAnnotations"] = node_goal_annotations(state, instance)

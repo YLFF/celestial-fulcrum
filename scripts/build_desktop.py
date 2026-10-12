@@ -17,13 +17,23 @@ ROOT = Path(__file__).resolve().parents[1]
 PROJECT = json.loads((ROOT / "data/project_info.json").read_text(encoding="utf-8"))
 
 
-def run(args, *, cwd=ROOT, capture=False, env=None):
+def run(args, *, cwd=ROOT, capture=False, env=None, timeout=None):
     command = [str(value) for value in args]
     if sys.platform == "win32" and command[0].lower().endswith((".cmd", ".bat")):
         command = [os.environ.get("COMSPEC", "cmd.exe"), "/d", "/s", "/c",
                    subprocess.list2cmdline(command)]
     return subprocess.run(command, cwd=cwd, env=env, check=True, text=True,
-                          encoding="utf-8", capture_output=capture)
+                          encoding="utf-8", capture_output=capture, timeout=timeout)
+
+
+def verify_window(folder, name, env):
+    report = ROOT / "build/desktop-window-test.json"
+    report.unlink(missing_ok=True)
+    run([folder / f"{name}.exe", "--window-test", "--data-dir",
+         ROOT / "build/desktop-window-test-data", "--report", report], env=env, timeout=120)
+    result = json.loads(report.read_text(encoding="utf-8"))
+    if not result.get("ok") or result.get("engine") != "edgechromium" or not result.get("frontendMounted"):
+        raise RuntimeError(f"Frozen desktop window test failed: {result}")
 
 
 def version_info(allow_dirty):
@@ -37,6 +47,8 @@ def version_info(allow_dirty):
 
 
 def collect_licenses(folder, node_version):
+    for filename in ("LICENSE", "NOTICE"):
+        shutil.copy2(ROOT / filename, folder / filename)
     destination = folder / "licenses"
     destination.mkdir(parents=True, exist_ok=True)
     for dist in metadata.distributions():
@@ -109,8 +121,9 @@ def main(argv=None):
     (folder / "START-HERE.txt").write_text(
         f"{PROJECT['name']}\n{PROJECT['englishName']}\n\n"
         f"完整解压后双击 {name}.exe。\n"
+        "从 GitHub 下载后，先右键原 ZIP → 属性 → 解除锁定 → 应用，再完整解压。仅解锁确认来源可信的本项目程序包。\n"
         "Requires Windows 10/11 x64, .NET Framework 4.8 and Microsoft WebView2 Runtime.\n"
-        "存档、图片与日志：%LOCALAPPDATA%\\Fulcrum；仅有旧版 BlackFlow 目录时继续读取旧目录。\n"
+        f"存档、图片与日志：%LOCALAPPDATA%\\{PROJECT['dataDirectoryName']}；旧版 BlackFlow/Fulcrum 存档需手动导入，不自动迁移。\n"
         "Do not copy only the EXE: _internal contains offline OCR, game data and UI.\n"
         "This is an unsigned development build. No Python or Node install is needed.\n",
         encoding="utf-8")
@@ -120,6 +133,7 @@ def main(argv=None):
     result = json.loads(report.read_text(encoding="utf-8"))
     if not result.get("ok"):
         raise RuntimeError(f"Frozen desktop self-test failed: {result}")
+    verify_window(folder, name, env)
     suffix = info["revision"][:8] + ("-dirty" if info["dirty"] else "")
     output = ROOT / f"dist/{name}-{suffix}-win-x64.zip"
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
