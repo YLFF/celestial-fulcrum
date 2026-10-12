@@ -9256,7 +9256,7 @@
         "maxRecipients": 1,
         "profession": "先锋",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9331,7 +9331,7 @@
         "maxRecipients": 1,
         "profession": "术师",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9410,7 +9410,7 @@
         "maxRecipients": 1,
         "profession": "近卫",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9485,7 +9485,7 @@
         "maxRecipients": 1,
         "profession": "重装",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9560,7 +9560,7 @@
         "maxRecipients": 1,
         "profession": "狙击",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9635,7 +9635,7 @@
         "maxRecipients": 1,
         "profession": "医疗",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9713,7 +9713,7 @@
         "maxRecipients": 1,
         "profession": "特种",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,
@@ -9780,7 +9780,7 @@
         "maxRecipients": 1,
         "profession": "辅助",
         "promotionEffect": true,
-        "autoPromote": false
+        "autoPromote": true
       },
       "managementReviewStatus": "confirmed",
       "endingRelic": false,

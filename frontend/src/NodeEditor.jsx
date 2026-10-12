@@ -22,7 +22,8 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
     window.addEventListener('resize', resize);
     return () => window.removeEventListener('resize', resize);
   }, []);
-  const [category, setCategory] = useState(nodeCategory(node));
+  const originalCategory = node.resolvedCategoryId || node.observedCategoryId || '';
+  const [category, setCategory] = useState(originalCategory);
   const [completion, setCompletion] = useState(node.completion);
   const [visibility, setVisibility] = useState(node.visibility);
   const [marks, setMarks] = useState(node.confirmedMarkIds);
@@ -36,7 +37,8 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
   const [shelves, setShelves] = useState(node.merchantViewedShelves ?? (completion === 'completed' ? 1 : 0));
   const isUnknown = id => id === 'unknown_mystery' || id === 'unknown_ferocity';
   async function save() {
-    const commands = [], changed = category !== nodeCategory(node);
+    if (!category) return;
+    const commands = [], changed = category !== originalCategory;
     const reset = changed && (isUnknown(category) || category === 'node_type_020');
     if (reset) commands.push({ type: 'nodeReset', areaKey: instance.areaKey, nodeId: node.id, categoryId: category });
     const changes = { completion, visibility, markIds: isUnknown(category) ? [] : marks };
@@ -68,7 +70,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
   const top = Math.max(70, Math.min(viewport.height - 570, anchor.top - 36));
   return <><section ref={panelRef} role="dialog" aria-label={`节点编辑 ${node.id}`} className="node-popover" style={{ left, top,
     maxHeight: viewport.width > 800 ? Math.max(120, viewport.height - top - 12) : undefined }}>
-    <header><div><small>节点 ({node.id})</small><h3>{catalog.labels.nodeTypes[nodeCategory(node)]}</h3></div>
+    <header><div><small>节点 ({node.id})</small><h3>{catalog.labels.nodeTypes[originalCategory] || '待确认节点'}</h3></div>
       <IconButton icon={X} label="关闭节点详情" onClick={onClose} /></header>
     <div className="tabs"><button className={tab === 'node' ? 'active' : ''} onClick={() => { setTab('node'); setPool(null); }}>节点状态</button>
       <button className={tab === 'score' ? 'active' : ''} onClick={() => setTab('score')}>概率与得分</button></div>
@@ -88,7 +90,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
         setVisibility(isUnknown(e.target.value) ? 'hidden' : 'revealed');
         if (isUnknown(e.target.value)) setCompletion('pending');
       }}>
-        {Object.entries(catalog.labels.nodeTypes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+        <option value="" disabled>请选择节点类别</option>{Object.entries(catalog.labels.nodeTypes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
       <label className="field"><span>完成状态</span><select aria-label="完成状态" value={completion} onChange={e => setCompletion(e.target.value)}>
         <option value="unknown">待确认</option><option value="pending">未完成</option><option value="completed">已完成</option></select></label>
       <label className="field"><span>探明状态</span><select aria-label="探明状态" value={visibility} onChange={e => setVisibility(e.target.value)}>
@@ -113,7 +115,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
       <label className="checkbox-field full"><input type="checkbox" checked={position} onChange={e => setPosition(e.target.checked)} /><Crosshair size={15} />玩家当前位置</label>
     </div>}</div>
     <footer><button onClick={() => { setCompletion('completed'); setVisibility('revealed'); }} disabled={busy}><Check size={15} />已完成</button>
-      <SaveButton busy={busy} onClick={save}>确认更新</SaveButton></footer>
+      <SaveButton busy={busy} disabled={busy || !category} onClick={save}>确认更新</SaveButton></footer>
   </section>{pool && <RewardPoolPanel key={`${pool.label}-${pool.kind}`} selection={pool} entries={entries} heldRelics={heldRelics}
     style={besidePopover(left, top, 386, panelHeight, viewport)} onClose={() => setPool(null)} />}</>;
 }

@@ -173,9 +173,11 @@ def apply_commands(state, commands):
             state["relics"] = preserve_bindings(state["relics"], command["items"])
             seed_owned_milestones(state)
         elif kind == "relicEnchant":
-            keys(command, ("type", "relicId", "operatorInstanceId"))
+            keys(command, ("type", "relicId"), ("operatorInstanceId", "operatorInstanceIds"))
+            if ("operatorInstanceId" in command) == ("operatorInstanceIds" in command):
+                raise ValueError("请指定一个受益干员或受益干员列表")
             from ..relic_presentation import enchant_relic
-            enchant_relic(state, command["relicId"], command["operatorInstanceId"])
+            enchant_relic(state, command["relicId"], command.get("operatorInstanceIds", command.get("operatorInstanceId")))
         elif kind == "tickets":
             keys(command, ("type", "items"))
             if not isinstance(command["items"], list):

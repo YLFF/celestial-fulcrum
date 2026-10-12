@@ -57,13 +57,11 @@ function BonusCategory({ category, entries }) {
   const groups = indicatorGroups(category.rows);
   return <details className="combat-category" data-combat-category={category.id}>
     <summary><Icon size={18} /><b>{category.name}</b><span>{groups.length ? `${groups.length} 项指标` : '无相关效果'}</span><ChevronDown size={16} className="combat-chevron" /></summary>
-    {groups.length ? <div className="combat-indicators">{groups.map((group, index) => <React.Fragment key={group.key}>
-      {group.section !== groups[index - 1]?.section && <h4 className="combat-indicator-section">{group.section}</h4>}
-      <details className="combat-indicator">
+    {groups.length ? <div className="combat-indicators">{groups.map(group => <details className="combat-indicator" key={group.key}>
       <summary><div className="combat-indicator-heading"><b>{group.label}</b><small>{group.side} · {group.domain}{group.tagText && ` · ${group.tagText}`}</small></div>
         <div className="combat-indicator-value"><b>{group.preview}</b>{group.additionalCount > 0 && <small>{group.additionalCount} 组条件 / 描述</small>}</div><ChevronDown size={15} className="combat-chevron" /></summary>
       {group.rows.map((row, index) => <EffectSources key={index} row={row} entries={entries} />)}
-    </details></React.Fragment>)}</div> : <p className="combat-empty">无相关效果</p>}
+    </details>)}</div> : <p className="combat-empty">无相关效果</p>}
   </details>;
 }
 

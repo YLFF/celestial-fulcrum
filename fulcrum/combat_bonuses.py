@@ -128,8 +128,8 @@ def _relic_state(row, definition):
         value = raw
         if value is not None and (type(value) is not int or value < 0):
             raise ValueError("藏品层数必须为非负整数")
-    binding = row.get("enchantment")
-    ids = row.get("operatorInstanceIds", [binding["operatorInstanceId"]] if binding else [])
+    from .relic_presentation import binding_recipients
+    ids = row.get("operatorInstanceIds", [item["operatorInstanceId"] for item in binding_recipients(row)])
     state = {"value": value, "operatorInstanceIds": ids}
     if value is not None or kind != "stacking":
         validate_runtime_state(definition, state)
@@ -180,7 +180,7 @@ def _scope(clause, operator, include_scoped=False):
             pending.append(f"{SCOPE_LABELS[key]}未确认")
         elif actual not in expected:
             return None
-    if operator is not None and scope.get("selection") == "one_random_in_squad_operator_at_battle_start" and not operator["inSquad"]:
+    if operator is not None and scope.get("selection") == "one_random_in_squad_operator_at_battle_start":
         return None
     if scope.get("unitType") == "summon":
         return "related", pending
@@ -549,7 +549,10 @@ def summarize_combat_bonuses(state, *, context=None, operator_instance_id=None, 
         if relic_id not in definitions:
             notices.append("藏品词条尚未定义：" + relic_id)
             continue
-        states[relic_id] = _relic_state(raw, definitions[relic_id])
+        from .relic_presentation import runtime_status
+        runtime = runtime_status(state, raw)
+        effective = {**raw, "state": runtime["value"]} if runtime["automatic"] and definitions[relic_id]["management"]["kind"] == "stacking" and "value" not in raw else raw
+        states[relic_id] = _relic_state(effective, definitions[relic_id])
         acquisitions[relic_id] = raw.get("acquisitionId")
     effect_states = [(key, status, acquisitions[key], False) for key, status in states.items()]
     # Already granted operator buffs can outlive the held relic, without settling again.

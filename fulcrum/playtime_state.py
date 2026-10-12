@@ -616,6 +616,8 @@ def _event_status(
 
 
 def rebuild_derived(state: dict[str, Any]) -> None:
+    from .relic_presentation import runtime_status
+    state["relicRuntime"] = {row["id"]: runtime_status(state, row) for row in state.get("relics", [])}
     events = _events()
     completions: dict[str, list[tuple[str, str, str]]] = {event["id"]: [] for event in events}
     outcomes: dict[str, dict[str, str]] = {event["id"]: {} for event in events}

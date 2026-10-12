@@ -4,7 +4,7 @@
   "oneShotOperatorRelics": ["relic_174", "relic_175", "relic_176", "relic_177", "relic_178", "relic_179", "relic_180", "relic_181", "relic_182", "relic_183", "relic_184", "relic_185", "relic_186", "relic_187", "relic_188"],
   "oneShotOtherRelics": ["relic_216", "relic_233"],
   "promotionEffectRelics": ["relic_174", "relic_175", "relic_176", "relic_177", "relic_178", "relic_179", "relic_180", "relic_181"],
-  "autoPromote": false,
+  "autoPromote": true,
   "defaultMaxRecipients": 1,
   "recipientOverrides": {"relic_188": 2},
   "endingRelics": ["relic_225", "relic_226", "relic_227", "relic_228", "relic_229", "relic_230"],

@@ -16,15 +16,16 @@ def management_for(relic_id):
     """Return confirmed policy; unknown management is not silently ordinary."""
     path = DEFINITIONS_PATH.parent / "management.json"
     policy = json.loads(path.read_text(encoding="utf-8"))
+    definition = load_definitions().get(relic_id)
     if relic_id in policy["oneShotOperatorRelics"]:
-        return {"kind": "one_shot", "bindOperator": True,
+        return {**(definition["management"] if definition else {}), "kind": "one_shot", "bindOperator": True,
                 "maxRecipients": policy["recipientOverrides"].get(relic_id, policy["defaultMaxRecipients"]),
-                "promotionEffect": relic_id in policy["promotionEffectRelics"], "autoPromote": False}
+                "promotionEffect": relic_id in policy["promotionEffectRelics"],
+                "autoPromote": relic_id in policy["promotionEffectRelics"]}
     if relic_id in policy["oneShotOtherRelics"]:
         return {"kind": "one_shot", "bindOperator": False}
     if relic_id in policy["confirmedStacking"]:
         return {"kind": "stacking", "bindOperator": False, **policy["confirmedStacking"][relic_id]}
-    definition = load_definitions().get(relic_id)
     return definition["management"] if definition else None
 
 

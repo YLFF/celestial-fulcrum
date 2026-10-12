@@ -453,6 +453,8 @@ pre { overflow: auto; max-height: 220px; font-size: 10px; color: #728778; }
 @media (prefers-reduced-motion: reduce) { .candidate-art > .node-icon { animation: none; } .candidate-art > .candidate-overlay { opacity: .65; } }
 .planning-items { padding-top: 14px; }
 .planning-search-options { margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); }
+.manual-map-fallback { display: flex; justify-content: flex-start; margin: 14px 0; }
+.manual-map-fallback button { color: var(--accent); }
 .planning-items h3 { font-size: 13px; }
 .planning-item-row { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 9px; padding: 10px 0; border-top: 1px solid var(--border); }
 .planning-item-row > b { font-size: 11px; padding-top: 12px; }
@@ -517,7 +519,10 @@ pre { overflow: auto; max-height: 220px; font-size: 10px; color: #728778; }
 .relic-display-group > div { display: flex; flex-wrap: wrap; gap: 4px; }
 .relic-display-group.classified { display: flex; align-items: center; gap: 7px; flex-shrink: 0; }
 .relic-display-group > small { width: 52px; flex-shrink: 0; font-size: 10px; color: var(--muted, #63776a); }
-.enchantment-controls { min-width: 0; }
+.enchantment-controls { min-width: 0; display: grid; gap: 6px; }
+.relic-runtime-status { color: var(--accent); font-size: 12px; }
+.template-navigation { display: flex; gap: 6px; align-items: center; min-width: 0; }
+.template-navigation select { flex: 1; width: 0; min-width: 0; }
 .enchantment-controls select { width: 100%; min-width: 0; }
 .enchantment-applied { display: block; font-size: 11px; color: var(--accent, #184e3d); overflow-wrap: anywhere; }
 .operator-row-actions { min-width: 108px; }

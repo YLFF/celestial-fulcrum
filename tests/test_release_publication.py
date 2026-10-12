@@ -52,6 +52,7 @@ class ReleasePublicationTests(unittest.TestCase):
         self.assertIn("data/scoring/blackflow/default.json", names)
         self.assertIn("data/scoring/blackflow/relics.json", names)
         self.assertIn("tests/fixtures/arkrog_30.json", names)
+        self.assertIn("tests/fixtures/n15_floor2_combat.json", names)
         for path in (ROOT / "data/relic_effects").rglob("*.json"):
             self.assertIn(path.relative_to(ROOT).as_posix(), names)
         self.assertIn("packaging/fulcrum.spec", names)

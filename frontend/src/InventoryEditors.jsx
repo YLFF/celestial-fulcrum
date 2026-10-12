@@ -5,25 +5,37 @@ import { componentAppraisalTotal, componentCommands, num, orderedOperatorRoster,
 import CatalogPicker from './CatalogPicker';
 import { SOURCE_CHOICES, sourceChoice } from './picker';
 import { acquireDraft, appraisalDraft } from './componentAppraisal';
-import { canEnchant, enchantCommands, manualTrainingPromotion, relicActive } from './relicPresentation';
+import { boundRecipients, canEnchant, enchantCommands, manualTrainingPromotion, newestRelics, recipientIds, relicActive, relicManagement, relicStatus, toggleRecipient } from './relicPresentation';
 import CombatBonusDialog from './CombatBonusDialog';
 
 export function RelicEditor({ state, catalog, entries, onSave, onClose, busy, adding = false }) {
   const [items, setItems] = useState(structuredClone(state.relics));
   const [assignments, setAssignments] = useState({});
-  function assign(id, operatorId) { setAssignments(current => { const next = { ...current }; if (operatorId) next[id] = operatorId; else delete next[id]; return next; }); }
+  function assign(id, operatorId, slot = 0) { setAssignments(current => {
+    const next = { ...current }, ids = [...(next[id] || [])]; ids[slot] = operatorId;
+    next[id] = ids; return next;
+  }); }
   const change = (index, changes) => setItems(items.map((row, i) => i === index ? { ...row, ...changes } : row));
   return <Modal title={`藏品 · ${items.reduce((a, b) => a + (b.count || 1), 0)} 件`} onClose={onClose} wide footer={<SaveButton busy={busy} onClick={() => onSave([{ type: 'relics', items }, ...enchantCommands(assignments)])} />}>
     <div className="picker-layout"><CatalogPicker autoFocus={adding} rows={catalog.relic} selectedIds={items.filter(row => row.id !== 'relic_014' && !/^relic_(03[2-7]|24[0-3])$/.test(row.id)).map(row => row.id)} onAdd={({ id }) => setItems(items.some(row => row.id === id) ? items.map(row => row.id === id ? { ...row, count: (row.count || 1) + 1 } : row) : [...items, { id, count: 1, state: null }])} />
-    <div className="editor-list">{items.map((row, index) => <div className="relic-edit-row" key={row.id}>
+    <div className="editor-list">{newestRelics(items).map(({ row, index }) => {
+      const entry = entries[row.id], management = relicManagement(entry), status = relicStatus(row, entry, state);
+      return <div className="relic-edit-row" key={row.id}>
       <EntryImage entry={entries[row.id]} className="inventory-image" /><div className="item-title"><b>{entries[row.id]?.name || row.id}</b><small>{row.id}</small></div>
-      {entries[row.id]?.enchantmentProfession ? <div className="enchantment-controls">
-        {relicActive(row) ? <span className="enchantment-applied">已生效{row.enchantment ? ` · ${row.enchantment.operatorName}` : ' · 受益干员未记录'}</span>
-          : <label className="field"><span>{assignments[row.id] ? '待保存附魔' : `附魔 · ${entries[row.id].enchantmentProfession}`}</span><select aria-label={`${entries[row.id].name} 受益干员`} value={assignments[row.id] || ''} onChange={e => assign(row.id, e.target.value)}>
-            <option value="">未生效 / 选择干员</option>{state.operators.filter(operator => canEnchant(row, operator, entries)).map(operator => <option key={operator.instanceId} value={operator.instanceId}>{operator.name}</option>)}</select></label>}
-      </div> : <label className="field"><span>层数 / 生效</span><input aria-label={`${entries[row.id]?.name} 层数 / 生效`} placeholder="层数或生效状态" value={row.state ?? ''} onChange={e => change(index, { state: e.target.value === '' ? null : /^\d+$/.test(e.target.value) ? Number(e.target.value) : e.target.value })} /></label>}
-      <IconButton icon={Trash2} label={`移除 ${entries[row.id]?.name}`} onClick={() => { setItems(items.filter((_, i) => i !== index)); assign(row.id, null); }} />
-    </div>)}</div></div>
+      {management.bindOperator ? <div className="enchantment-controls">
+        {relicActive(row) ? <span className="enchantment-applied">已生效 · {boundRecipients(row).map(item => item.operatorName).join('、') || '受益干员未记录'}</span>
+          : Array.from({ length: management.maxRecipients || 1 }, (_, slot) => <label className="field" key={slot}>
+            <span>{recipientIds(assignments[row.id]).some(Boolean) ? '待保存附魔' : `附魔${management.profession ? ` · ${management.profession}` : ''}`}{management.promotionEffect && ' · 自动进阶'}</span>
+            <select aria-label={`${entry.name} 受益干员${slot ? ` ${slot + 1}` : ''}`} value={assignments[row.id]?.[slot] || ''} onChange={e => assign(row.id, e.target.value, slot)}>
+            <option value="">未生效 / 选择干员</option>{state.operators.filter(operator => canEnchant(row, operator, entries)).map(operator => <option key={operator.instanceId} value={operator.instanceId}
+              disabled={(assignments[row.id] || []).some((id, index) => index !== slot && id === operator.instanceId)}>{operator.name}</option>)}</select></label>)}
+      </div> : status.readOnly ? <span className="relic-runtime-status">{status.label}</span>
+        : status.kind === 'stacking' ? <NumberField label="层数" aria-label={`${entry.name} 层数`} value={row.state} nullable
+          max={management.maximum} min={management.minimum || 0} onChange={value => change(index, { state: value })} />
+        : <label className="field"><span>生效状态</span><select aria-label={`${entry.name} 生效状态`} value={relicActive(row) ? 'active' : 'inactive'}
+          onChange={e => change(index, { state: e.target.value })}><option value="inactive">未生效</option><option value="active">已生效</option></select></label>}
+      <IconButton icon={Trash2} label={`移除 ${entries[row.id]?.name}`} onClick={() => { setItems(items.filter((_, i) => i !== index)); setAssignments(current => { const next = { ...current }; delete next[row.id]; return next; }); }} />
+    </div>; })}</div></div>
   </Modal>;
 }
 
@@ -92,7 +104,7 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
       }
     }
     commands.push({ type: 'squad', operatorIds: squad.filter(id => live.has(id)) });
-    commands.push(...enchantCommands(Object.fromEntries(Object.entries(assignments).filter(([, id]) => live.has(id)))));
+    commands.push(...enchantCommands(Object.fromEntries(Object.entries(assignments).map(([id, value]) => [id, recipientIds(value).filter(recipient => live.has(recipient))]))));
     await onSave(commands);
   }
   if (bonusOperator) return <CombatBonusDialog loaded={loaded} areaKey={areaKey} entries={entries}
@@ -122,15 +134,17 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
       {settle && <NumberField label="希望费用" value={row.hopeCost} nullable onChange={value => change(row.instanceId, { hopeCost: value })} />}
       <div className="operator-row-actions operator-bonus-actions"><IconButton icon={ChartNoAxesCombined} label={`查看 ${row.name} 加成（已保存状态）`}
         disabled={busy || !loaded || !state.operators.some(item => item.instanceId === row.instanceId)} onClick={() => setBonusOperator(row.instanceId)} />
-        <IconButton icon={WandSparkles} label={`附魔 ${row.name}`} disabled={busy || !state.relics.some(relic => canEnchant(relic, row, entries))} onClick={() => setEnchantOperator(enchantOperator === row.instanceId ? null : row.instanceId)} />
+        <IconButton icon={WandSparkles} label={`附魔 ${row.name}`} disabled={busy} onClick={() => setEnchantOperator(enchantOperator === row.instanceId ? null : row.instanceId)} />
         <IconButton icon={ChevronsUp} label={`进阶 ${row.name}`} disabled={busy || row.elite === 2 || !operatorProgressOptions(row.rarity, row.elite).includes(2)} onClick={() => change(row.instanceId, { elite: 2 })} />
         <IconButton icon={Trash2} label={`移除干员 ${row.name}`} disabled={busy} onClick={() => setPendingDelete(row)} /></div>
-      {(enchantOperator === row.instanceId || Object.values(assignments).includes(row.instanceId) || state.relics.some(relic => relic.enchantment?.operatorInstanceId === row.instanceId)) &&
-        <div className="operator-enchantments">{state.relics.filter(relic => relic.enchantment?.operatorInstanceId === row.instanceId).map(relic => <span key={relic.id}>{entries[relic.id]?.name} · 已生效</span>)}
-          {state.relics.filter(relic => canEnchant(relic, row, entries) && (enchantOperator === row.instanceId || assignments[relic.id] === row.instanceId)).map(relic => <label className="checkbox-field" key={relic.id}>
-            <input type="checkbox" checked={assignments[relic.id] === row.instanceId} disabled={!!assignments[relic.id] && assignments[relic.id] !== row.instanceId} onChange={e => setAssignments(current => {
-              const next = { ...current }; if (e.target.checked) next[relic.id] = row.instanceId; else delete next[relic.id]; return next;
-            })} /><EntryImage entry={entries[relic.id]} className="inventory-image" />{entries[relic.id]?.name}{assignments[relic.id] === row.instanceId ? ' · 待保存' : ''}</label>)}
+      {(enchantOperator === row.instanceId || Object.values(assignments).some(value => recipientIds(value).includes(row.instanceId)) || state.relics.some(relic => boundRecipients(relic).some(item => item.operatorInstanceId === row.instanceId))) &&
+        <div className="operator-enchantments">{state.relics.filter(relic => boundRecipients(relic).some(item => item.operatorInstanceId === row.instanceId)).map(relic => <span key={relic.id}>{entries[relic.id]?.name} · 已生效</span>)}
+          {!state.relics.some(relic => canEnchant(relic, row, entries)) && <span className="quiet">无可用的附魔藏品</span>}
+          {state.relics.filter(relic => canEnchant(relic, row, entries) && (enchantOperator === row.instanceId || recipientIds(assignments[relic.id]).includes(row.instanceId))).map(relic => <label className="checkbox-field" key={relic.id}>
+            <input type="checkbox" aria-label={`将${entries[relic.id]?.name}附魔至${row.name}`} checked={recipientIds(assignments[relic.id]).includes(row.instanceId)}
+              disabled={!recipientIds(assignments[relic.id]).includes(row.instanceId) && recipientIds(assignments[relic.id]).length >= (relicManagement(entries[relic.id]).maxRecipients || 1)}
+              onChange={e => setAssignments(current => toggleRecipient(current, relic.id, row.instanceId, e.target.checked))} />
+            <EntryImage entry={entries[relic.id]} className="inventory-image" />{entries[relic.id]?.name}{recipientIds(assignments[relic.id]).includes(row.instanceId) ? ' · 待保存' : ''}{relicManagement(entries[relic.id]).promotionEffect && ' · 自动进阶'}</label>)}
         </div>}
     </section>)}</div></div>
   </Modal>;

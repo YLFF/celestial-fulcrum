@@ -9,6 +9,7 @@ import unittest
 from fastapi.testclient import TestClient
 
 from fulcrum.combat_bonuses import describe_layer_environment, fresh_relic_state, render_combat_bonuses, summarize_combat_bonuses
+from fulcrum.manual_map import create_manual_map, templates_for_area
 from fulcrum.playtime_state import new_playtime
 from fulcrum.relic_effects import evaluate_numeric, load_definitions
 from fulcrum.service.app import create_app
@@ -29,7 +30,7 @@ class CombatBonusTests(unittest.TestCase):
         cls.definitions = load_definitions()
 
     def setUp(self):
-        sample = json.loads((ROOT / "samples/combat_bonuses/n15_floor2.json").read_text(encoding="utf-8"))
+        sample = json.loads((ROOT / "tests/fixtures/n15_floor2_combat.json").read_text(encoding="utf-8"))
         self.state, self.context = sample["state"], sample["context"]
 
     def report(self, **context):
@@ -166,14 +167,24 @@ class CombatBonusTests(unittest.TestCase):
         for view in report["operators"]:
             constant = rows(view, "attack", "operator", bucket="constant")[0]
             self.assertEqual(constant["relativeFactor"], "1.94")
-            random = rows(view, "attack", "operator", bucket="conditional")[0]
-            self.assertEqual(random["relativeFactor"], "1.55")
+            self.assertFalse(rows(view, "attack", "operator", bucket="conditional"))
+        random = rows(report["global"], "attack", "friendly_operator", bucket="conditional")[0]
+        self.assertEqual(random["relativeFactor"], "1.55")
         self.state["squad"] = ["angelina"]
         self.assertFalse(rows(self.report()["operators"][0], "attack", "operator", bucket="conditional"))
         for key in ("relic_193", "relic_208", "relic_218"):
             self.assertEqual(fresh_relic_state(key)["value"], 0)
             self.assertTrue(self.definitions[key]["lossPolicy"]["resetCounterOnReacquire"])
         self.assertFalse(self.definitions["relic_198"]["effects"][0]["revokeOnLoss"])
+
+    def test_random_battle_recipient_relics_are_not_operator_bonuses(self):
+        self.state["relics"] = [{"id": "relic_061"}, {"id": "relic_197", "value": 10}]
+        report = self.report()
+        global_sources = {source["id"] for group in report["global"]["detailCategories"] for row in group["rows"] for source in row["sources"]}
+        self.assertTrue({"relic_061", "relic_197"} <= global_sources)
+        for view in report["operators"]:
+            sources = {source["id"] for group in view["categories"] for row in group["rows"] for source in row["sources"]}
+            self.assertFalse({"relic_061", "relic_197"} & sources)
 
     def test_cash_snapshot_and_component_count_are_from_real_state(self):
         self.state["resources"] = {"originiumIngot": 14}
@@ -384,9 +395,8 @@ class CombatBonusApiTests(unittest.TestCase):
             app = create_app(root)
             with TestClient(app, client=("127.0.0.1", 12345)) as client:
                 headers = {"X-Fulcrum-Token": client.get("/api/session").json()["token"]}
-                state = json.loads((ROOT / "runs/true-run-001/playtime.json").read_text(encoding="utf-8"))
-                slot = state["areas"]["I"]
-                instance = next(item for item in slot["instances"] if item["instanceId"] == slot["activeInstanceId"])
+                state = new_playtime("environment-test", squad_id="squad_014")
+                instance = create_manual_map(state, "I", templates_for_area("I")[0].id)
                 instance["dystopia"] = {"active": True, "ideologyId": "dystopia_001", "policyId": "dystopia_014",
                     "affectedNodeIds": list(instance["nodes"]), "uncertainNodeIds": [], "idealSourceNodeId": None}
                 initial = client.post("/api/runs/restore", json={"state": state, "runId": "environment-test"}, headers=headers).json()

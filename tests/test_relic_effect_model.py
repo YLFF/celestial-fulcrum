@@ -80,7 +80,7 @@ class RelicEffectModelTests(unittest.TestCase):
         self.assertEqual(management_for("relic_188")["maxRecipients"], 2)
         self.assertFalse(management_for("relic_188")["promotionEffect"])
         self.assertTrue(management_for("relic_177")["promotionEffect"])
-        self.assertFalse(management_for("relic_177")["autoPromote"])
+        self.assertTrue(management_for("relic_177")["autoPromote"])
         self.assertIsNone(management_for("relic_999"))
 
     def test_stacking_expiry_preserves_counter(self):

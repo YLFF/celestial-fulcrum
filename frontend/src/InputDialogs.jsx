@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScanLine, RefreshCw, Monitor, LoaderCircle } from 'lucide-react';
+import { ScanLine, RefreshCw, Monitor, LoaderCircle, Map as MapIcon } from 'lucide-react';
 import { api } from './api';
 import { readPreference } from './preferences';
 import { captureTarget, rememberedCaptureWindow } from './captureTarget';
@@ -9,13 +9,15 @@ import MapView from './MapView';
 import { SpecialRegionFields } from './DystopiaEditor';
 import { dystopiaFromObservation, emptyDystopia } from './dystopia';
 import { recognitionChanges, recognitionReview, mergedRecognitionPreview } from './recognitionMerge';
+import ManualMapDialog from './ManualMapDialog';
 
 const FIELDS = { life: '生命', shield: '护盾', level: '等级', experience: '经验', hope: '希望', originium_ingot: '源石锭', action_points: '行动力' };
 const TARGETS = { life: 'life', shield: 'shield', level: 'level', experience: 'experience', hope: 'hope', originium_ingot: 'originiumIngot' };
 
-export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJob, onConfirm, onClose, busy, notify, onAsset }) {
+export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJob, onConfirm, onManualCreate, onClose, busy, notify, onAsset }) {
   const [asset, setAsset] = useState(assetInfo || null), [area, setArea] = useState(''), [template, setTemplate] = useState('');
   const [working, setWorking] = useState(false), [candidate, setCandidate] = useState(null);
+  const [manual, setManual] = useState(false);
   const [fields, setFields] = useState({}), [selected, setSelected] = useState({}), [confirmMap, setConfirmMap] = useState(true);
   const [newInstance, setNewInstance] = useState(false), [position, setPosition] = useState(''), [completePosition, setCompletePosition] = useState(false);
   const [nodeChanges, setNodeChanges] = useState({}), [error, setError] = useState('');
@@ -103,6 +105,8 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
   const previewMap = mergedRecognitionPreview(observation, oldMap, { newInstance, position, completePosition,
     nodeChanges, completions, encounters, markChoices, dystopia, utopiaId });
   const changes = recognitionChanges(observation, oldMap, newInstance);
+  if (manual) return <ManualMapDialog loaded={loaded} catalog={catalog} entries={entries}
+    initialArea={chosenArea || area} asset={asset} busy={busy} onCreate={onManualCreate} onClose={() => setManual(false)} />;
   return <Modal title={candidate ? '确认识别结果' : '导入截图'} onClose={onClose} wide footer={candidate ?
     <><button onClick={recognize} disabled={working}><RefreshCw size={15} />重新识别</button><SaveButton busy={busy || working} onClick={confirm}>确认入局</SaveButton></> :
     <SaveButton busy={working} onClick={recognize} disabled={working || !asset}><ScanLine size={16} />开始识别</SaveButton>}>
@@ -110,6 +114,9 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
       <option value="">自动判层</option>{Object.entries(AREA_NAMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
       <label className="field"><span>指定模板 ID（可选）</span><input value={template} onChange={e => { setTemplate(e.target.value); setCandidate(null); }} /></label></div>
     {error && <div role="alert" className="form-error">{error}</div>}
+    {(error || (observation && !observation.success)) && <div className="manual-map-fallback">
+      <button onClick={() => setManual(true)} disabled={busy || working}><MapIcon size={16} />选择层数与模板，手动建图</button>
+    </div>}
     {asset && (candidate ? <details><summary>原始截图</summary><div className="recognition-preview"><AssetImage assetId={asset.assetId} className="screenshot-preview" /></div></details> : <div className="recognition-preview"><AssetImage assetId={asset.assetId} className="screenshot-preview" /></div>)}
     {working && <div className="pending"><LoaderCircle size={18} className="spin" />识别任务进行中</div>}
     {observation && <>
@@ -179,7 +186,7 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
 
 export function CaptureDialog({ onClose, onCaptured, notify }) {
   const [windows, setWindows] = useState([]), [selected, setSelected] = useState(''), [method, setMethod] = useState('graphics');
-  const [consent, setConsent] = useState(false), [crop, setCrop] = useState(false), [rect, setRect] = useState([0, 0, 1920, 1080]);
+  const [consent, setConsent] = useState(() => readPreference('fulcrum-capture-consent') === 'true'), [crop, setCrop] = useState(false), [rect, setRect] = useState([0, 0, 1920, 1080]);
   const [working, setWorking] = useState(false), [error, setError] = useState('');
   async function refresh() {
     try {
@@ -189,7 +196,7 @@ export function CaptureDialog({ onClose, onCaptured, notify }) {
       let saved;
       try { saved = JSON.parse(readPreference('fulcrum-capture-target')); } catch { saved = null; }
       const target = rows.find(row => row.windowId === selected && !row.minimized) || rememberedCaptureWindow(rows, saved);
-      setSelected(target?.windowId || ''); setConsent(false);
+      setSelected(target?.windowId || '');
       if (target) setRect([0, 0, target.clientRect.width, target.clientRect.height]);
     }
     catch (e) { setError(e.message); }
@@ -210,7 +217,7 @@ export function CaptureDialog({ onClose, onCaptured, notify }) {
   return <Modal title="选择窗口截图" onClose={onClose} footer={<SaveButton busy={working} disabled={working || !selected || !consent} onClick={capture}><Monitor size={15} />授权并截取</SaveButton>}>
     <div className="section-heading"><h3>可见窗口</h3><button onClick={refresh}><RefreshCw size={15} />刷新</button></div>
     <label className="field"><span>目标进程 / 窗口</span><select aria-label="目标进程 / 窗口" value={selected} onChange={e => {
-      setSelected(e.target.value); setConsent(false); const row = windows.find(w => w.windowId === e.target.value);
+      setSelected(e.target.value); const row = windows.find(w => w.windowId === e.target.value);
       if (row) setRect([0, 0, row.clientRect.width, row.clientRect.height]);
     }}><option value="">选择窗口</option>{windows.map(w => <option key={w.windowId} value={w.windowId} disabled={w.minimized}>
       {w.foreground ? '前台 · ' : ''}{w.process || w.pid} · {w.title}{w.minimized ? '（最小化）' : ''}</option>)}</select></label>
@@ -218,7 +225,10 @@ export function CaptureDialog({ onClose, onCaptured, notify }) {
       <option value="graphics">窗口内容 · Windows Graphics Capture</option><option value="printwindow">窗口内容 · PrintWindow</option><option value="screen">屏幕区域 · 可能包含遮挡</option></select></label>
     <label className="checkbox-field"><input type="checkbox" checked={crop} onChange={e => setCrop(e.target.checked)} />裁剪客户区</label>
     {crop && <div className="form-grid">{['X', 'Y', '宽度', '高度'].map((label, index) => <NumberField key={label} label={label} value={rect[index]} min={index < 2 ? 0 : 1} onChange={value => setRect(rect.map((x, i) => i === index ? value : x))} />)}</div>}
-    <label className="checkbox-field consent"><input type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)} />允许本次截取所选窗口</label>
+    <label className="checkbox-field consent"><input type="checkbox" checked={consent} onChange={e => {
+      setConsent(e.target.checked);
+      try { localStorage.setItem('fulcrum-capture-consent', String(e.target.checked)); } catch { /* Keep consent for this dialog if storage is unavailable. */ }
+    }} />允许截取所选窗口</label>
     {error && <div role="alert" className="form-error">{error}</div>}
   </Modal>;
 }

@@ -108,6 +108,14 @@ class ConfirmRecognition(RevisionRequest):
     commands: list[dict[str, Any]] = Field(default_factory=list, max_length=200)
 
 
+class ManualMapRequest(RevisionRequest):
+    areaKey: str
+    templateId: str
+    replaceExisting: bool = False
+    actionPoints: int | None = Field(default=None, ge=0)
+    assetId: str | None = None
+
+
 class CaptureRequest(StrictModel):
     pid: int = Field(ge=1)
     windowId: str
@@ -469,6 +477,24 @@ def create_app(storage_root=None, *, allowed_origins=None):
     @app.post("/api/jobs/{job_id}/cancel", dependencies=auth)
     def cancel(job_id: str):
         return app.state.jobs.cancel(job_id)
+
+    @app.get("/api/map-templates", dependencies=auth)
+    def map_templates(areaKey: str):
+        from ..manual_map import template_options
+        return {"areaKey": areaKey, "templates": template_options(areaKey)}
+
+    @app.post("/api/runs/{run_id}/manual-map", dependencies=auth)
+    def manual_map(run_id: str, body: ManualMapRequest):
+        from ..manual_map import create_manual_map
+        if body.assetId:
+            assets.load(body.assetId)
+        source = assets.path(body.assetId) if body.assetId else None
+        def mutate(draft):
+            instance = create_manual_map(draft, body.areaKey, body.templateId,
+                replace_existing=body.replaceExisting, action_points=body.actionPoints)
+            if source:
+                instance.update(sourceAssetId=body.assetId, sourceScreenshot=str(source))
+        return store.update(run_id, body.expectedRevision, mutate, map_update=True)
 
     @app.post("/api/runs/{run_id}/confirm-recognition", dependencies=auth)
     def confirm(run_id: str, body: ConfirmRecognition):

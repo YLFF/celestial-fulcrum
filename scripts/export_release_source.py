@@ -16,6 +16,7 @@ EXTRA_FILES = (
     "scripts/export_release_source.py", "scripts/new_run.py",
     "experiments/__init__.py", "experiments/node_prediction_beta.py",
     "tests/fixtures/arkrog_30.json",
+    "tests/fixtures/n15_floor2_combat.json",
 )
 TREES = {
     "fulcrum": {".py"},

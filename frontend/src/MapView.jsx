@@ -111,7 +111,7 @@ export default function MapView({ instance, catalog, entries, scores, route, onS
               })}
             </svg>
             {geometry.nodes.map(node => {
-              const category = preview && !node.observedCategoryId && !node.resolvedCategoryId ? 'unreadable' : nodeCategory(node), point = geometry.points[node.id];
+              const category = !node.observedCategoryId && !node.resolvedCategoryId ? 'unreadable' : nodeCategory(node), point = geometry.points[node.id];
               const position = instance.playerPosition === node.id;
               const value = scores?.nodeValues?.[node.id];
               const name = catalog.labels.nodeTypes[category] || (category === 'unreadable' ? '待确认' : category);
@@ -141,7 +141,7 @@ export default function MapView({ instance, catalog, entries, scores, route, onS
     </div>
     </div>
     {hover && <div className="hover-sheet" style={{ left: Math.max(8, Math.min(window.innerWidth - 264, hover.rect.right + 8)), top: Math.max(8, Math.min(window.innerHeight - 250, hover.rect.top)) }}>
-      <b>{catalog.labels.nodeTypes[nodeCategory(hover.node)]} <span>({hover.node.id})</span></b>
+      <b>{catalog.labels.nodeTypes[hover.node.resolvedCategoryId || hover.node.observedCategoryId] || '待确认'} <span>({hover.node.id})</span></b>
       <div className="hover-score">{num(scores?.nodeValues?.[hover.node.id]?.arrivalPoints ?? scores?.nodeValues?.[hover.node.id]?.points)}<small>期望分</small></div>
       <div className="hover-foot">节点 {num(scores?.nodeValues?.[hover.node.id]?.points)} + 揭示 {num(scores?.nodeValues?.[hover.node.id]?.revealValue)}</div>
       {scores?.nodeValues?.[hover.node.id]?.referenceLoss && <div className="reference-loss-inline">上贡损失 {num(scores.nodeValues[hover.node.id].referenceLoss.points)} 分

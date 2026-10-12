@@ -4,7 +4,7 @@ import { Plus, Upload, Download, ImagePlus, ScanLine, Monitor, Undo2, Redo2, Ref
 import { api, download, setToken } from './api';
 import { applyTheme, savedTheme } from './theme';
 import { readPreference } from './preferences.js';
-import { relicGroups } from './relicPresentation';
+import { boundRecipients, relicGroups } from './relicPresentation';
 import { filterRoutes } from './routeFilters';
 import { searchOptionsError } from './planningOptions';
 import { AREA_NAMES, componentAppraisalTotal, currentInstance, num, operatorProgressLabel, pct, routeNodeName, SOURCES, stepScoreDetails } from './model';
@@ -189,6 +189,14 @@ export default function App() {
       await openRun(value.runId, false); await listRuns(); notify('藏品已追加，原有藏品保留');
     } catch (error) { failed(error); } finally { setBusy(false); }
   }
+  async function createManualMap(body) {
+    setBusy(true);
+    try {
+      const value = await api(`/api/runs/${modal.source.runId}/manual-map`, { method: 'POST', body });
+      setModal(null);
+      await openRun(value.runId); await listRuns(); notify('手动地图已建立，请补充待确认节点');
+    } finally { setBusy(false); }
+  }
   async function search() {
     try {
       const source = loadedRef.current;
@@ -282,7 +290,7 @@ export default function App() {
           actions={<><div className="segmented relic-view-switch" aria-label="藏品展示方式"><button className={relicView === 'acquired' ? 'active' : ''} onClick={() => setRelicView('acquired')}>获得顺序</button><button className={relicView === 'category' ? 'active' : ''} onClick={() => setRelicView('category')}>分类</button></div><IconButton icon={ScanLine} label="识别藏品" disabled={!state || busy || !caps.relicRecognition} onClick={() => edit('relicRecognition', { assetInfo: lastAsset })} />
             <button className="bonus-button" title="查看全体干员战斗加成" onClick={() => edit('combatBonuses')} disabled={!state || busy || !caps.relicEffectAggregation}><Sparkles size={14} />加成汇总</button></>}>
           {(relicView === 'category' ? relicGroups(state?.relics || [], entries, catalog.relicCategories) : [{ name: '', items: state?.relics || [] }]).map(group => <div className={`relic-display-group ${group.name ? 'classified' : ''}`} key={group.name}>
-            {group.name && <small>{group.name}</small>}<div>{group.items.map(row => <button key={row.id} className="inventory-token" title={`${entries[row.id]?.name}${row.enchantment ? ` · 已附魔 ${row.enchantment.operatorName}` : ''}`} onClick={() => edit('relics')}><EntryImage entry={entries[row.id]} className="inventory-image" />{row.count > 1 && <span>{row.count}</span>}</button>)}</div>
+            {group.name && <small>{group.name}</small>}<div>{group.items.map(row => <button key={row.id} className="inventory-token" title={`${entries[row.id]?.name}${row.enchantment ? ` · 已附魔 ${boundRecipients(row).map(item => item.operatorName).join('、')}` : ''}`} onClick={() => edit('relics')}><EntryImage entry={entries[row.id]} className="inventory-image" />{row.count > 1 && <span>{row.count}</span>}</button>)}</div>
           </div>)}
           {!state?.relics.length && <span className="quiet">暂无藏品</span>}
         </InventoryStrip>
@@ -376,7 +384,7 @@ export default function App() {
       entries={entries} mode={planMode} topN={topN} budget={budget} onTopNChange={value => { setTopN(value); setPlanning(null); }}
       onBudgetChange={value => { setBudget(value); setPlanning(null); }} busy={busy} onClose={close} onPlan={(ids, items) => executeSearch(ids, modal.source, items)} />}
     {modal?.type === 'batchNodes' && <BatchNodeEditor ids={modal.ids} areaKey={area} catalog={catalog} onClose={close} onSave={saveModal} busy={busy} />}
-    {modal?.type === 'upload' && <UploadDialog key={modal.file?.name || modal.assetInfo?.assetId} {...modal} loaded={modal.source} catalog={catalog} entries={entries} startJob={startJob} onConfirm={confirmRecognition} onClose={close} busy={busy} notify={notify} onAsset={setLastAsset} />}
+    {modal?.type === 'upload' && <UploadDialog key={modal.file?.name || modal.assetInfo?.assetId} {...modal} loaded={modal.source} catalog={catalog} entries={entries} startJob={startJob} onConfirm={confirmRecognition} onManualCreate={createManualMap} onClose={close} busy={busy} notify={notify} onAsset={setLastAsset} />}
     {modal?.type === 'capture' && <CaptureDialog onClose={close} notify={notify} onCaptured={assetInfo => setModal({ type: 'upload', source: modal.source, assetInfo })} />}
     {modal?.type === 'relics' && <RelicEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'relicRecognition' && <RelicRecognitionDialog loaded={modal.source} entries={entries} assetInfo={modal.assetInfo} onAsset={setLastAsset}

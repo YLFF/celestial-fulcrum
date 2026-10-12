@@ -1,0 +1,27 @@
+{
+  "state": {
+    "opening": {
+      "difficulty": 15,
+      "technologyCombatBonuses": {"attackPercent": 20, "defensePercent": 20, "maxHpPercent": 25}
+    },
+    "currentAreaKey": "II",
+    "operators": [
+      {"instanceId": "mechanist", "operatorId": "char_4230_mcnist", "name": "机械师", "source": "normal"},
+      {"instanceId": "angelina", "operatorId": "char_1015_aglna2", "name": "予愿安洁莉娜", "source": "normal"}
+    ],
+    "squad": ["mechanist", "angelina"],
+    "relics": [
+      {"id": "relic_199", "value": null},
+      {"id": "relic_052", "value": null},
+      {"id": "relic_180", "value": true, "operatorInstanceIds": ["angelina"]},
+      {"id": "relic_130", "value": null},
+      {"id": "relic_077", "value": null}
+    ]
+  },
+  "context": {
+    "componentCount": 8,
+    "enemyRegionCount": 2,
+    "dystopiaId": "dystopia_001",
+    "dystopiaAffected": true
+  }
+}
