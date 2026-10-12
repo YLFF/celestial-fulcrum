@@ -42,5 +42,6 @@ test('ordinary, bound and computable counters do not expose manual fields', () =
   const dragon = { automaticCounter: 'entered_map_layers', management: { kind: 'stacking', ineffectiveAt: 3 } };
   assert.equal(relicStatus({ id: 'dragon', state: 99 }, dragon, state).label, '2 层');
   assert.equal(relicStatus({ id: 'dragon' }, dragon, { ...state, currentAreaKey: 'III' }).label, '3 层 · 已失效');
+  assert.equal(relicStatus({ id: 'dragon' }, dragon, { ...state, currentAreaKey: null }).label, '待确认 层');
   assert.equal(relicStatus({ id: 'altar', state: 4 }, { management: { kind: 'stacking' } }, state).readOnly, false);
 });

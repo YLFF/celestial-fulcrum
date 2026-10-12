@@ -67,6 +67,8 @@ jobs:
           tests.test_macos_packaging tests.test_release_publication
           tests.test_scoring_profile tests.test_snapshot_scoring
           tests.test_arkrog_comparison tests.test_team_power tests.test_combat_bonuses
+          tests.test_relic_presentation tests.test_relic_effect_model tests.test_manual_map
+          tests.test_route_planner tests.test_route_allocation tests.test_one_step_advice
           tests.test_scoring_calibration.CalibrationMathTests
       - name: Test frontend
         run: |

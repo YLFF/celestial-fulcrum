@@ -67,12 +67,12 @@ def runtime_status(state, row):
     elif automatic in {"entered_map_layers", "entered_regions"}:
         from .playtime_state import AREA_SPECS
         current = state.get("currentAreaKey")
-        floor = AREA_SPECS.get(current, (None, 1))[1]
+        floor = AREA_SPECS.get(current, (None, None))[1]
         visited = {key for key, slot in state.get("areas", {}).items()
-                   if slot.get("activeInstanceId") and AREA_SPECS.get(key, (None, 99))[1] <= floor}
+                   if floor is not None and slot.get("activeInstanceId") and AREA_SPECS.get(key, (None, 99))[1] <= floor}
         visited.add(current)
         caves = sum(key is not None and key.endswith("-treehole") for key in visited)
-        value = floor + (min(1, caves) if automatic == "entered_regions" else caves + int("IV-remembrance" in visited))
+        value = floor + (min(1, caves) if automatic == "entered_regions" else caves + int("IV-remembrance" in visited)) if floor is not None else None
     elif management.get("kind") == "one_shot":
         value = relic_active(row)
     elif management.get("kind") == "ordinary":
