@@ -1,7 +1,5 @@
 from copy import deepcopy
 from dataclasses import replace
-import json
-from pathlib import Path
 import tempfile
 import time
 import unittest
@@ -9,6 +7,8 @@ import unittest
 from fastapi.testclient import TestClient
 
 from fulcrum.decision_advisor import DecisionAdvisor, advise
+from fulcrum.manual_map import create_manual_map, templates_for_area
+from fulcrum.playtime_state import new_playtime, rebuild_derived
 from fulcrum.playtime_route import route_inputs
 from fulcrum.route_allocation import MoveChoice
 from fulcrum.route_planner import RoutePlanner, SCORE_SCALE
@@ -172,7 +172,12 @@ class OneStepAdviceTests(unittest.TestCase):
 
 class AdviceApiTests(unittest.TestCase):
     def test_background_endpoint_supports_both_modes_without_run_mutation(self):
-        fixture = json.loads((Path(__file__).resolve().parents[1] / "runs/true-run-001/playtime.json").read_text(encoding="utf-8"))
+        fixture = new_playtime("advice-api-test", squad_id="squad_014")
+        instance = create_manual_map(fixture, "I", templates_for_area("I")[0].id)
+        for node in instance["nodes"].values():
+            if node["resolvedCategoryId"] is None:
+                node.update(observedCategoryId="node_type_020", resolvedCategoryId="node_type_020", visibility="revealed")
+        rebuild_derived(fixture)
         with tempfile.TemporaryDirectory() as directory, TestClient(create_app(directory)) as client:
             token = client.get("/api/session").json()["token"]
             headers = {"X-Fulcrum-Token": token}

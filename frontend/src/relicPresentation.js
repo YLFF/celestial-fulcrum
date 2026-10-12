@@ -26,8 +26,8 @@ export function relicStatus(row, entry, state) {
     if (entry.automaticCounter === 'snapshot') {
       const count = entry.snapshotCounter.field === 'cash' ? state.resources?.originiumIngot : state.componentBox?.items.length;
       value = count == null ? null : Math.floor(count / (entry.snapshotCounter.unitSize || 1));
-    } else if (value == null) {
-      const floors = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 }, current = state.currentAreaKey || 'I';
+    } else if (value == null && state.currentAreaKey) {
+      const floors = { I: 1, II: 2, III: 3, IV: 4, V: 5, VI: 6 }, current = state.currentAreaKey;
       const floor = floors[current.split('-')[0]], visited = Object.entries(state.areas || {})
         .filter(([key, slot]) => slot.activeInstanceId && floors[key.split('-')[0]] <= floor).map(([key]) => key);
       if (!visited.includes(current)) visited.push(current);

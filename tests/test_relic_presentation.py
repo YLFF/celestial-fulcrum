@@ -164,6 +164,11 @@ class RelicEnchantmentTests(unittest.TestCase):
             self.assertEqual(rejected.status_code, 422)
             self.assertEqual(client.get(path).json()["revision"], 2)
 
+    def test_automatic_layers_do_not_guess_missing_current_area(self):
+        self.state["currentAreaKey"] = None
+        for relic_id in ("relic_034", "relic_035"):
+            self.assertIsNone(runtime_status(self.state, {"id": relic_id, "state": 99})["value"])
+
     def test_api_persistence_atomic_rejection_and_map_history(self):
         with tempfile.TemporaryDirectory() as folder, TestClient(create_app(folder)) as client:
             client.headers["X-Fulcrum-Token"] = client.get("/api/session").json()["token"]
