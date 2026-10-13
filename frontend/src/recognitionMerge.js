@@ -3,6 +3,18 @@ const concrete = id => !!id && !id.startsWith('unknown_') && id !== 'start';
 const RESIDENT = 'node_mark_001';
 const terminalCategory = hint => ({ 'danger-end': 'node_type_015', 'danger-enemy': 'node_type_003' })[hint];
 
+export function newRecognizedRelics(observation, heldRelics) {
+  const result = observation?.relicObservation;
+  if (!observation?.success || !result?.success) return [];
+  const seen = new Set(heldRelics.map(row => row.id));
+  const accepted = new Set(result.acceptedRelicIds || []);
+  return (result.slots || []).filter(row => {
+    if (row.status !== 'accepted' || row.partial || !accepted.has(row.id) || seen.has(row.id)) return false;
+    seen.add(row.id);
+    return true;
+  });
+}
+
 export const residentActive = node => !!node?.confirmedMarkIds?.includes(RESIDENT) &&
   !(node.residentCleared ?? node.completion === 'completed');
 

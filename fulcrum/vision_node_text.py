@@ -157,9 +157,13 @@ class NodeLabelRecognizer:
         started = perf_counter()
         if not MODEL.is_file():
             return {"status": "unavailable", "observations": {}, "reason": "缺少离线中文识别模型"}
-        crops = {f"{node_id}|{method}": crop for node_id, pixel in positions.items()
-                 for method in ("gray", "binary")
-                 if (crop := label_crop(image, pixel, step, viewport, binarize=method == "binary")) is not None}
+        crops = {}
+        for node_id, pixel in positions.items():
+            crop = label_crop(image, pixel, step, viewport)
+            if crop is not None:
+                gray, box = crop
+                crops[f"{node_id}|gray"] = crop
+                crops[f"{node_id}|binary"] = cv2.threshold(gray, 64, 255, cv2.THRESH_BINARY)[1], box
         if not crops:
             return {"status": "no_text", "observations": {}, "cropCount": 0, "acceptedCount": 0,
                     "elapsedMs": round((perf_counter() - started) * 1000, 1)}

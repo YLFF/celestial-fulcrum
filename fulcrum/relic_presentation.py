@@ -118,19 +118,29 @@ def enchant_relic(state, relic_id, operator_ids):
     if (not isinstance(ids, list) or not 1 <= len(ids) <= management.get("maxRecipients", 1)
             or any(not isinstance(item, str) or not item for item in ids) or len(set(ids)) != len(ids)):
         raise ValueError("受益干员人数不正确或重复")
-    recipients, promotions = [], []
+    recipients, promotions, identities = [], [], []
     for operator_id in ids:
         operator = next((row for row in state["operators"] if row["instanceId"] == operator_id), None)
-        if operator is None or profession and operator.get("profession") != profession:
+        if operator is None:
+            raise ValueError(f"请选择当前干员列表中的{profession or ''}干员")
+        from .operator_catalog import find_operator
+        entry = find_operator(operator.get("operatorId")) or find_operator(operator["name"])
+        identity = {field: entry[field] for field in ("profession", "rarity")
+                    if entry and operator.get(field) is None and not entry.get(f"{field}Editable")}
+        resolved = {**operator, **identity}
+        if profession and resolved.get("profession") != profession:
             raise ValueError(f"请选择当前干员列表中的{profession or ''}干员")
         if management.get("promotionEffect"):
-            if (operator.get("elite") not in (1, 2) or (operator.get("rarity") or 0) < 4
+            if (operator.get("elite") not in (1, 2) or (resolved.get("rarity") or 0) < 4
                     or operator.get("remainingBattles") is not None):
                 raise ValueError("请选择可进阶或已经进阶的非应急助力干员")
             if operator["elite"] == 1:
                 promotions.append(operator_id)
+        identities.append((operator, identity))
         recipients.append({"operatorInstanceId": operator_id, "operatorName": operator["name"],
-                           "profession": operator.get("profession") or "未确认"})
+                           "profession": resolved.get("profession") or "未确认"})
+    for operator, identity in identities:
+        operator.update(identity)
     for operator_id in promotions:
         from .operators import promote_operator
         promote_operator(state, operator_id, hope_cost=0)

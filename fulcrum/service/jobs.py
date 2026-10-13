@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from datetime import datetime, timezone
 import json
+import logging
 from pathlib import Path
 import re
 from threading import Event, RLock
@@ -36,7 +37,13 @@ class JobManager:
             if not re.fullmatch(r"[a-f0-9]{32}", path.stem):
                 continue
             path = self.path(path.stem)
-            row = json.loads(path.read_text(encoding="utf-8"))
+            try:
+                row = json.loads(path.read_text(encoding="utf-8"))
+                if not isinstance(row, dict) or row.get("jobId") != path.stem:
+                    raise ValueError("invalid saved job record")
+            except (OSError, ValueError) as error:
+                logging.getLogger(__name__).warning("忽略损坏的历史任务文件 %s：%s", path, error)
+                continue
             if row.get("status") in {"queued", "running"}:
                 row.update(status="interrupted", error=message("service restarted; submit against the current snapshot"))
                 atomic_json(path, row)
@@ -62,7 +69,7 @@ class JobManager:
                     raise FileNotFoundError("job not found")
                 row = json.loads(path.read_text(encoding="utf-8"))
         try:
-            revision = self.store.load(row["runId"])["revision"]
+            revision = self.store.get_revision(row["runId"])
         except FileNotFoundError:
             revision = None
         row["currentRevision"] = revision
@@ -143,6 +150,15 @@ class JobManager:
                     result = MapRecognizer().recognize(asset, area=area, floor=floor,
                         template_override=options.get("templateId"), include_resources=options.get("includeResources", True),
                         difficulty=state["opening"]["difficulty"]).to_dict()
+                    if result.get("success") and options.get("includeRelics", True):
+                        check()
+                        from ..vision_relics import RelicRecognizer
+                        try:
+                            result["relicObservation"] = RelicRecognizer().recognize(asset)
+                        except Exception:
+                            logging.getLogger(__name__).exception("地图已匹配，但同步识别收藏品栏失败")
+                            result["relicObservation"] = {"success": False, "slots": [], "acceptedRelicIds": [],
+                                "reason": "收藏品栏识别未完成，本次未同步藏品；地图结果仍可确认。"}
                 result["assetId"] = options["assetId"]
             else:
                 geometry, route_state = route_inputs(state, options.get("areaKey"),

@@ -14,7 +14,9 @@ test('operator candidates combine selected professions, rarity sorting and fuzzy
   assert.deepEqual(operatorCandidates(rows, ['近卫', '特种']).map(row => row.name),
     ['近卫乙', '特种甲', '近卫丙', '近卫甲', '新干员临时占位']);
   assert.deepEqual(operatorCandidates(rows, ['特种'], '甲').map(row => row.name), ['特种甲']);
-  assert.deepEqual(operatorCandidates(rows, []).map(row => row.name), ['新干员临时占位']);
+  assert.deepEqual(operatorCandidates(rows, []).map(row => row.name),
+    ['近卫乙', '特种甲', '近卫丙', '近卫甲', '新干员临时占位']);
+  assert.deepEqual(operatorCandidates(rows, [], '甲').map(row => row.name), ['特种甲', '近卫甲']);
   assert.deepEqual(rows, before);
 });
 

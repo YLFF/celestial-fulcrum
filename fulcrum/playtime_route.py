@@ -107,6 +107,10 @@ def route_inputs(
     if scoring_mode == "snapshot":
         state["scoringContext"] = deepcopy({
             "areaKey": area_key, "resources": playtime["resources"],
+            "currentAreaKey": playtime.get("currentAreaKey"),
+            # Automatic relic counters need visited areas, not their full map histories.
+            "areas": {key: {"activeInstanceId": slot.get("activeInstanceId")}
+                      for key, slot in playtime["areas"].items()},
             "opening": playtime.get("opening", {}), "operators": playtime.get("operators", []),
             "squad": playtime.get("squad", []), "grantedEffects": playtime.get("grantedEffects", []),
             "goals": playtime.get("goals", {}), "relics": playtime.get("relics", []),

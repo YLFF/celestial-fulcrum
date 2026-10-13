@@ -10,7 +10,7 @@ export function fuzzyMatch(row, query) {
 }
 
 export function operatorCandidates(rows, professions, query = '') {
-  return rows.filter(row => (!row.profession || professions.includes(row.profession)) && fuzzyMatch(row, query))
+  return rows.filter(row => (!professions.length || !row.profession || professions.includes(row.profession)) && fuzzyMatch(row, query))
     .sort((a, b) => (b.rarity || 0) - (a.rarity || 0));
 }
 

@@ -233,21 +233,18 @@ def _edge_contrast(gray: np.ndarray, first: tuple[float, float], second: tuple[f
     if close_to_border:
         return 0.0
     normal = np.array([-direction[1], direction[0]], dtype=np.float32) / length
-    center: list[float] = []
-    flank: list[float] = []
-    for t in np.linspace(0.29, 0.71, 9):
-        point = start + direction * t
-        # Map links bend slightly between grid centers; sample a narrow corridor.
-        cross_section = [point + normal * offset for offset in range(-8, 9, 2)]
-        center.append(float(np.percentile([gray[round(sample[1]), round(sample[0])]
-                                          for sample in cross_section], 80)))
-        for offset in (-17.0, 17.0):
-            sample = point + normal * offset
-            flank.append(float(gray[round(sample[1]), round(sample[0])]))
+    points = np.stack([start + direction * t for t in np.linspace(0.29, 0.71, 9)])
+    # Keep the same corridor and sample precision, batching its percentile calculation.
+    corridor = points[:, None, :] + normal * np.arange(-8, 9, 2, dtype=np.float32)[None, :, None]
+    sides = points[:, None, :] + normal * np.array([-17, 17], dtype=np.float32)[None, :, None]
+    corridor = np.rint(corridor).astype(np.intp)
+    sides = np.rint(sides).astype(np.intp)
+    center = np.percentile(gray[corridor[..., 1], corridor[..., 0]], 80, axis=1)
+    flank = gray[sides[..., 1], sides[..., 0]]
     return float(np.median(center) - np.median(flank))
 
 
-def _edge_agreement(gray: np.ndarray, match: TemplateMatch) -> float:
+def _edge_agreement(gray: np.ndarray, match: TemplateMatch, *, contrast_cache=None) -> float:
     template = match.template
     occupied = set(template.occupied_slots)
     edges = {frozenset((a, b)) for a, b in template.edges}
@@ -259,7 +256,14 @@ def _edge_agreement(gray: np.ndarray, match: TemplateMatch) -> float:
             a, b = match.pixel_at((col, row)), match.pixel_at(neighbor)
             if any(not (0 <= point[0] < gray.shape[1] and 0 <= point[1] < gray.shape[0]) for point in (a, b)):
                 continue
-            evidence = np.tanh((_edge_contrast(gray, a, b) - 8.0) / 16.0)
+            key = (a, b)
+            if contrast_cache is None:
+                contrast = _edge_contrast(gray, a, b)
+            else:
+                if key not in contrast_cache:
+                    contrast_cache[key] = _edge_contrast(gray, a, b)
+                contrast = contrast_cache[key]
+            evidence = np.tanh((contrast - 8.0) / 16.0)
             sign = 1 if frozenset(((col, row), neighbor)) in edges else -1
             values.append(float(sign * evidence))
     return float(np.mean(values)) if values else 0.0
@@ -318,6 +322,7 @@ def match_templates(
     points = np.array([(circle.x, circle.y) for circle in circles], dtype=np.float32)
     width, height = image_size
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY) if image is not None else None
+    contrast_cache = {}
     fits_by_shape: dict[tuple[int, int], tuple[list[AxisFit], list[AxisFit]]] = {}
     results: list[TemplateMatch] = []
     for template in templates:
@@ -360,14 +365,14 @@ def match_templates(
         if gray is not None:
             refined = _refine_connector_fit(best, circles, points)
             def evidence(candidate):
-                return candidate.score + .20 * _edge_agreement(gray, candidate) + .18 * candidate.point_explanation
+                return candidate.score + .20 * _edge_agreement(gray, candidate, contrast_cache=contrast_cache) + .18 * candidate.point_explanation
             if refined.score >= best.score and evidence(refined) > evidence(best):
                 best = refined
         results.append(best)
     if image is not None and results:
         refined: list[TemplateMatch] = []
         for match in results:
-            edge_score = _edge_agreement(gray, match)
+            edge_score = _edge_agreement(gray, match, contrast_cache=contrast_cache)
             refined.append(
                 replace(
                     match,

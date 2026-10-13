@@ -3,12 +3,12 @@ import { ScanLine, RefreshCw, Monitor, LoaderCircle, Map as MapIcon } from 'luci
 import { api } from './api';
 import { readPreference } from './preferences';
 import { captureTarget, rememberedCaptureWindow } from './captureTarget';
-import { Modal, SaveButton, AssetImage, NumberField } from './common';
+import { Modal, SaveButton, AssetImage, EntryImage, NumberField } from './common';
 import { AREA_NAMES, areaFromObservation } from './model';
 import MapView from './MapView';
 import { SpecialRegionFields } from './DystopiaEditor';
 import { dystopiaFromObservation, emptyDystopia } from './dystopia';
-import { recognitionChanges, recognitionReview, mergedRecognitionPreview, mergedResidentMarks } from './recognitionMerge';
+import { recognitionChanges, recognitionReview, mergedRecognitionPreview, mergedResidentMarks, newRecognizedRelics } from './recognitionMerge';
 import ManualMapDialog from './ManualMapDialog';
 
 const FIELDS = { life: '生命', shield: '护盾', level: '等级', experience: '经验', hope: '希望', originium_ingot: '源石锭', action_points: '行动力' };
@@ -17,6 +17,7 @@ const TARGETS = { life: 'life', shield: 'shield', level: 'level', experience: 'e
 export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJob, onConfirm, onManualCreate, onClose, busy, notify, onAsset }) {
   const [asset, setAsset] = useState(assetInfo || null), [area, setArea] = useState(''), [template, setTemplate] = useState('');
   const [working, setWorking] = useState(false), [candidate, setCandidate] = useState(null);
+  const [includeRelics, setIncludeRelics] = useState(true), [selectedRelics, setSelectedRelics] = useState({});
   const [manual, setManual] = useState(false);
   const [fields, setFields] = useState({}), [selected, setSelected] = useState({}), [confirmMap, setConfirmMap] = useState(true);
   const [newInstance, setNewInstance] = useState(false), [position, setPosition] = useState(''), [completePosition, setCompletePosition] = useState(false);
@@ -37,11 +38,12 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
     return () => { live = false; };
   }, [file, assetInfo]);
   async function recognize() {
-    setWorking(true); setError(''); setCandidate(null);
+    setWorking(true); setError(''); setCandidate(null); setSelectedRelics({});
     try {
-      const job = await startJob('recognize', { assetId: asset.assetId, areaKey: area || null, templateId: template || null, includeResources: true }, loaded);
+      const job = await startJob('recognize', { assetId: asset.assetId, areaKey: area || null, templateId: template || null, includeResources: true, includeRelics }, loaded);
       const result = job.result, resource = result.resourceObservation?.fields || {};
       setCandidate(job); setFields(structuredClone(resource)); setSelected(Object.fromEntries(Object.entries(resource).map(([id, row]) => [id, ['recognized', 'absent_zero'].includes(row.status)])));
+      setSelectedRelics(Object.fromEntries(newRecognizedRelics(result, loaded.state.relics).map(row => [row.id, true])));
       setConfirmMap(result.success); setPosition(result.playerPositionObservation?.nodeId || '');
       setCompletePosition(!!result.playerPositionObservation?.nodeId);
       const chosen = area || areaFromObservation(result), slot = loaded.state.areas[chosen];
@@ -99,9 +101,11 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
     // Opening AP follows the confirmed opening preset, even if the screenshot is a simulation.
     const filtered = freshI ? commands.filter(row => row.type !== 'actionPoints') : commands;
     await onConfirm({ expectedRevision: candidate.sourceRevision, jobId: candidate.jobId, areaKey: chosen, confirmMap,
-      resourceFields: [], newInstance, initialAreaEntry: freshI && confirmMap, commands: filtered });
+      resourceFields: [], newInstance, initialAreaEntry: freshI && confirmMap, commands: filtered,
+      relicIds: relicCandidates.filter(row => selectedRelics[row.id]).map(row => row.id) });
   }
   const observation = candidate?.result;
+  const relicCandidates = newRecognizedRelics(observation, loaded.state.relics);
   const chosenArea = area || (observation && areaFromObservation(observation));
   const slot = loaded.state.areas[chosenArea], oldMap = slot?.instances.find(row => row.instanceId === slot.activeInstanceId);
   const review = recognitionReview(observation && { ...observation, playerPositionObservation: { nodeId: position } }, oldMap, newInstance);
@@ -115,7 +119,9 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
     <SaveButton busy={working} onClick={recognize} disabled={working || !asset}><ScanLine size={16} />开始识别</SaveButton>}>
     <div className="upload-config form-grid"><label className="field"><span>识别区域</span><select aria-label="识别区域" value={area} onChange={e => { setArea(e.target.value); setCandidate(null); }}>
       <option value="">自动判层</option>{Object.entries(AREA_NAMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-      <label className="field"><span>指定模板 ID（可选）</span><input value={template} onChange={e => { setTemplate(e.target.value); setCandidate(null); }} /></label></div>
+      <label className="field"><span>指定模板 ID（可选）</span><input value={template} onChange={e => { setTemplate(e.target.value); setCandidate(null); }} /></label>
+      <label className="checkbox-field"><input type="checkbox" checked={includeRelics} disabled={working || busy}
+        onChange={e => { setIncludeRelics(e.target.checked); setCandidate(null); }} />同步识别左下角藏品</label></div>
     {error && <div role="alert" className="form-error">{error}</div>}
     {(error || (observation && !observation.success)) && <div className="manual-map-fallback">
       <button onClick={() => setManual(true)} disabled={busy || working}><MapIcon size={16} />选择层数与模板，手动建图</button>
@@ -156,6 +162,12 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
             <option value="">请补充事件（也可稍后补充）</option>{catalog.encounters.map(event => <option key={event.id} value={event.id}>{event.name}</option>)}</select>}
         </div>;
       })}</section>}
+      {!!relicCandidates.length && <section className="synced-relic-candidates" aria-label="新识别藏品"><h3>新识别藏品</h3>
+        <div className="synced-relic-list">{relicCandidates.map(row => <label key={row.id}>
+          <input type="checkbox" aria-label={`添加 ${row.name}`} checked={!!selectedRelics[row.id]} disabled={busy || working}
+            onChange={e => setSelectedRelics(old => ({ ...old, [row.id]: e.target.checked }))} />
+          <EntryImage entry={entries[row.id]} /><span>{row.name}</span>
+        </label>)}</div></section>}
       {previewMap && <><MapView preview instance={previewMap} catalog={catalog} entries={entries} busy={busy} selectedIds={selectedNodes} onSelectionChange={setSelectedNodes} />
         <div className="map-review-toolbar"><span>已选 {selectedNodes.length} 个节点</span><select aria-label="批量修正节点类别" value={batchCategory} onChange={e => setBatchCategory(e.target.value)}><option value="">节点类别</option>
           {Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select>

@@ -112,8 +112,13 @@ try {
   });
   await check('new PRTS operators can be found by name and code within profession filters', async () => {
     await page.getByRole('button', { name: '添加干员与编队', exact: true }).click();
+    const filters = dialog().getByRole('group', { name: '筛选职业', exact: true });
+    const checkboxes = filters.getByRole('checkbox');
+    assert.equal(await checkboxes.count(), 8);
+    for (const checkbox of await checkboxes.all()) assert.equal(await checkbox.isChecked(), false);
     for (const [name, code, profession] of [['克莱门莎', 'AE01', '近卫'], ['旅骨', 'II12', '特种'], ['德·托莱多', 'II13', '辅助']]) {
-      await dialog().getByLabel('筛选职业', { exact: true }).selectOption(profession);
+      for (const checkbox of await checkboxes.all()) await checkbox.uncheck();
+      await filters.getByRole('checkbox', { name: profession, exact: true }).check();
       for (const query of [name, code]) {
         await dialog().getByLabel('搜索名称', { exact: true }).fill(query);
         assert.ok(await dialog().getByRole('button', { name: `选择 ${name}`, exact: true }).isVisible());

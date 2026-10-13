@@ -66,7 +66,7 @@ def main():
             route_state["maxStates"] = 50000
             reference = RoutePlanner(geometry).plan(route_state)
             assert planning["routes"][0]["metrics"]["weightedValue"] == reference["routes"][0]["metrics"]["weightedValue"], (planning["routes"][0], reference["routes"][0])
-            routes[planning["mode"]] = {"elapsedSeconds": job["elapsedSeconds"], "expandedStates": planning["expandedStates"],
+            routes["pursuit" if pursuit else "no-pursuit"] = {"elapsedSeconds": job["elapsedSeconds"], "expandedStates": planning["expandedStates"],
                 "searchComplete": planning["searchComplete"], "topScore": planning["routes"][0]["metrics"]["weightedValue"]}
         assert request("GET", f"/api/runs/{run_id}")["state"] == confirmed["state"]
         report = {"runId": run_id, "revision": revision, "templateId": result["templateId"], "nodeCount": len(result["nodes"]),

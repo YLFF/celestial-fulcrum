@@ -75,6 +75,7 @@ class RecognizeRequest(RevisionRequest):
     areaKey: str | None = None
     templateId: str | None = None
     includeResources: bool = True
+    includeRelics: bool = True
     resourcesOnly: bool = False
 
 
@@ -106,6 +107,7 @@ class ConfirmRecognition(RevisionRequest):
     initialAreaEntry: bool = False
     entrySandboxRelicIds: list[str] | None = None
     commands: list[dict[str, Any]] = Field(default_factory=list, max_length=200)
+    relicIds: list[str] = Field(default_factory=list, max_length=100)
 
 
 class ManualMapRequest(RevisionRequest):
@@ -342,6 +344,10 @@ def create_app(storage_root=None, *, allowed_origins=None):
                 instance.get("strategy", {}).get("scoringOptions", {}) if instance else {}, attribute_summary=attributes)
         return {**loaded, "goalSummary": goal_summary(state), "teamThresholds": thresholds}
 
+    @app.get("/api/runs/{run_id}/export", dependencies=auth)
+    def export_run(run_id: str):
+        return store.export(run_id)
+
     @app.patch("/api/runs/{run_id}", dependencies=auth)
     def patch_run(run_id: str, body: PatchRun):
         movement = any(command.get("type") in {"position", "currentArea"} for command in body.commands)
@@ -442,16 +448,17 @@ def create_app(storage_root=None, *, allowed_origins=None):
         if not set(body.relicIds) <= candidates:
             raise ValueError("selected relic is not a recognition candidate")
 
-        def merge(draft):
-            rows = deepcopy(draft["relics"])
-            held = {row["id"] for row in rows}
-            for relic_id in body.relicIds:
-                if relic_id not in held:
-                    rows.append({"id": relic_id, "count": 1})
-                    held.add(relic_id)
-            apply_commands(draft, [{"type": "relics", "items": rows}])
+        return store.update(run_id, body.expectedRevision, lambda draft: append_relics(draft, body.relicIds))
 
-        return store.update(run_id, body.expectedRevision, merge)
+    def append_relics(draft, relic_ids):
+        rows = deepcopy(draft["relics"])
+        held = {row["id"] for row in rows}
+        for relic_id in relic_ids:
+            if relic_id not in held:
+                rows.append({"id": relic_id, "count": 1})
+                held.add(relic_id)
+        if len(rows) != len(draft["relics"]):
+            apply_commands(draft, [{"type": "relics", "items": rows}])
 
     @app.post("/api/runs/{run_id}/jobs/plan", dependencies=auth, status_code=202)
     def plan(run_id: str, body: PlanRequest):
@@ -504,6 +511,10 @@ def create_app(storage_root=None, *, allowed_origins=None):
         if job["sourceRevision"] != body.expectedRevision or job["stale"]:
             raise RevisionConflict("recognition was computed on an older snapshot; recognize again")
         observation = deepcopy(job["result"])
+        relics = observation.get("relicObservation") or {}
+        accepted = set(relics.get("acceptedRelicIds", [])) if relics.get("success") else set()
+        if body.relicIds and (not observation.get("success") or not set(body.relicIds) <= accepted):
+            raise ValueError("只能添加本次地图截图中通过置信度检查的藏品")
         if any(command.get("type") == "dystopia" for command in body.commands):
             # Apply the user's reviewed coverage once, not the unreviewed candidate first.
             observation.pop("dystopiaObservation", None)
@@ -538,6 +549,7 @@ def create_app(storage_root=None, *, allowed_origins=None):
             else:
                 from ..playtime_state import rebuild_derived
                 rebuild_derived(draft)
+            append_relics(draft, body.relicIds)
         return store.update(run_id, body.expectedRevision, mutate, map_update=body.confirmMap)
 
     return app

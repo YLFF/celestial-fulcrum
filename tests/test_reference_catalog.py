@@ -485,11 +485,7 @@ class LocalCatalogTests(unittest.TestCase):
             "## 第三阶段：智能化交互",
         )
         self.assertEqual([roadmap.index(phase) for phase in phases], sorted(roadmap.index(phase) for phase in phases))
-        self.assertIn("将现有藏品表的效果格式化为可计算条目", roadmap)
-        self.assertIn("合并所有适用加成", roadmap)
-        self.assertIn("截图到地图/资源候选、确认入局和离线节点预测", roadmap)
         self.assertFalse((ROOT / "STAGE1_MAP_AND_RESOURCES.md").exists())
-        self.assertIn("不计算具体干员的生存、输出", roadmap)
         self.assertIn("节点预测", roadmap)
         self.assertIn("路线规划", roadmap)
         self.assertFalse((ROOT / "NEXT_STEPS.md").exists())

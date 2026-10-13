@@ -72,6 +72,37 @@ class RelicEnchantmentTests(unittest.TestCase):
         self.assertEqual(self.state["resources"]["hope"], hope)
         self.assertEqual(sum(row["componentId"] == "component_023" for row in self.state["componentBox"]["items"]), 1)
 
+    def test_training_resolves_legacy_operator_identity_and_preserves_promotion_rewards(self):
+        for relic_id, name, profession, instance_id in (
+                ("relic_177", "机械师", "重装", "mechanist"),
+                ("relic_180", "予愿安洁莉娜", "特种", "angelina")):
+            with self.subTest(name=name):
+                state = new_playtime("legacy-training")
+                state["operators"] = [{"instanceId": instance_id, "name": name, "profession": None,
+                                       "elite": 1, "source": "normal", "remainingBattles": None}]
+                state["relics"] = [{"id": relic_id}]
+                hope, count = state["resources"]["hope"], len(state["componentBox"]["items"])
+                apply_commands(state, [{"type": "relicEnchant", "relicId": relic_id,
+                                        "operatorInstanceId": instance_id}])
+                operator = state["operators"][0]
+                self.assertEqual((operator["profession"], operator["rarity"], operator["elite"]), (profession, 6, 2))
+                self.assertEqual(state["relics"][0]["enchantment"]["profession"], profession)
+                self.assertEqual(state["resources"]["hope"], hope)
+                self.assertEqual(len(state["componentBox"]["items"]), count + (name == "机械师"))
+                report = summarize_combat_bonuses(state, operator_instance_id=instance_id)
+                self.assertTrue(any(source["id"] == relic_id for category in report["operators"][0]["categories"]
+                                    for row in category["rows"] for source in row["sources"]))
+
+    def test_rejected_legacy_training_does_not_change_operator_identity(self):
+        state = new_playtime("legacy-training-rejection")
+        state["operators"] = [{"instanceId": "angelina", "name": "予愿安洁莉娜", "profession": None,
+                               "elite": 1, "source": "normal", "remainingBattles": None}]
+        state["relics"] = [{"id": "relic_177"}]
+        before = deepcopy(state)
+        with self.assertRaisesRegex(ValueError, "重装"):
+            apply_commands(state, [{"type": "relicEnchant", "relicId": "relic_177", "operatorInstanceId": "angelina"}])
+        self.assertEqual(state, before)
+
     def test_wrong_profession_missing_or_active_relic_rejected(self):
         for relic_id in ("relic_174", "relic_014"):
             with self.assertRaises(ValueError):

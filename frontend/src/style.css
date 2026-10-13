@@ -472,6 +472,12 @@ pre { overflow: auto; max-height: 220px; font-size: 10px; color: #728778; }
 .merge-review-row > .checkbox-field, .merge-review-row > small, .merge-summary > div:not(.negative) { color: #184e3d; }
 :where([data-theme="dark"]) .merge-review-row > .checkbox-field, :where([data-theme="dark"]) .merge-review-row > small, :where([data-theme="dark"]) .merge-summary > div:not(.negative) { color: #ace1c8; }
 .merge-review-row select { max-width: 230px; }
+.synced-relic-candidates { padding: 8px 0 12px; }
+.synced-relic-candidates h3 { margin: 0 0 8px; }
+.synced-relic-list { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 18px; }
+.synced-relic-list label { display: inline-flex; align-items: center; gap: 7px; max-width: 100%; font-size: 12px; cursor: pointer; }
+.synced-relic-list img, .synced-relic-list svg { width: 30px; height: 30px; flex: 0 0 30px; object-fit: contain; }
+.synced-relic-list span { min-width: 0; overflow-wrap: anywhere; }
 .relic-scan-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 .relic-scan-toolbar > button { display: inline-flex; align-items: center; gap: 6px; }
 .relic-scan-toolbar > span { font-size: 12px; color: var(--muted, #697b70); }

@@ -5,7 +5,7 @@ import { PROFESSIONS } from './model';
 import { fuzzyMatch, operatorCandidates } from './picker';
 
 export default function CatalogPicker({ rows = [], onAdd, operators = false, components = false, selectedIds = [], autoFocus = false }) {
-  const [query, setQuery] = useState(''), [professions, setProfessions] = useState([...PROFESSIONS]);
+  const [query, setQuery] = useState(''), [professions, setProfessions] = useState([]);
   const [limit, setLimit] = useState(100);
   useEffect(() => { setLimit(100); }, [query, professions]);
   const matches = useMemo(() => operators ? operatorCandidates(rows, professions, query)

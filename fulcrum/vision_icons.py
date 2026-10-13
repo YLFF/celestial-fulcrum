@@ -82,21 +82,21 @@ class IconMatcher:
             th, tw = template.shape[:2]
             if patch.shape[0] < th or patch.shape[1] < tw:
                 continue
-            if template.ndim == 3 and template.shape[2] == 4:
-                mask = template[:, :, 3]
-                scores = cv2.matchTemplate(patch, template[:, :, :3], cv2.TM_CCOEFF_NORMED, mask=mask)
-            else:
-                scores = cv2.matchTemplate(patch, template, cv2.TM_CCOEFF_NORMED)
             # A label or nearby icon must not win a search far from the mapped cell.
             cx = x - x0 - tw / 2
             cy = y - y0 - th / 2
             slack = max(9, step * search_fraction)
             left = max(0, int(cx - slack))
-            right = min(scores.shape[1], int(cx + slack) + 1)
+            right = min(patch.shape[1] - tw + 1, int(cx + slack) + 1)
             top = max(0, int(cy - slack))
-            bottom = min(scores.shape[0], int(cy + slack) + 1)
+            bottom = min(patch.shape[0] - th + 1, int(cy + slack) + 1)
             if left < right and top < bottom:
-                local = scores[top:bottom, left:right]
+                search = patch[top:bottom + th - 1, left:right + tw - 1]
+                if template.ndim == 3 and template.shape[2] == 4:
+                    local = cv2.matchTemplate(search, template[:, :, :3], cv2.TM_CCOEFF_NORMED,
+                                             mask=template[:, :, 3])
+                else:
+                    local = cv2.matchTemplate(search, template, cv2.TM_CCOEFF_NORMED)
                 finite = local[np.isfinite(local)]
                 if finite.size:
                     best = max(best, min(1.0, float(np.max(finite))))

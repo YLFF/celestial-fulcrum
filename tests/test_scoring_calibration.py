@@ -276,8 +276,9 @@ class OpportunityCalibrationTests(unittest.TestCase):
         self.assertEqual(self.shop(category_id="node_type_013", yellow_visited=False)["points"], 1000)
 
     def test_merchant_conditions_and_repeat_do_not_grant_tickets(self) -> None:
-        self.assertAlmostEqual(self.shop(yellow_visited=False)["points"], green_merchant_base_score(30) + 100)
-        self.assertAlmostEqual(self.shop(yellow_visited=False, below_threshold=True)["points"], green_merchant_base_score(30) + 125)
+        self.assertAlmostEqual(self.shop(yellow_visited=False)["points"], green_merchant_base_score(50) + 100)
+        self.assertAlmostEqual(self.shop(yellow_visited=False, below_threshold=True)["points"], green_merchant_base_score(50) + 125)
+        self.assertAlmostEqual(self.shop(yellow_visited=False, reserve_override=20)["points"], green_merchant_base_score(30) + 100)
         self.assertAlmostEqual(self.shop(eligible_event_ids=["encounter_016"])["points"], green_merchant_base_score(50) + 100)
         self.assertEqual(self.shop(cash=0)["points"], 0)
         self.assertEqual(self.shop(category_id="node_type_013", yellow_visited=False, cash=20)["points"], 600)

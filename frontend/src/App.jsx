@@ -56,6 +56,7 @@ export default function App() {
   const [selectedNodes, setSelectedNodes] = useState([]);
   useEffect(() => { setSelectedNodes([]); }, [loaded?.runId, loaded?.revision, area]);
   const loadedRef = useRef(null), fileInput = useRef(null), importInput = useRef(null), taskControllers = useRef(new Map());
+  const runRequest = useRef(0);
   const pendingFile = useRef(null), dragDepth = useRef(0);
   const viewRef = useRef({ area, pursuit, topN, budget, planMode }); viewRef.current = { area, pursuit, topN, budget, planMode };
   const entries = useMemo(() => catalog ? Object.fromEntries(Object.values(catalog).filter(Array.isArray).flat().filter(row => row.id).map(row => [row.id, row])) : {}, [catalog]);
@@ -69,12 +70,16 @@ export default function App() {
     notify(text, true);
   }
   async function listRuns() { const value = await api('/api/runs'); setRuns(value.runs); return value.runs; }
-  async function openRun(id, forceArea = true) {
-    const value = await api(`/api/runs/${encodeURIComponent(id)}`);
+  function applyRun(value, forceArea) {
     loadedRef.current = value; setLoaded(value);
     if (forceArea) setArea(value.state.currentAreaKey || 'I');
     setPlanning(null); setAdvice(null); setScores(null); setNode(null); setStepDetail(null);
-    localStorage.setItem('fulcrum-run', id);
+    localStorage.setItem('fulcrum-run', value.runId);
+  }
+  async function openRun(id, forceArea = true) {
+    const request = ++runRequest.current;
+    const value = await api(`/api/runs/${encodeURIComponent(id)}`);
+    if (request === runRequest.current) applyRun(value, forceArea);
     return value;
   }
   async function initialize() {
@@ -99,8 +104,12 @@ export default function App() {
     if (!loaded) return;
     const id = setInterval(async () => {
       try {
+        const request = runRequest.current;
         const fresh = await api(`/api/runs/${encodeURIComponent(loaded.runId)}`);
-        if (fresh.revision !== loadedRef.current?.revision) { await openRun(loaded.runId, false); notify('已同步新的对局状态'); }
+        if (request === runRequest.current && loadedRef.current?.runId === fresh.runId &&
+            fresh.revision > loadedRef.current.revision) {
+          applyRun(fresh, false); notify('已同步新的对局状态');
+        }
       } catch { /* A transient refresh failure does not erase an open form. */ }
     }, 8000);
     return () => clearInterval(id);
@@ -234,7 +243,12 @@ export default function App() {
     try { await api(`/api/runs/${loaded.runId}/${direction}`, { method: 'POST', body: { expectedRevision: loaded.revision } }); await openRun(loaded.runId, true); notify(direction === 'undo' ? '已撤销上次地图更新' : '已重做地图更新'); }
     catch (e) { failed(e); } finally { setBusy(false); }
   }
-  async function exportRun() { download(JSON.stringify(loaded.state, null, 2), `${loaded.runId}.json`); }
+  async function exportRun() {
+    try {
+      const state = await api(`/api/runs/${loaded.runId}/export`);
+      download(JSON.stringify(state, null, 2), `${loaded.runId}.json`);
+    } catch (e) { failed(e); }
+  }
   const activePlan = tasks.some(row => row.kind === 'plan'), selectedRoute = planMode === 'advice' ? adviceMapRoute(visibleAdvice[routeIndex]) : visibleRoutes[routeIndex];
   const activeStep = stepDetail && visibleRoutes[stepDetail.route]?.steps[stepDetail.step];
   const eventPool = poolMode === 'local' ? state?.areas[area]?.encounterPool || [] : state?.globalEncounterPool || [];
@@ -294,7 +308,7 @@ export default function App() {
           </div>)}
           {!state?.relics.length && <span className="quiet">暂无藏品</span>}
         </InventoryStrip>
-        <InventoryStrip title="零件箱" subtitle={state ? `${state.componentBox.items.length}/${state.componentBox.capacity}` : '—'} icon={Package}
+        <InventoryStrip title="零件箱" subtitle={state ? `${state.componentBox.items.length}/${state.componentBox.capacity} · 总估价 ${num(componentAppraisalTotal(state.componentBox.items))}` : '—'} icon={Package}
           warning={state && state.componentBox.items.length > state.componentBox.capacity ? `超限 ${state.componentBox.items.length - state.componentBox.capacity} 件` : ''}
           contentClass="component-inventory" onEdit={() => edit('components')} onAdd={() => edit('components', { adding: true })} disabled={!state || busy}>
           {['加工品', '自然物', '概念体'].map(kind => <div className="component-inventory-row" key={kind}><small>{kind}</small><div>{state?.componentBox.items.filter(row => entries[row.componentId]?.kind === kind).sort((a, b) => a.componentId.localeCompare(b.componentId)).map(row => <button key={row.instanceId} className={`inventory-token ${row.remainingUses != null && !row.routeCandidate ? 'excluded' : ''}`} title={`${entries[row.componentId]?.name} · 估价 ${num(row.estimatedValue)}`} onClick={() => edit('components')}>

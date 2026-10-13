@@ -18,6 +18,21 @@ test('all confirmed bound relics allow already-promoted operators and multiple d
   assert.equal(canEnchant({ id: 'training' }, { ...operator, profession: '辅助' }, entries), false);
 });
 
+test('training candidates resolve missing legacy identity from the operator catalog', () => {
+  const catalog = [{ id: 'known', name: '旧存档干员', profession: '重装', rarity: 6 },
+    { id: 'placeholder', name: '新干员临时占位', profession: null, rarity: 3, professionEditable: true, rarityEditable: true }];
+  const legacy = { instanceId: 'legacy', name: '旧存档干员', profession: null, rarity: null, elite: 1 };
+  assert.equal(canEnchant({ id: 'training' }, legacy, entries, catalog), true);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, name: '别名', operatorId: 'known' }, entries, catalog), true);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, profession: '辅助' }, entries, catalog), false);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, remainingBattles: 1 }, entries, catalog), false);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, name: '未知干员' }, entries, catalog), false);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, name: '新干员临时占位', profession: '重装' }, entries, catalog), false);
+  assert.equal(canEnchant({ id: 'training' }, { ...legacy, name: '新干员临时占位', profession: '重装', rarity: 5 }, entries, catalog), true);
+  assert.equal(legacy.profession, null);
+  assert.equal(legacy.rarity, null);
+});
+
 test('cookie assignments produce one atomic two-recipient command without empty slots', () => {
   let values = toggleRecipient({}, 'cookie', 'a', true);
   values = toggleRecipient(values, 'cookie', 'b', true);

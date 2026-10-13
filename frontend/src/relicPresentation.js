@@ -39,11 +39,15 @@ export function relicStatus(row, entry, state) {
   return { readOnly: management.kind === 'ordinary', kind: management.kind, label: '' };
 }
 
-export function canEnchant(row, operator, entries) {
+export function canEnchant(row, operator, entries, operatorCatalog = []) {
   const management = relicManagement(entries[row.id]);
+  const entry = operatorCatalog.find(entry => entry.id === operator.operatorId)
+    || operatorCatalog.find(entry => entry.name === operator.name);
+  const profession = operator.profession ?? (!entry?.professionEditable ? entry?.profession : null);
+  const rarity = operator.rarity ?? (!entry?.rarityEditable ? entry?.rarity : null);
   return !!management.bindOperator && !relicActive(row)
-    && (!management.profession || operator.profession === management.profession)
-    && (!management.promotionEffect || ([1, 2].includes(operator.elite) && operator.rarity >= 4 && operator.remainingBattles == null));
+    && (!management.profession || profession === management.profession)
+    && (!management.promotionEffect || ([1, 2].includes(operator.elite) && rarity >= 4 && operator.remainingBattles == null));
 }
 
 export function orderedRelics(rows, entries) {

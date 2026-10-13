@@ -69,7 +69,7 @@ class MerchantPrefixTests(unittest.TestCase):
         self.assertFalse(result["unlocksGuaranteedActions"])
 
     def test_nonlinear_condition_is_evaluated_per_branch_not_on_average_cash(self):
-        parameters = self.parameters(category_id="node_type_004", cash=15)
+        parameters = self.parameters(category_id="node_type_004", cash=15, reserve_override=20)
         result = merchant_prefix_score(**parameters, prefix_cash_outcomes=[(0, 0.5), (12, 0.5)])
         self.assertEqual(result["expectedArrivalCash"], 21)
         self.assertAlmostEqual(result["points"], 0.5 * (green_merchant_base_score(7) + 100))

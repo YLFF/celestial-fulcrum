@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { candidateIconSwitch, candidatePositions, POSITION_FILTERS, routeCurve } from '../src/mapPresentation.js';
-import { mergedRecognitionPreview, recognitionChanges, recognitionReview, residentActive } from '../src/recognitionMerge.js';
+import { mergedRecognitionPreview, recognitionChanges, recognitionReview, residentActive, newRecognizedRelics } from '../src/recognitionMerge.js';
 import { AREA_NAMES } from '../src/model.js';
 
 test('ten fixed area names and candidate filter order', () => {
@@ -61,6 +61,22 @@ const old = { templateId: 't', nodes: {
   d: { id: 'd', resolvedCategoryId: null, observedCategoryId: 'unknown_mystery', completion: 'pending', confirmedMarkIds: [] },
 } };
 const observation = { success: true, templateId: 't', edges: [], nodes: ['a', 'b', 'c', 'd'].map(id => ({ id, categoryId: 'node_type_020', marks: [] })) };
+
+test('map relic sync lists only accepted, new, unique complete icons without changing source data', () => {
+  const source = { success: true, relicObservation: { success: true,
+    acceptedRelicIds: ['held', 'new', 'partial'], slots: [
+      { id: 'held', status: 'accepted' }, { id: 'new', name: '新藏品', status: 'accepted' },
+      { id: 'new', status: 'accepted' }, { id: 'uncertain', status: 'needs_review' },
+      { id: 'partial', status: 'accepted', partial: true },
+    ] } };
+  const held = [{ id: 'held', state: 4, note: 'keep' }];
+  const before = structuredClone({ source, held });
+  assert.deepEqual(newRecognizedRelics(source, held).map(row => row.id), ['new']);
+  assert.deepEqual(newRecognizedRelics({ ...source, success: false }, held), []);
+  assert.deepEqual(newRecognizedRelics({ success: true }, held), []);
+  assert.deepEqual(newRecognizedRelics(null, held), []);
+  assert.deepEqual({ source, held }, before);
+});
 
 test('merge change summary distinguishes revelations, completion suggestions and conflicts', () => {
   assert.deepEqual(recognitionChanges(observation, old).map(row => [row.nodeId, row.kind]),

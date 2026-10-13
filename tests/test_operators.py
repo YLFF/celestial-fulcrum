@@ -144,6 +144,34 @@ class OperatorTests(unittest.TestCase):
             promote_operator(state, operator["instanceId"], record_only=True, hope_cost=1)
         self.assertEqual(state, before)
 
+    def test_departed_enchantment_recipient_id_cannot_transfer_to_new_recruit(self) -> None:
+        from fulcrum.service.updates import apply_commands
+        from fulcrum.combat_bonuses import summarize_combat_bonuses
+
+        state = new_playtime("retired-binding")
+        previous = add_operator(state, "示例干员甲", record_only=True)
+        apply_commands(state, [
+            {"type": "relics", "items": [{"id": "relic_188"}]},
+            {"type": "relicEnchant", "relicId": "relic_188", "operatorInstanceId": previous["instanceId"]},
+            {"type": "operatorRemove", "instanceId": previous["instanceId"]},
+        ])
+        before = deepcopy(state)
+        with self.assertRaisesRegex(ValueError, "saved references"):
+            add_operator(state, "示例干员乙", instance_id=previous["instanceId"], record_only=True)
+        self.assertEqual(state, before)
+        current = add_operator(state, "示例干员乙", record_only=True)
+        self.assertNotEqual(current["instanceId"], previous["instanceId"])
+        report = summarize_combat_bonuses(state, operator_instance_id=current["instanceId"])
+        sources = {source["id"] for category in report["operators"][0]["categories"]
+                   for row in category["rows"] for source in row["sources"]}
+        self.assertNotIn("relic_188", sources)
+
+    def test_granted_effect_recipient_id_is_reserved_without_held_relic(self) -> None:
+        state = new_playtime("retired-grant")
+        state["grantedEffects"] = [{"relicId": "relic_188", "operatorInstanceIds": ["operator-1"]}]
+        current = add_operator(state, "示例干员", record_only=True)
+        self.assertNotEqual(current["instanceId"], "operator-1")
+
     def test_confirmed_initial_roster_accepts_other_operators_and_stays_isolated(self) -> None:
         initial = [{"name": "示例干员", "instanceId": "initial", "hopeCost": 1}]
         state = new_playtime("initial-input", initial_operators=initial)

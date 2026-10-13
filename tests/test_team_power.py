@@ -4,6 +4,9 @@ import unittest
 from fulcrum.combat_bonuses import summarize_combat_bonuses
 from fulcrum.node_scoring import SnapshotScorer
 from fulcrum.team_status import team_status, threshold_floor
+from fulcrum.playtime_route import route_inputs
+from fulcrum.playtime_state import merge_map_observation, new_playtime
+from tests.test_playtime_prediction import chain_map, treehole_map
 from tests.test_route_planner import state
 from tests.test_snapshot_scoring import context
 
@@ -90,6 +93,25 @@ class TeamPowerTests(unittest.TestCase):
         self.assertGreater(scorer.battle("normal")["parts"]["experience"], 0)
         c["resources"]["hope"] = 100
         self.assertEqual(SnapshotScorer([], c, state(2)).hope_deficit, 0)
+
+    def test_route_adapter_preserves_automatic_relic_counter_context(self):
+        s = new_playtime("automatic-layer-power")
+        s["operators"] = [operator(i) for i in range(3)]
+        s["relics"] = [{"id": relic_id} for relic_id in ("relic_033", "relic_034", "relic_035")]
+        for area, observed in (("III", chain_map(3)), ("III-treehole", treehole_map(3)),
+                               ("IV-treehole", treehole_map(4)), ("IV-remembrance", chain_map(4))):
+            with self.subTest(area=area):
+                instance = merge_map_observation(s, area, observed, player_position="0,0")
+                instance["actionPoints"] = 3
+                before = deepcopy(s)
+                map_result, inputs = route_inputs(s)
+                scorer = SnapshotScorer(map_result["nodes"], inputs["scoringContext"], inputs)
+                actual = team_status(s["operators"], area, combat_state=s)
+                self.assertEqual({key: scorer.threshold[key] for key in actual}, actual)
+                self.assertEqual(actual["pendingAttributeTerms"], 0)
+                self.assertEqual(s, before)
+                self.assertTrue(all(set(slot) == {"activeInstanceId"}
+                                    for slot in inputs["scoringContext"]["areas"].values()))
 
 
 if __name__ == "__main__":

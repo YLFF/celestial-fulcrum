@@ -82,6 +82,20 @@ class RunStore:
                     "history": {"canUndo": bool(history["past"]), "canRedo": bool(history["future"]),
                                 "undoCount": len(history["past"]), "redoCount": len(history["future"])}}
 
+    def get_revision(self, run_id):
+        """Read freshness metadata without rebuilding predictions or loading legacy history."""
+        with self.lock:
+            path = self.path(run_id)
+            if not path.is_file():
+                raise FileNotFoundError("run not found")
+            saved = json.loads(path.read_text(encoding="utf-8"))
+            if not isinstance(saved, dict) or saved.get("runId") != run_id:
+                raise ValueError("stored run ID does not match directory")
+            revision = saved.get("_serviceRevision", 0)
+            if type(revision) is not int or revision < 0:
+                raise ValueError("invalid saved revision")
+            return revision
+
     def list(self):
         rows = []
         for path in sorted(self.root.glob("*/playtime.json")):
@@ -103,22 +117,35 @@ class RunStore:
             if not isinstance(source, dict):
                 raise ValueError("Playtime must be an object")
             state = deepcopy(source)
-            state.pop("_serviceHistory", None)
+            history = state.pop("_serviceHistory", None)
+            if history is None:
+                history = {"past": [], "future": []}
+            self._validate_history(history)
+            source_id = state.get("runId")
             run_id = safe_id(run_id or state.get("runId"))
-            state["runId"] = run_id
-            state.setdefault("goals", new_goals())
             try:
-                seed_owned_milestones(state)
-                rebuild_derived(state)
-                self.validate(state)
+                for snapshot in [state, *history["past"], *history["future"]]:
+                    if snapshot.get("runId") != source_id:
+                        raise ValueError("history run ID does not match imported snapshot")
+                    snapshot["runId"] = run_id
+                    snapshot.setdefault("goals", new_goals())
+                    seed_owned_milestones(snapshot)
+                    rebuild_derived(snapshot)
+                    self.validate(snapshot)
             except (KeyError, TypeError, AttributeError) as error:
                 raise ValueError("malformed Playtime snapshot") from error
             path = self.path(run_id)
             if path.exists():
                 raise RevisionConflict("run already exists; open it or import under a new ID")
             path.parent.mkdir(parents=True, exist_ok=True)
-            self._save(path, state, 1)
+            self._save(path, state, 1, history)
             return self.load(run_id)
+
+    def export(self, run_id):
+        with self.lock:
+            state = self.load(run_id)["state"]
+            state["_serviceHistory"] = self._history(run_id)
+            return state
 
     def _save(self, path, state, revision, history=None):
         state["_serviceRevision"] = revision

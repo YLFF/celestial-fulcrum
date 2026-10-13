@@ -97,13 +97,20 @@ def add_operator(
         raise ValueError("record-only updates cannot settle costs")
     draft = _draft(state)
     existing_ids = {row["instanceId"] for row in draft["operators"]}
+    # Departed operators may still own a saved enchantment or granted effect.
+    from .relic_presentation import binding_recipients
+    reserved_ids = existing_ids | set(state.get("squad", []))
+    for relic in state.get("relics", []):
+        reserved_ids.update(row["operatorInstanceId"] for row in binding_recipients(relic))
+    for grant in state.get("grantedEffects", []):
+        reserved_ids.update(grant["operatorInstanceIds"])
     if instance_id is None:
         number = 1
-        while f"operator-{number}" in existing_ids:
+        while f"operator-{number}" in reserved_ids:
             number += 1
         instance_id = f"operator-{number}"
-    if instance_id in existing_ids:
-        raise ValueError(f"operator instance already exists: {instance_id}")
+    if instance_id in reserved_ids:
+        raise ValueError(f"operator instance already exists or has saved references: {instance_id}")
     matching = [row for row in draft["operators"] if row["name"] == name]
     repeatable = bool(entry and entry.get("repeatable"))
     if not repeatable and any(row.get("remainingBattles") is None for row in matching):

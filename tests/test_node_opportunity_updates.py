@@ -90,11 +90,13 @@ class UpdatedMerchantTests(unittest.TestCase):
 
     def test_default_reserve_and_confirmed_absence(self):
         before = merchant_reference_score(**self.parameters(cash=40))
-        self.assertAlmostEqual(before["points"], 300)
+        self.assertEqual(before["preferences"]["cashReserve"], 0)
+        self.assertAlmostEqual(before["points"], green_merchant_base_score(40) + 100)
         for changes in ({"floor": 6}, {"floor": 1, "yellow_shop_available": False}, {"yellow_visited": True}):
             after = merchant_reference_score(**self.parameters(cash=20, **changes))
             self.assertAlmostEqual(after["points"], 300)
-        self.assertEqual(merchant_reference_score(**self.parameters(cash=20))["points"], 0)
+        self.assertAlmostEqual(merchant_reference_score(**self.parameters(cash=20))["points"], 300)
+        self.assertEqual(merchant_reference_score(**self.parameters(cash=20, reserve_override=20))["points"], 0)
         self.assertGreater(merchant_reference_score(**self.parameters(cash=21))["points"], 0)
 
     def test_repeat_discounts_shopping_without_awarding_tickets(self):

@@ -27,7 +27,7 @@ export function RelicEditor({ state, catalog, entries, onSave, onClose, busy, ad
           : Array.from({ length: management.maxRecipients || 1 }, (_, slot) => <label className="field" key={slot}>
             <span>{recipientIds(assignments[row.id]).some(Boolean) ? '待保存附魔' : `附魔${management.profession ? ` · ${management.profession}` : ''}`}{management.promotionEffect && ' · 自动进阶'}</span>
             <select aria-label={`${entry.name} 受益干员${slot ? ` ${slot + 1}` : ''}`} value={assignments[row.id]?.[slot] || ''} onChange={e => assign(row.id, e.target.value, slot)}>
-            <option value="">未生效 / 选择干员</option>{state.operators.filter(operator => canEnchant(row, operator, entries)).map(operator => <option key={operator.instanceId} value={operator.instanceId}
+            <option value="">未生效 / 选择干员</option>{state.operators.filter(operator => canEnchant(row, operator, entries, catalog.operators)).map(operator => <option key={operator.instanceId} value={operator.instanceId}
               disabled={(assignments[row.id] || []).some((id, index) => index !== slot && id === operator.instanceId)}>{operator.name}</option>)}</select></label>)}
       </div> : status.readOnly ? <span className="relic-runtime-status">{status.label}</span>
         : status.kind === 'stacking' ? <NumberField label="层数" aria-label={`${entry.name} 层数`} value={row.state} nullable
