@@ -6,6 +6,7 @@ import ScoreDetails from './ScoreDetails';
 import { coverageStatus, setCoverage } from './dystopia';
 import RewardPoolPanel, { RewardPoolButtons } from './RewardPoolPanel';
 import { besidePopover, rewardPoolsFor } from './rewardPools';
+import { residentActive } from './recognitionMerge';
 
 export default function NodeEditor({ node, instance, catalog, value, anchor, onClose, onSave, busy, entries, heldRelics = [] }) {
   const [tab, setTab] = useState('score');
@@ -25,6 +26,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
   const originalCategory = node.resolvedCategoryId || node.observedCategoryId || '';
   const [category, setCategory] = useState(originalCategory);
   const [completion, setCompletion] = useState(node.completion);
+  const [confirmCompletion, setConfirmCompletion] = useState(false);
   const [visibility, setVisibility] = useState(node.visibility);
   const [marks, setMarks] = useState(node.confirmedMarkIds);
   const [encounter, setEncounter] = useState(node.encounterId || '');
@@ -41,7 +43,9 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
     const commands = [], changed = category !== originalCategory;
     const reset = changed && (isUnknown(category) || category === 'node_type_020');
     if (reset) commands.push({ type: 'nodeReset', areaKey: instance.areaKey, nodeId: node.id, categoryId: category });
-    const changes = { completion, visibility, markIds: isUnknown(category) ? [] : marks };
+    const changes = { visibility, markIds: isUnknown(category) ? [] : marks };
+    if (completion !== 'completed' || completion !== node.completion || !marks.includes('node_mark_001') || confirmCompletion)
+      changes.completion = completion;
     if (!isUnknown(category)) changes.categoryId = category;
     if (category === 'node_type_006') {
       if (encounter) changes.encounterId = encounter;
@@ -51,7 +55,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
     if (category === 'node_type_012') changes.fateRole = role;
     if (category !== 'node_type_012' && node.fateRole !== 'unknown') changes.fateRole = 'unknown';
     if (completion === 'completed' && !isUnknown(category) &&
-        (changed || marks.includes('node_mark_001') !== node.confirmedMarkIds.includes('node_mark_001'))) {
+        (changed || !node.completedCategoryId && marks.includes('node_mark_001') !== node.confirmedMarkIds.includes('node_mark_001'))) {
       changes.completedCategoryId = marks.includes('node_mark_001') ? 'node_type_021' : category;
     }
     commands.push({ type: 'node', areaKey: instance.areaKey, nodeId: node.id, changes });
@@ -91,7 +95,10 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
         if (isUnknown(e.target.value)) setCompletion('pending');
       }}>
         <option value="" disabled>请选择节点类别</option>{Object.entries(catalog.labels.nodeTypes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
-      <label className="field"><span>完成状态</span><select aria-label="完成状态" value={completion} onChange={e => setCompletion(e.target.value)}>
+      {residentActive(node) && <small className="full">流窜居民：未清理</small>}
+      <label className="field"><span>完成状态</span><select aria-label="完成状态" value={completion} onChange={e => {
+        setCompletion(e.target.value); setConfirmCompletion(e.target.value === 'completed');
+      }}>
         <option value="unknown">待确认</option><option value="pending">未完成</option><option value="completed">已完成</option></select></label>
       <label className="field"><span>探明状态</span><select aria-label="探明状态" value={visibility} onChange={e => setVisibility(e.target.value)}>
         <option value="unknown">待确认</option><option value="hidden">未探明</option><option value="revealed">已探明</option></select></label>
@@ -114,7 +121,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
       {['node_type_004', 'node_type_013'].includes(category) && <NumberField label="已查看货柜面数" value={shelves} onChange={setShelves} max={5} />}
       <label className="checkbox-field full"><input type="checkbox" checked={position} onChange={e => setPosition(e.target.checked)} /><Crosshair size={15} />玩家当前位置</label>
     </div>}</div>
-    <footer><button onClick={() => { setCompletion('completed'); setVisibility('revealed'); }} disabled={busy}><Check size={15} />已完成</button>
+    <footer><button onClick={() => { setCompletion('completed'); setConfirmCompletion(true); setVisibility('revealed'); }} disabled={busy}><Check size={15} />已完成</button>
       <SaveButton busy={busy} disabled={busy || !category} onClick={save}>确认更新</SaveButton></footer>
   </section>{pool && <RewardPoolPanel key={`${pool.label}-${pool.kind}`} selection={pool} entries={entries} heldRelics={heldRelics}
     style={besidePopover(left, top, 386, panelHeight, viewport)} onClose={() => setPool(null)} />}</>;

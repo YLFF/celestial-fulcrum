@@ -8,7 +8,7 @@ import { AREA_NAMES, areaFromObservation } from './model';
 import MapView from './MapView';
 import { SpecialRegionFields } from './DystopiaEditor';
 import { dystopiaFromObservation, emptyDystopia } from './dystopia';
-import { recognitionChanges, recognitionReview, mergedRecognitionPreview } from './recognitionMerge';
+import { recognitionChanges, recognitionReview, mergedRecognitionPreview, mergedResidentMarks } from './recognitionMerge';
 import ManualMapDialog from './ManualMapDialog';
 
 const FIELDS = { life: '生命', shield: '护盾', level: '等级', experience: '经验', hope: '希望', originium_ingot: '源石锭', action_points: '行动力' };
@@ -78,14 +78,17 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
         if (!completed) continue;
         const categoryId = nodeChanges[row.nodeId] || row.categoryId;
         if (!categoryId || categoryId.startsWith('unknown_')) { setError(`请补充已完成节点 (${row.nodeId}) 的原始类别，不能从空地反推具体事件。`); return; }
-        const changes = { categoryId, completion: 'completed' };
+        const changes = row.reason === 'resident' ? { completion: 'completed',
+          ...(!oldMap?.nodes[row.nodeId]?.completedCategoryId ? { completedCategoryId: 'node_type_021' } : {}) }
+          : { categoryId, completion: 'completed' };
         if (categoryId === 'node_type_006' && encounters[row.nodeId]) changes.encounterId = encounters[row.nodeId];
         commands.push({ type: 'node', areaKey: chosen, nodeId: row.nodeId, changes });
       }
       for (const [nodeId, marks] of Object.entries(markChoices)) {
         if (!marks.length || nodeChanges[nodeId]?.startsWith('unknown_')) continue;
-        const previous = !newInstance && oldMap?.templateId === observation.templateId ? oldMap.nodes[nodeId]?.confirmedMarkIds || [] : [];
-        commands.push({ type: 'node', areaKey: chosen, nodeId, changes: { markIds: [...new Set([...previous, ...marks])] } });
+        const previous = !newInstance && oldMap?.templateId === observation.templateId ? oldMap.nodes[nodeId] : null;
+        const observed = observation.nodes.find(row => row.id === nodeId);
+        commands.push({ type: 'node', areaKey: chosen, nodeId, changes: { markIds: mergedResidentMarks(observed, previous, marks) } });
       }
       commands.push({ type: 'dystopia', areaKey: chosen, value: dystopia });
       commands.push({ type: 'utopia', areaKey: chosen, value: utopiaId });
@@ -133,9 +136,10 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
       {confirmMap && newInstance && oldMap && <label className="checkbox-field form-error"><input type="checkbox" checked={resetConfirmed} onChange={e => setResetConfirmed(e.target.checked)} />确认换图：本次不沿用旧节点记录，旧实例仍保留</label>}
       {confirmMap && !newInstance && oldMap && oldMap.templateId !== observation.templateId && <div className="form-error">模板与本层记录不同，不能直接合并。请核对截图或明确选择重新建立。</div>}
       {confirmMap && oldMap?.templateId === observation.templateId && !newInstance && <section className="merge-summary">
-        <h3>本层合并预览</h3><p>保留已确认的原节点类别、标记与事件；确认后更新探索进度。</p>
-        {changes.map(row => <div key={row.nodeId} className={row.kind === 'conflict' ? 'negative' : ''}>
+        <h3>本层合并预览</h3><p>保留原节点类别、事件与结局标记；流窜居民位置以新截图更新。</p>
+        {changes.map(row => <div key={`${row.nodeId}-${row.kind}`} className={row.kind === 'conflict' ? 'negative' : ''}>
           ({row.nodeId}) · {row.kind === 'completion' ? `可能已完成：${catalog.labels.nodeTypes[row.before] || '原类别待补充'}` :
+            row.kind === 'residentArrival' ? '新出现流窜居民（原节点记录保留）' : row.kind === 'residentDeparture' ? '流窜居民已不在此处（移动或清理）' :
             row.kind === 'reveal' ? `新探明：${catalog.labels.nodeTypes[row.after]}` : `类别冲突：${catalog.labels.nodeTypes[row.before]} / ${catalog.labels.nodeTypes[row.after]}，请修正节点`}</div>)}
         {!changes.length && <span className="quiet">未发现新增类别或完成候选；仍可确认位置与资源更新。</span>}
       </section>}

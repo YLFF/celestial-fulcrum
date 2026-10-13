@@ -67,7 +67,7 @@ class PlaytimePredictionTests(unittest.TestCase):
         self.assertNotIn("encounter_009", event_candidates(instance))
         self.assertEqual(len(state["areas"]["III"]["instances"]), 1)
 
-    def test_multiple_shop_and_exit_hints_do_not_confirm_every_candidate(self) -> None:
+    def test_multiple_exits_are_fixed_but_shop_candidates_remain_uncertain(self) -> None:
         state = new_playtime("hint-candidates")
         observed = chain_map(3)
         for index, hint in ((1, "rogue-trader"), (2, "rogue-trader"), (3, "danger-end"), (4, "danger-end")):
@@ -75,7 +75,8 @@ class PlaytimePredictionTests(unittest.TestCase):
         observed["nodes"][3]["categoryId"] = "node_type_015"
         instance = merge_map_observation(state, "III", observed)
         self.assertEqual(instance["nodes"]["3,0"]["resolvedCategoryId"], "node_type_015")
-        for node_id in ("1,0", "2,0", "4,0"):
+        self.assertEqual(instance["nodes"]["4,0"]["resolvedCategoryId"], "node_type_015")
+        for node_id in ("1,0", "2,0"):
             self.assertIsNone(instance["nodes"][node_id]["resolvedCategoryId"])
             self.assertEqual(instance["nodes"][node_id]["observedCategoryId"], "unknown_mystery")
         merge_map_observation(state, "III", observed)

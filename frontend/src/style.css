@@ -95,7 +95,7 @@ svg { flex-shrink: 0; }
 .empty-map { min-height: 384px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 15px; color: #8caa9a; }
 .empty-map h2 { font-size: 15px; }
 .empty-map button { color: #bfd5c7; background: #2c3c32; border-color: #51695a; }
-.hover-sheet { position: fixed; z-index: 70; width: 254px; color: #32483a; background: #fbfdfb; border: 1px solid #afc8b7; border-radius: 6px; box-shadow: 0 8px 20px #14281b26; padding: 13px; pointer-events: none; }
+.hover-sheet { position: fixed; z-index: 70; width: 254px; max-height: calc(100dvh - 16px); overflow: hidden; color: #32483a; background: #fbfdfb; border: 1px solid #afc8b7; border-radius: 6px; box-shadow: 0 8px 20px #14281b26; padding: 13px; pointer-events: none; }
 .hover-sheet > b { display: flex; justify-content: space-between; font-size: 12px; }
 .hover-sheet > b span { font-family: monospace; color: #809285; }
 .hover-score { font-size: 22px; font-weight: 600; margin: 9px 0; color: #247451; }
@@ -364,6 +364,9 @@ pre { overflow: auto; max-height: 220px; font-size: 10px; color: #728778; }
 .component-picker-grid .inventory-image { width: 28px; height: 28px; }
 .component-picker-grid span { font-size: 10px; line-height: 1.2; overflow-wrap: anywhere; text-align: center; align-self: center; }
 .catalog-picker { display: flex; flex-direction: column; gap: 9px; min-width: 0; padding-right: 15px; border-right: 1px solid var(--border, #dce5df); }
+.profession-filters { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 7px 4px; }
+.profession-filters label { display: flex; align-items: center; gap: 4px; font-size: 11px; white-space: nowrap; }
+.profession-filters input { width: 13px; height: 13px; margin: 0; }
 .picker-search { display: flex; align-items: center; gap: 6px; }
 .picker-search input { width: 100%; }
 .picker-results { max-height: 390px; overflow: auto; }

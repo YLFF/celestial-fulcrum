@@ -13,6 +13,7 @@ from .operators import validate_operator_pool
 from .goals import new_goals, validate_goals
 from .merchant_state import DEFAULT_INVESTMENT_BALANCE, SHOP_CATEGORIES, validate_viewed_shelves
 from .node_identity import contextual_mark_id
+from .residents import clear_outpost_residents, complete_node, merge_resident_marks, resident_active
 from .opening import (
     SQUAD_NAMES, COCOON_NAMES, DEFAULT_TECHNOLOGY_COMBAT_BONUSES,
     build_opening, normalize_technology_combat_bonuses, opening_action_points,
@@ -247,6 +248,7 @@ def _node_from_observation(
         "completion": "unknown",
         "completedCategoryId": None,
         "confirmedMarkIds": marks,
+        "residentCleared": "node_mark_001" not in marks,
         "markCandidates": observed.get("marks", []),
         "encounterId": encounter,
         "encounterOutcome": None,
@@ -298,7 +300,7 @@ def merge_map_observation(
         raise ValueError("invalid fifth-floor entry sandboxes")
     slot = state["areas"][area_key]
     hint_counts = Counter(node.get("templateHint") for node in observation["nodes"])
-    ambiguous_hints = {hint for hint in ("danger-end", "rogue-trader") if hint_counts[hint] > 1}
+    ambiguous_hints = {"rogue-trader"} if hint_counts["rogue-trader"] > 1 else set()
     existing = None if new_instance or slot["activeInstanceId"] is None else active_instance(state, area_key)
     position_observation = observation.get("playerPositionObservation") or {}
     confirmed_position = player_position or (
@@ -319,6 +321,8 @@ def merge_map_observation(
         instance = existing
         for observed in observation["nodes"]:
             node = instance["nodes"][str(observed["id"])]
+            if confirmed_position == node["id"] and resident_active(node):
+                complete_node(instance, node)
             current = _node_from_observation(observed, area_key, ambiguous_hints)
             if current["observedCategoryId"] is not None:
                 node["observedCategoryId"] = current["observedCategoryId"]
@@ -331,7 +335,7 @@ def merge_map_observation(
                     node["resolvedCategoryId"] = current["resolvedCategoryId"]
                 elif old != current["resolvedCategoryId"] and current["resolvedCategoryId"] != "node_type_020":
                     node["needsCategoryReview"] = [old, current["resolvedCategoryId"]]
-            node["confirmedMarkIds"] = sorted(set(node["confirmedMarkIds"]) | set(current["confirmedMarkIds"]))
+            merge_resident_marks(node, current)
             if current["encounterId"] and node["encounterId"] is None:
                 node["encounterId"] = current["encounterId"]
                 node["resolvedCategoryId"] = "node_type_006"
@@ -434,10 +438,7 @@ def set_player_position(instance: dict[str, Any], node_id: str) -> None:
     instance["playerPosition"] = node_id
     instance["playerPositionCandidate"] = None
     node = instance["nodes"][node_id]
-    node["completion"] = "completed"
-    if not node.get("completedCategoryId") and node.get("resolvedCategoryId"):
-        node["completedCategoryId"] = ("node_type_021" if "node_mark_001" in node.get("confirmedMarkIds", [])
-                                       else node["resolvedCategoryId"])
+    complete_node(instance, node)
 
 
 def merge_resource_observation(state: dict[str, Any], observation: dict[str, Any] | None) -> None:
@@ -498,7 +499,8 @@ def update_node(
         if (completion or node["completion"]) != "completed":
             raise ValueError("completed category requires a completed node")
     marks_after = node["confirmedMarkIds"] if confirmed_mark_ids is None else confirmed_mark_ids
-    completed_resident_before = node["completion"] == "completed" and "node_mark_001" in node["confirmedMarkIds"]
+    completed_resident_before = node["completion"] == "completed" and (
+        "node_mark_001" in node["confirmedMarkIds"] or node.get("residentCompleted", False))
     marked_event = next((KNOWN_MARK_EVENTS[mark] for mark in marks_after if mark in KNOWN_MARK_EVENTS), None)
     event_after = encounter_id if encounter_id is not None else (None if clear_encounter else node["encounterId"])
     if clear_encounter and marked_event is not None:
@@ -531,6 +533,8 @@ def update_node(
     if visibility is not None:
         node["visibility"] = visibility
     if confirmed_mark_ids is not None:
+        if "node_mark_001" in confirmed_mark_ids and "node_mark_001" not in node["confirmedMarkIds"]:
+            node["residentCleared"] = False
         node["confirmedMarkIds"] = sorted(set(confirmed_mark_ids))
         marked_event = next((KNOWN_MARK_EVENTS[mark] for mark in node["confirmedMarkIds"] if mark in KNOWN_MARK_EVENTS), None)
         if marked_event:
@@ -565,6 +569,8 @@ def update_node(
             "node_type_021" if completed_resident_before or "node_mark_001" in node["confirmedMarkIds"]
             else node["resolvedCategoryId"]
         )
+    if completion == "completed":
+        complete_node(instance, node)
     rebuild_derived(state)
     return node
 
@@ -623,6 +629,7 @@ def rebuild_derived(state: dict[str, Any]) -> None:
     outcomes: dict[str, dict[str, str]] = {event["id"]: {} for event in events}
     for key, slot in state["areas"].items():
         for instance in slot["instances"]:
+            clear_outpost_residents(instance)
             for node in instance["nodes"].values():
                 event_id = node["encounterId"]
                 completed_category = node.get("completedCategoryId")

@@ -126,6 +126,8 @@ def apply_commands(state, commands):
                         encounterOutcome=None, fateRole="unknown")
             node.pop("merchantViewedShelves", None)
             node.pop("needsCategoryReview", None)
+            node.pop("residentCompleted", None)
+            node.pop("residentCleared", None)
         elif kind in {"position", "actionPoints", "utopia", "dystopia", "strategy"}:
             keys(command, ("type", "areaKey", "value"))
             instance = active_instance(state, command["areaKey"])

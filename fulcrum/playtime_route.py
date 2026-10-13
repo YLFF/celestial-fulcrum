@@ -10,6 +10,7 @@ from .playtime_state import active_instance, validate_playtime, rebuild_derived
 from .merchant_state import snapshot_shelves
 from .goals import planning_pursuit
 from .scoring_profile import PROFILE
+from .residents import resident_active
 
 
 def route_inputs(
@@ -38,7 +39,8 @@ def route_inputs(
     action = instance.get("actionPoints")
     if position is None or action is None:
         raise ValueError("player position and action points must be confirmed before route planning")
-    completed = [node_id for node_id, node in instance["nodes"].items() if node["completion"] == "completed"]
+    completed = [node_id for node_id, node in instance["nodes"].items()
+                 if node["completion"] == "completed" and not resident_active(node)]
     if "0,0" not in completed:
         completed.append("0,0")
     if position not in completed:
@@ -47,7 +49,8 @@ def route_inputs(
         "success": True, "templateId": instance["templateId"],
         "nodes": [
             {"id": node_id, "coord": node["coord"],
-             "categoryId": node["resolvedCategoryId"] or node["observedCategoryId"],
+             "categoryId": ("node_type_020" if node["completion"] == "completed" and resident_active(node)
+                            else node["resolvedCategoryId"] or node["observedCategoryId"]),
              "visibility": node["visibility"], "templateHint": node["templateHint"],
              "encounterId": node.get("encounterId"), "stageName": node.get("stageName"),
              "confirmedMarkIds": node.get("confirmedMarkIds", []), "fateRole": node.get("fateRole", "unknown"),

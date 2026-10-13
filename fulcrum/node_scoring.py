@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Any, Mapping
 
 from .battle_rewards import BattleRewardCatalog
+from .development_bonuses import battle_reward_modifiers
 from .node_rewards import NodeRewardPoolCatalog
 from .operators import PERMANENT_SOURCES
 from .team_status import team_status
@@ -118,6 +119,7 @@ class SnapshotScorer:
         if "merchantRepeatFactor" in self.options:
             self.warnings.add("merchantRepeatFactor is superseded by per-node merchantViewedShelves")
         self.pools, self.battles, self.relics, self.reward_rules = _catalogs()
+        self.reward_modifiers = battle_reward_modifiers(self.context.get("relics", []))
         self.definitions, self.weight_data = _events()
         self.operators = self.context.get("operators", [])
         permanent = [op for op in self.operators if op.get("source") in PERMANENT_SOURCES
@@ -350,7 +352,7 @@ class SnapshotScorer:
             return value
         try:
             reward = self.battles.resolve(area_key=key, mode=mode, stage_name=stage,
-                experience_multipliers=self.options.get("experienceMultipliers"))
+                experience_multipliers=self.options.get("experienceMultipliers"), reward_modifiers=self.reward_modifiers)
         except ValueError as error:
             return _value(missing=[str(error)])
         if reward.get("terminalRewardOverride"):
@@ -361,7 +363,8 @@ class SnapshotScorer:
         elif stage == self.reward_rules["battles"]["stranger_companion"]["stageName"]:
             rule = self.reward_rules["battles"]["stranger_companion"]
             ingots = self.battles.resolve(area_key=key.split("-")[0], mode=rule["ingotsReferenceMode"],
-                                         experience_multipliers=self.options.get("experienceMultipliers"))["originiumIngot"]["value"]
+                experience_multipliers=self.options.get("experienceMultipliers"),
+                reward_modifiers=self.reward_modifiers)["originiumIngot"]["value"]
             reward["cashReference"] = {"areaKey": key.split("-")[0], **rule}
         else:
             ingots = 0
@@ -373,6 +376,7 @@ class SnapshotScorer:
                        "components": sum(self.pool(context) for context in components),
                        "relics": relic_count * self.relics.pool_score(relic_context) if relic_count else 0},
                       cash=ingots, missing=missing, experienceAward=reward["experienceAward"], stage=stage,
+                      **({"rewardModifiers": reward["rewardModifiers"]} if reward.get("rewardModifiers") else {}),
                       **({"cashReference": reward["cashReference"]} if "cashReference" in reward else {}))
         return self.with_soil_reward(value, node)
 

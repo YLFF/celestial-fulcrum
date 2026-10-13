@@ -231,7 +231,7 @@ class MapRecognizer:
         template = selected.template
         hint_counts = Counter(template.fixed_nodes.values())
         hint_counts[template.terminal_type] += len(template.terminal_slots)
-        ambiguous_hints = {hint for hint in ("danger-end", "rogue-trader") if hint_counts[hint] > 1}
+        ambiguous_hints = {"rogue-trader"} if hint_counts["rogue-trader"] > 1 else set()
         for slot in template.occupied_slots:
             coord = template.coord(slot)
             wx, wy = selected.pixel_at(slot)

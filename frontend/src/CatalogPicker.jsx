@@ -2,16 +2,19 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronDown, Plus, Search } from 'lucide-react';
 import { EntryImage } from './common';
 import { PROFESSIONS } from './model';
-import { fuzzyMatch } from './picker';
+import { fuzzyMatch, operatorCandidates } from './picker';
 
 export default function CatalogPicker({ rows = [], onAdd, operators = false, components = false, selectedIds = [], autoFocus = false }) {
-  const [query, setQuery] = useState(''), [profession, setProfession] = useState('');
+  const [query, setQuery] = useState(''), [professions, setProfessions] = useState([...PROFESSIONS]);
   const [limit, setLimit] = useState(100);
-  useEffect(() => { setLimit(100); }, [query, profession]);
-  const matches = useMemo(() => rows.filter(row => (!profession || row.profession === profession) && fuzzyMatch(row, query)), [rows, query, profession]);
+  useEffect(() => { setLimit(100); }, [query, professions]);
+  const matches = useMemo(() => operators ? operatorCandidates(rows, professions, query)
+    : rows.filter(row => fuzzyMatch(row, query)), [rows, query, professions, operators]);
   return <aside className="catalog-picker">
     <label className="picker-search"><Search size={15} /><input aria-label="搜索名称" placeholder={operators ? '中文名 / 代号 / 英文名' : '搜索名称'} autoFocus={autoFocus} value={query} onChange={e => setQuery(e.target.value)} /></label>
-    {operators && <select aria-label="筛选职业" value={profession} onChange={e => setProfession(e.target.value)}><option value="">全部职业</option>{PROFESSIONS.map(p => <option key={p}>{p}</option>)}</select>}
+    {operators && <div className="profession-filters" role="group" aria-label="筛选职业">{PROFESSIONS.map(p =>
+      <label key={p}><input type="checkbox" checked={professions.includes(p)} onChange={e =>
+        setProfessions(e.target.checked ? [...professions, p] : professions.filter(value => value !== p))} />{p}</label>)}</div>}
     <small className="quiet">{matches.length} 项</small>
     {components ? <div className="component-picker-results">{['加工品', '自然物', '概念体'].map(kind => <section key={kind}>
       <h3>{kind}</h3><div className="component-picker-grid">{matches.filter(row => row.kind === kind).map(row => <button key={row.id} title={row.name}

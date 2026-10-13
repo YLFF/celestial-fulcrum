@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { candidateIconSwitch, candidatePositions, POSITION_FILTERS, routeCurve } from '../src/mapPresentation.js';
-import { mergedRecognitionPreview, recognitionChanges, recognitionReview } from '../src/recognitionMerge.js';
+import { mergedRecognitionPreview, recognitionChanges, recognitionReview, residentActive } from '../src/recognitionMerge.js';
 import { AREA_NAMES } from '../src/model.js';
 
 test('ten fixed area names and candidate filter order', () => {
@@ -89,4 +89,60 @@ test('merge preview preserves original types/events and exposes unknown traverse
   assert.equal(retained.nodes.c.resolvedCategoryId, 'node_type_006');
   assert.equal(retained.nodes.c.observedCategoryId, 'node_type_020');
   assert.equal(retained.nodes.c.encounterId, 'event-1');
+});
+
+test('resident merge refreshes overlays on completed nodes without erasing original event history', () => {
+  const previous = { templateId: 't', nodes: {
+    a: { ...old.nodes.c, id: 'a', completedCategoryId: 'node_type_006', confirmedMarkIds: ['node_mark_001', 'node_mark_007'], residentCleared: false },
+    b: { ...old.nodes.c, id: 'b', completedCategoryId: 'node_type_006', confirmedMarkIds: [], residentCleared: true },
+  } };
+  const incoming = { success: true, templateId: 't', edges: [], nodes: [
+    { id: 'a', categoryId: 'node_type_020', marks: [] },
+    { id: 'b', categoryId: 'node_type_020', marks: [{ id: 'node_mark_001', status: 'confirmed' }] },
+  ] };
+  assert.deepEqual(recognitionChanges(incoming, previous).map(row => [row.nodeId, row.kind]),
+    [['a', 'residentDeparture'], ['b', 'residentArrival']]);
+  const options = { newInstance: false, nodeChanges: {}, completions: {}, encounters: {}, markChoices: {} };
+  const preview = mergedRecognitionPreview(incoming, previous, options);
+  assert.deepEqual(preview.nodes.a.confirmedMarkIds, ['node_mark_007']);
+  assert.equal(residentActive(preview.nodes.b), true);
+  assert.equal(preview.nodes.b.encounterId, 'event-1');
+  assert.equal(preview.nodes.b.completedCategoryId, 'node_type_006');
+  const atResident = { ...incoming, playerPositionObservation: { nodeId: 'b' } };
+  assert.deepEqual(recognitionReview(atResident, previous).map(row => [row.nodeId, row.reason]), [['b', 'resident']]);
+  const cleared = mergedRecognitionPreview(atResident, previous, { ...options, position: 'b', completePosition: true });
+  assert.equal(residentActive(cleared.nodes.b), false);
+  assert.equal(cleared.nodes.b.completedCategoryId, 'node_type_006');
+});
+
+test('completion preview clears all residents when completing the outpost, never other marks', () => {
+  const previous = { templateId: 't', nodes: {
+    a: { ...old.nodes.a, resolvedCategoryId: 'node_type_019' },
+    b: { ...old.nodes.c, confirmedMarkIds: ['node_mark_001', 'node_mark_007'], residentCleared: false },
+  } };
+  const preview = mergedRecognitionPreview(observation, previous, { newInstance: false,
+    completions: { a: true }, nodeChanges: {}, encounters: {}, markChoices: {} });
+  assert.deepEqual(preview.nodes.b.confirmedMarkIds, ['node_mark_007']);
+  assert.equal(residentActive(preview.nodes.b), false);
+});
+
+test('an incoming resident on an unread unknown node does not suggest completion of the original node', () => {
+  const incoming = { success: true, templateId: 't', nodes: [
+    { id: 'd', categoryId: 'node_type_020', marks: [{ id: 'node_mark_001', status: 'confirmed' }] },
+  ] };
+  assert.deepEqual(recognitionChanges(incoming, old).map(row => row.kind), ['residentArrival']);
+  assert.deepEqual(recognitionReview(incoming, old), []);
+});
+
+test('unrevealed fixed exits appear in merge preview without being mistaken for shortcuts', () => {
+  const incoming = { success: true, templateId: 't', edges: [], nodes: [
+    { id: 'a', categoryId: 'unknown_mystery', templateHint: 'danger-end', marks: [] },
+    { id: 'b', categoryId: null, templateHint: 'danger-end', marks: [] },
+    { id: 'c', categoryId: 'node_type_016', templateHint: null, marks: [] },
+  ] };
+  const preview = mergedRecognitionPreview(incoming, null, { newInstance: true,
+    completions: {}, nodeChanges: {}, encounters: {}, markChoices: {} });
+  assert.equal(preview.nodes.a.resolvedCategoryId, 'node_type_015');
+  assert.equal(preview.nodes.b.resolvedCategoryId, 'node_type_015');
+  assert.equal(preview.nodes.c.resolvedCategoryId, 'node_type_016');
 });

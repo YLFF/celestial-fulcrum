@@ -25,6 +25,12 @@ export default function ScoreDetails({ value, catalog, compact = false, rewardSc
       <span>{TERM_NAMES[key] || key}</span><strong className={number < 0 ? 'negative' : ''}>{num(number)}</strong></div>)}
     {!!value.scoringBasis?.length && <div className="score-basis">{value.scoringBasis.map((row, index) =>
       <div className="score-part" key={index}><span>{row.label}</span><strong>{num(row.points)} 分</strong></div>)}</div>}
+    {value.rewardModifiers && <details><summary>战斗奖励加成</summary>{Object.entries(value.rewardModifiers).map(([metric, terms]) =>
+      !!terms.length && <div key={metric}><b>{metric === 'battle_cash_reward' ? '源石锭' : '指挥经验'}</b>
+        {terms.map(term => <div className="score-part" key={term.clauseId}><span>{term.name}</span><strong>
+          {term.operation === 'factor' ? `×${num(term.value)}` : term.operation === 'base_ratio_delta'
+            ? `${term.value >= 0 ? '+' : ''}${pct(term.value)}` : `${term.value >= 0 ? '+' : ''}${num(term.value)}`}</strong></div>)}</div>)}
+      <small>固定增减先结算；经验藏品增幅相加、源石锭藏品倍率相乘，科技倍率独立，最后向下取整一次。</small></details>}
     {value.actionGainEstimate != null && <div className="score-part"><span>获得 {value.actionGainEstimate} 行动力（期望收益，不预加搜索行动力）</span></div>}
     {value.fruitReward && <details><summary>藏果地自然物的期望收益</summary>
       {value.fruitReward.fruitOutcomes?.map(row => <div className="score-part" key={row.itemId}>

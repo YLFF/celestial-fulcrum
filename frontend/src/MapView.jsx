@@ -18,6 +18,14 @@ export default function MapView({ instance, catalog, entries, scores, route, onS
     try { localStorage.setItem(MAP_BRIGHTNESS_KEY, String(value)); } catch { /* Keep the current brightness when storage is unavailable. */ }
   }
   const [hover, setHover] = useState(null);
+  const hoverSheet = useRef(null);
+  const [hoverHeight, setHoverHeight] = useState(250);
+  useEffect(() => {
+    if (!hover || !hoverSheet.current) return;
+    const observer = new ResizeObserver(() => setHoverHeight(hoverSheet.current.getBoundingClientRect().height));
+    observer.observe(hoverSheet.current);
+    return () => observer.disconnect();
+  }, [hover]);
   const [filter, setFilter] = useState('');
   const markerId = `route-arrow-${useId().replace(/:/g, '')}`;
   useEffect(() => { setFilter(''); }, [instance?.instanceId]);
@@ -140,7 +148,7 @@ export default function MapView({ instance, catalog, entries, scores, route, onS
         </div>}
     </div>
     </div>
-    {hover && <div className="hover-sheet" style={{ left: Math.max(8, Math.min(window.innerWidth - 264, hover.rect.right + 8)), top: Math.max(8, Math.min(window.innerHeight - 250, hover.rect.top)) }}>
+    {hover && <div ref={hoverSheet} className="hover-sheet" style={{ left: Math.max(8, Math.min(window.innerWidth - 264, hover.rect.right + 8)), top: Math.max(8, Math.min(window.innerHeight - hoverHeight - 8, hover.rect.top)) }}>
       <b>{catalog.labels.nodeTypes[hover.node.resolvedCategoryId || hover.node.observedCategoryId] || '待确认'} <span>({hover.node.id})</span></b>
       <div className="hover-score">{num(scores?.nodeValues?.[hover.node.id]?.arrivalPoints ?? scores?.nodeValues?.[hover.node.id]?.points)}<small>期望分</small></div>
       <div className="hover-foot">节点 {num(scores?.nodeValues?.[hover.node.id]?.points)} + 揭示 {num(scores?.nodeValues?.[hover.node.id]?.revealValue)}</div>

@@ -7,6 +7,7 @@ from fractions import Fraction
 import json
 from pathlib import Path
 from typing import Iterable
+from .development_bonuses import reward_amount
 
 
 DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "blackflow_battle_rewards.json"
@@ -20,6 +21,7 @@ class BattleRewardCatalog:
     def resolve(
         self, *, area_key: str, mode: str, stage_name: str | None = None,
         experience_multipliers: Iterable[str | int | Fraction] | None = None,
+        reward_modifiers: dict | None = None,
     ) -> dict:
         if mode not in MODES:
             raise ValueError(f"Unsupported battle mode: {mode}")
@@ -70,12 +72,13 @@ class BattleRewardCatalog:
                           terminalRewardOverride=terminal)
         multipliers = (self.data["experienceCalculation"]["fullTechnologyMultipliers"]
                        if experience_multipliers is None else experience_multipliers)
-        value = Fraction(result["experience"]["base"])
-        for multiplier in multipliers:
-            factor = Fraction(str(multiplier))
-            if factor < 0:
-                raise ValueError("Experience multipliers cannot be negative")
-            value *= factor
-        result["experienceAward"] = value.numerator // value.denominator
+        modifiers = reward_modifiers or {}
+        result["experienceAward"] = reward_amount(result["experience"]["base"],
+            modifiers.get("battle_experience_reward", []), multipliers=multipliers)
+        if result["originiumIngot"]["kind"] == "fixed":
+            cash = result["originiumIngot"]["value"]
+            result["originiumIngot"]["value"] = reward_amount(cash, modifiers.get("battle_cash_reward", []))
+        if any(modifiers.values()):
+            result["rewardModifiers"] = deepcopy(modifiers)
         result["resolvedRegion"] = region if not mode.startswith("special") else None
         return result
