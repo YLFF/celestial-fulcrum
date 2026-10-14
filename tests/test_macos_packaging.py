@@ -58,6 +58,7 @@ class MacBuildMaterialsTests(unittest.TestCase):
                 self.assertIn(image_path(entry["id"]), bundled, entry["id"])
         self.assertEqual(spec["exe"]["target_arch"], "arm64")
         self.assertEqual(spec["app"]["name"], PROJECT["executableName"] + ".app")
+        self.assertEqual(spec["app"]["icon"], str(ROOT / "assets/ui/sitting-dog-v1.icns"))
         self.assertIn((str(ROOT / "build/macos-input/runtime/node/bin/node"), "runtime/node/bin"), spec["a"].binaries)
         self.assertIn((str(ROOT / "frontend/dist"), "frontend/dist"), spec["datas"])
 

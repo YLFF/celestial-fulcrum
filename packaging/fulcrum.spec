@@ -47,5 +47,6 @@ a = Analysis([str(root / "desktop_launcher.py")], pathex=[str(root)],
 pyz = PYZ(a.pure)
 exe = EXE(pyz, a.scripts, [("X utf8", None, "OPTION")], exclude_binaries=True,
           name=project["executableName"], version=version_resource,
+          icon=str(root / "assets/ui/sitting-dog-v1.ico"),
           console=False, debug=False, upx=False)
 coll = COLLECT(exe, a.binaries, a.datas, name=project["executableName"], upx=False)

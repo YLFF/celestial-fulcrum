@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       release_tag:
-        description: Private preview release tag (new tag only)
+        description: Release tag (new tag only; suffixes create prereleases)
         required: true
-        default: v0.1.0-preview.1
+        default: v0.1.0
         type: string
 
 permissions:
@@ -69,7 +69,7 @@ jobs:
           tests.test_arkrog_comparison tests.test_team_power tests.test_combat_bonuses
           tests.test_relic_presentation tests.test_relic_effect_model tests.test_manual_map
           tests.test_route_planner tests.test_route_allocation tests.test_one_step_advice
-          tests.test_scoring_calibration.CalibrationMathTests
+          tests.test_scoring_calibration.CalibrationMathTests tests.test_app_icon
       - name: Test frontend
         run: |
           pnpm --dir frontend install --frozen-lockfile
@@ -104,7 +104,7 @@ jobs:
           retention-days: 7
 
   publish:
-    name: Publish private preview
+    name: Publish release
     needs: build
     runs-on: ubuntu-24.04
     timeout-minutes: 10
@@ -132,7 +132,13 @@ jobs:
             echo 'Release already exists; choose a new tag.'
             exit 1
           fi
+          release_flags=()
+          if [[ "$RELEASE_TAG" == *-* ]]; then
+            release_flags+=(--prerelease)
+          else
+            release_flags+=(--latest)
+          fi
           gh release create "$RELEASE_TAG" ./*.zip ./*.zip.sha256 \
-            --target "$SOURCE_REVISION" --prerelease \
+            --target "$SOURCE_REVISION" "${release_flags[@]}" \
             --title "Celestial Fulcrum $RELEASE_TAG" \
-            --notes "Private test build. Windows x64 and Apple Silicon macOS arm64. Both packages passed offline OCR, catalog image and map asset checks; Windows also passed native WebView2 window startup. Windows: after confirming this trusted project source, unblock the downloaded ZIP in Properties before extracting. Unsigned Windows build; ad-hoc signed, non-notarized Mac app. Source: $SOURCE_REVISION."
+            --notes "Windows x64 / macOS Apple Silicon arm64。包含地图识别与手动建图、节点预测与路径规划、藏品加成汇总与附魔、对局导入导出及地图更新撤销重做。两个平台均通过离线识图和素材完整性自检，Windows 另通过 WebView2 窗口启动验证。主程序采用 sitting-dog 图标。Windows 包未签名；确认来源可信后，若系统阻止运行，请先在下载的 ZIP 属性中解除锁定再完整解压。Mac 包为本机临时签名、未公证。数据目录为 CFARA，旧版存档需手动导入。源码提交：$SOURCE_REVISION。"

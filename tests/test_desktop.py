@@ -123,6 +123,7 @@ class DesktopTests(unittest.TestCase):
         for kind in ("unknown_mystery", "unknown_ferocity"):
             self.assertIn(root / "assets/vision" / f"{kind}_01.png", bundled)
         self.assertEqual(spec["exe"]["name"], PROJECT["executableName"])
+        self.assertEqual(spec["exe"]["icon"], str(root / "assets/ui/sitting-dog-v1.ico"))
         self.assertIn(PROJECT["name"], str(spec["version_resource"]))
 
     def test_explicit_and_default_data_directories(self):

@@ -36,7 +36,7 @@ exe = EXE(pyz, a.scripts, [("X utf8", None, "OPTION")], exclude_binaries=True,
           name=project["executableName"], console=False, debug=False, upx=False,
           target_arch="arm64", codesign_identity=None, entitlements_file=None)
 coll = COLLECT(exe, a.binaries, a.datas, name=project["executableName"], upx=False)
-app = BUNDLE(coll, name=project["executableName"] + ".app", icon=None,
+app = BUNDLE(coll, name=project["executableName"] + ".app", icon=str(root / "assets/ui/sitting-dog-v1.icns"),
              bundle_identifier="local.celestialfulcrum.assistant", info_plist={
                  "CFBundleDisplayName": project["shortName"],
                  "CFBundleShortVersionString": project["version"],

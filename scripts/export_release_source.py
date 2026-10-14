@@ -23,7 +23,7 @@ TREES = {
     "frontend/src": None,
     "frontend/tests": {".mjs"},
     "frontend/public": {".png", ".jpg", ".jpeg", ".webp", ".ico"},
-    "assets": {".png", ".npz"},
+    "assets": {".png", ".npz", ".ico", ".icns"},
     "tests": {".py"},
     "scripts": {".py", ".mjs"},
 }
