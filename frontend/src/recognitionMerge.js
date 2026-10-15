@@ -2,6 +2,8 @@ const CLEARING = 'node_type_020';
 const concrete = id => !!id && !id.startsWith('unknown_') && id !== 'start';
 const RESIDENT = 'node_mark_001';
 const terminalCategory = hint => ({ 'danger-end': 'node_type_015', 'danger-enemy': 'node_type_003' })[hint];
+export const volatileRecognition = (observation, previous) =>
+  (observation?.layerObservation?.utopiaId || previous?.utopiaId) === 'utopia_005';
 
 export function newRecognizedRelics(observation, heldRelics) {
   const result = observation?.relicObservation;
@@ -27,6 +29,7 @@ export function mergedResidentMarks(row, old, selected) {
 
 export function recognitionChanges(observation, previous, newInstance = false) {
   if (!observation?.success || newInstance || previous?.templateId !== observation.templateId) return [];
+  if (volatileRecognition(observation, previous)) return [];
   return observation.nodes.flatMap(row => {
     const old = previous.nodes[row.id];
     if (!old) return [];
@@ -46,6 +49,7 @@ export function recognitionChanges(observation, previous, newInstance = false) {
 export function recognitionReview(observation, previous, newInstance = false) {
   if (!observation?.success) return [];
   const compatible = !newInstance && previous?.templateId === observation.templateId;
+  const volatile = volatileRecognition(observation, compatible ? previous : null);
   return observation.nodes.flatMap(row => {
     const old = compatible ? previous.nodes[row.id] : null;
     const current = row.id === observation.playerPositionObservation?.nodeId;
@@ -53,11 +57,11 @@ export function recognitionReview(observation, previous, newInstance = false) {
       return [{ nodeId: row.id, categoryId: 'node_type_021', encounterId: null, reason: 'resident' }];
     if (old?.completion === 'completed') return [];
     if (residentActive(old) || (row.marks || []).some(mark => mark.id === RESIDENT && mark.status === 'confirmed')) return [];
-    const becameClearing = old && row.categoryId === CLEARING &&
+    const becameClearing = !volatile && old && row.categoryId === CLEARING &&
       (old.resolvedCategoryId !== CLEARING && old.observedCategoryId !== CLEARING);
     if (current && row.id === '0,0' && row.categoryId === 'start' && !old?.resolvedCategoryId) return [];
     if (!becameClearing && !current) return [];
-    const categoryId = old?.resolvedCategoryId || old?.completedCategoryId || (becameClearing ? null : row.categoryId);
+    const categoryId = (!volatile && (old?.resolvedCategoryId || old?.completedCategoryId)) || (becameClearing ? null : row.categoryId);
     return [{ nodeId: row.id, categoryId: concrete(categoryId) ? categoryId : '',
       encounterId: old?.encounterId || null, reason: becameClearing ? 'clearing' : 'position' }];
   });
@@ -67,8 +71,11 @@ export function mergedRecognitionPreview(observation, previous, options) {
   if (!observation?.success) return null;
   const { newInstance, position, completePosition, nodeChanges, completions, encounters, markChoices, dystopia, utopiaId } = options;
   const compatible = !newInstance && previous?.templateId === observation.templateId;
+  const volatile = utopiaId === 'utopia_005' || volatileRecognition(observation, compatible ? previous : null);
   const nodes = Object.fromEntries(observation.nodes.map(row => {
-      const old = compatible ? previous.nodes[row.id] : null;
+      const previousNode = compatible ? previous.nodes[row.id] : null;
+      if (volatile && previousNode?.completion === 'completed') return [row.id, { ...previousNode }];
+      const old = !volatile || previousNode?.completion === 'completed' ? previousNode : null;
       const override = nodeChanges[row.id];
       const category = override || (concrete(old?.resolvedCategoryId) ? old.resolvedCategoryId :
         terminalCategory(row.templateHint) || row.categoryId);

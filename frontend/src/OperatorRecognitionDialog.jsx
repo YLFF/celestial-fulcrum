@@ -51,7 +51,7 @@ export default function OperatorRecognitionDialog({ loaded, startJob, onConfirm,
   if (capture) return <CaptureDialog notify={notify} onClose={() => setCapture(false)} onCaptured={info => {
     setCapture(false); setAsset(info); onAsset(info); recognize(info);
   }} />;
-  return <Modal title="识别编队页面干员" wide onClose={onClose} footer={<SaveButton busy={busy} disabled={locked || !chosen.length}
+  return <Modal title="识别编队页面干员" wide onClose={onClose} dismissOutside={!job} footer={<SaveButton busy={busy} disabled={locked || !chosen.length}
     onClick={() => onConfirm({ expectedRevision: loaded.revision, jobId: job.jobId, choices: chosen })}>确认更新 {chosen.length} 名干员</SaveButton>}>
     <div className="relic-scan-surface" onDragOver={event => { event.preventDefault(); event.stopPropagation(); }}
       onDrop={event => { event.preventDefault(); event.stopPropagation(); upload(event.dataTransfer.files[0]); }}>

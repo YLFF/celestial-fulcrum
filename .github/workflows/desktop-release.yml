@@ -6,7 +6,7 @@ on:
       release_tag:
         description: Release tag (new tag only; suffixes create prereleases)
         required: true
-        default: v0.1.1
+        default: v0.1.2
         type: string
 
 permissions:
@@ -66,6 +66,7 @@ jobs:
           tests.test_ending_prediction tests.test_node_prediction_beta tests.test_desktop
           tests.test_macos_packaging tests.test_release_publication
           tests.test_operator_recognition tests.test_app_updates tests.test_node_text
+          tests.test_october_patch tests.test_image_io
           tests.test_scoring_profile tests.test_snapshot_scoring
           tests.test_arkrog_comparison tests.test_team_power tests.test_combat_bonuses
           tests.test_relic_presentation tests.test_relic_effect_model tests.test_manual_map
@@ -77,6 +78,17 @@ jobs:
           pnpm --dir frontend test
       - name: Build and verify offline desktop package
         run: python ${{ matrix.script }}
+      - name: Prepare Windows installer compiler
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path 'C:/Program Files (x86)/Inno Setup 6/ISCC.exe') -and -not (Test-Path 'C:/Program Files (x86)/Inno Setup 7/ISCC.exe')) {
+            choco install innosetup --yes --no-progress
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          }
+      - name: Build and verify Windows installer
+        if: runner.os == 'Windows'
+        run: python scripts/build_windows_installer.py
       - name: Upload release packages
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -84,6 +96,8 @@ jobs:
           path: |
             dist/CelestialFulcrum-*-${{ matrix.platform }}.zip
             dist/CelestialFulcrum-*-${{ matrix.platform }}.zip.sha256
+            dist/CelestialFulcrum-*-${{ matrix.platform }}-setup.exe
+            dist/CelestialFulcrum-*-${{ matrix.platform }}-setup.exe.sha256
           if-no-files-found: error
           compression-level: 0
           retention-days: 7
@@ -95,6 +109,7 @@ jobs:
           path: |
             build/desktop-self-test.json
             build/desktop-window-test.json
+            build/installer-self-test.json
             build/desktop-window-test-data/logs/desktop.log
             work/macos-self-test.json
             build/pyinstaller/**/warn-*.txt
@@ -128,7 +143,7 @@ jobs:
           set -euo pipefail
           [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[A-Za-z0-9.-]+)?$ ]] || { echo 'Invalid release tag'; exit 1; }
           cd packages
-          sha256sum --check ./*.zip.sha256
+          sha256sum --check ./*.sha256
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             echo 'Release already exists; choose a new tag.'
             exit 1
@@ -139,7 +154,11 @@ jobs:
           else
             release_flags+=(--latest)
           fi
-          gh release create "$RELEASE_TAG" ./*.zip ./*.zip.sha256 \
+          gh release create "$RELEASE_TAG" ./*.zip ./*.exe ./*.sha256 \
             --target "$SOURCE_REVISION" "${release_flags[@]}" \
             --title "Celestial Fulcrum $RELEASE_TAG" \
-            --notes "Windows x64 / macOS Apple Silicon arm64。本次新增编队页面干员识别，支持截图导入、窗口截图及逐项确认，不自动删除未出镜干员或结算招募资源；新增手动检查整包更新、校验和重启安装入口。改进地图缩放与偏移匹配、实托邦及理想源、空地和节点标记识别；修复狭路相逢误识别，普通完整节点文字适度放宽，行商及未知类别保留严格检查。修复机械师奖励、薄行囊容量、笼控器获取历史、部分事件池和一层固定商店规则。两个平台通过离线识图和素材完整性自检，Windows 另通过 WebView2 窗口启动验证；Mac 重启更新尚未实机验证。更新入口读取公开 GitHub 发行资源，私有仓库请在登录 GitHub 后手动下载。Windows 包未签名；若系统阻止运行，请先核实来源和校验值，再在 ZIP 属性中解除锁定后完整解压。Mac 包为临时签名、未公证。存档目录仍为 CFARA。源码提交：$SOURCE_REVISION。"
+            --notes "发布平台：Windows x64、macOS Apple Silicon arm64。
+
+          更新：增加 Windows 安装包；发行文件使用版本号命名，主进程名改为天堂支点；普通弹窗支持点击外部关闭。
+
+          修复：一层横叉地图的险路小径预测；选择树洞所属层后保留识图结果；全知者盲区只保留已完成节点；典训候选、短干员名识别及编队位结算。"

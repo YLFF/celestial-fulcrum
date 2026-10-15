@@ -18,6 +18,7 @@ from fastapi.testclient import TestClient
 from fulcrum.app_updates import AppUpdater, release_candidate, trusted_url, unpack_package, version_tuple
 from fulcrum.service.app import create_app
 from fulcrum.update_install import prepare_install, WINDOWS_HELPER
+from fulcrum.product import PROJECT
 
 
 def release(version="0.2.0"):
@@ -39,6 +40,36 @@ def package(extra=None):
 
 
 class UpdateSafetyTests(unittest.TestCase):
+    def test_versioned_assets_ignore_installer_and_accept_legacy_packages(self):
+        row = release()
+        name = 'CelestialFulcrum-0.2.0-win-x64.zip'
+        row['assets'][0].update(name=name, browser_download_url=
+            'https://github.com/YLFF/celestial-fulcrum/releases/download/v0.2.0/' + name)
+        row['assets'].append({'name': 'CelestialFulcrum-0.2.0-win-x64-setup.exe'})
+        self.assertEqual(release_candidate([row], '0.1.0', 'win-x64')['version'], '0.2.0')
+        self.assertEqual(release_candidate([release()], '0.1.0', 'win-x64')['version'], '0.2.0')
+        row['assets'][0]['name'] = 'CelestialFulcrum-0.3.0-win-x64.zip'
+        with self.assertRaises(ValueError):
+            release_candidate([row], '0.1.0', 'win-x64')
+
+    def test_chinese_executable_package(self):
+        name = PROJECT['executableName']
+        for target, suffix in [('win-x64', ''), ('mac-arm64', '.app')]:
+            with self.subTest(target=target), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                archive = root / 'bundle.zip'
+                app_name = name + suffix
+                binary = f'{name}.exe' if not suffix else f'Contents/MacOS/{name}'
+                metadata = 'build-info.json' if not suffix else 'Contents/Resources/build-info.json'
+                with zipfile.ZipFile(archive, 'w') as bundle:
+                    bundle.writestr(f'{app_name}/{binary}', b'executable')
+                    bundle.writestr(f'{app_name}/{metadata}', json.dumps({
+                        'platform': 'win32' if not suffix else 'darwin',
+                        'architecture': 'x64' if not suffix else 'arm64', 'dirty': False,
+                        'project': {'version': '0.2.0', 'executableName': name}}))
+                result = unpack_package(archive, root / 'out', '0.2.0', target)
+                self.assertTrue((result / binary).is_file())
+
     def test_stable_versions_no_equal_version_or_downgrade(self):
         self.assertIsNone(version_tuple('1.2.3-preview'))
         self.assertEqual(version_tuple('v1.2.3'), (1, 2, 3))
@@ -160,8 +191,9 @@ function Start-Process {
   }
 }
 '''
-        for healthy in (True, False):
-            with self.subTest(healthy=healthy), tempfile.TemporaryDirectory() as temp:
+        for healthy, new_name in ((ok, name) for ok in (True, False)
+                                  for name in ('CelestialFulcrum', PROJECT['executableName'])):
+            with self.subTest(healthy=healthy, new_name=new_name), tempfile.TemporaryDirectory() as temp:
                 root = Path(temp)
                 current, data = root / 'installed app', root / 'CFARA data'
                 current.mkdir()
@@ -171,7 +203,7 @@ function Start-Process {
                 updates = data / 'updates'
                 staged = updates / 'candidate'
                 staged.mkdir(parents=True)
-                (staged / 'CelestialFulcrum.exe').write_text('new')
+                (staged / f'{new_name}.exe').write_text('new')
                 plan_path = prepare_install(staged, data, updates, current=current)
                 plan = json.loads(plan_path.read_text(encoding='utf-8'))
                 plan['parentPid'] = 2147483646
@@ -181,7 +213,8 @@ function Start-Process {
                 result = subprocess.run(['powershell.exe', '-NoProfile', '-NonInteractive', '-EncodedCommand', script],
                                         env=env, capture_output=True, timeout=20)
                 self.assertEqual(result.returncode, 0, result.stderr)
-                self.assertEqual((current / 'CelestialFulcrum.exe').read_text(), 'new' if healthy else 'old')
+                expected_name = new_name if healthy else 'CelestialFulcrum'
+                self.assertEqual((current / f'{expected_name}.exe').read_text(), 'new' if healthy else 'old')
                 self.assertEqual((data / 'save.json').read_text(), 'original save')
                 self.assertTrue(Path(plan['backup'] if healthy else plan['failed']).is_dir())
 

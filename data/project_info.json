@@ -5,9 +5,9 @@
   "englishShortName": "CFARA",
   "dataDirectoryName": "CFARA",
   "description": "面向《明日方舟》集成战略玩家的本地辅助工具",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "license": "GPL-3.0-only",
   "status": "development",
-  "executableName": "CelestialFulcrum",
+  "executableName": "天堂支点",
   "supportedThemes": ["沉沦者的黑流树海"]
 }

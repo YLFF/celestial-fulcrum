@@ -15,6 +15,7 @@ from ..goals import goal_summary, node_goal_annotations
 from ..playtime_route import route_inputs
 from ..playtime_state import AREA_SPECS, active_instance
 from ..route_planner import RoutePlanner
+from ..image_io import read_image
 from .store import atomic_json
 
 
@@ -148,7 +149,7 @@ class JobManager:
                 asset = self.assets.path(options["assetId"])
                 if options.get("resourcesOnly"):
                     import cv2
-                    result = {"success": False, "resourceObservation": HudRecognizer().recognize_image(cv2.imread(str(asset))),
+                    result = {"success": False, "resourceObservation": HudRecognizer().recognize_image(read_image(asset)),
                               "warnings": ["本次仅识别资源，不生成地图候选。"]}
                 else:
                     area_key = options.get("areaKey")

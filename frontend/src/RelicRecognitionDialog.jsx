@@ -47,7 +47,7 @@ export default function RelicRecognitionDialog({ loaded, entries, startJob, onCo
     } catch (error) { notify(error.message, true); }
     finally { setWorking(false); }
   }
-  return <Modal title="识别藏品" wide onClose={onClose} footer={<SaveButton busy={busy} disabled={locked || !job || !chosen.length}
+  return <Modal title="识别藏品" wide onClose={onClose} dismissOutside={!job} footer={<SaveButton busy={busy} disabled={locked || !job || !chosen.length}
     onClick={() => onConfirm({ expectedRevision: loaded.revision, jobId: job.jobId, relicIds: chosen })}>添加 {chosen.length} 件藏品</SaveButton>}>
     <div className="relic-scan-surface" onDragOver={event => { event.preventDefault(); event.stopPropagation(); }}
       onDrop={event => { event.preventDefault(); event.stopPropagation(); upload(event.dataTransfer.files[0]); }}>

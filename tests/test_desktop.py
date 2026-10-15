@@ -91,7 +91,7 @@ class DesktopTests(unittest.TestCase):
 
     def test_public_identity_keeps_theme_separate(self):
         self.assertEqual(PROJECT["name"], "天堂支点——明日方舟集成战略助手")
-        self.assertEqual(PROJECT["executableName"], "CelestialFulcrum")
+        self.assertEqual(PROJECT["executableName"], "天堂支点")
         self.assertEqual(PROJECT["englishName"], "Celestial Fulcrum — Arknights Rogue Assistant")
         self.assertEqual(PROJECT["shortName"], "CFARA")
         self.assertEqual(PROJECT["englishShortName"], "CFARA")

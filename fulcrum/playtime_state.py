@@ -314,6 +314,7 @@ def merge_map_observation(
     ambiguous_hints = {"rogue-trader"} if area_key != "I" and hint_counts["rogue-trader"] > 1 else set()
     existing = None if new_instance or slot["activeInstanceId"] is None else active_instance(state, area_key)
     position_observation = observation.get("playerPositionObservation") or {}
+    observed_utopia = (observation.get("layerObservation") or {}).get("utopiaId") if "treehole" in area_key else None
     confirmed_position = player_position or (
         position_observation.get("nodeId") if position_observation.get("status") == "recognized" else None
     )
@@ -330,8 +331,15 @@ def merge_map_observation(
         if {frozenset(edge) for edge in existing["edges"]} != {frozenset(edge) for edge in observation["edges"]}:
             raise ValueError("map edges changed; confirm a new instance explicitly")
         instance = existing
+        volatile = (observed_utopia or instance.get("utopiaId")) == "utopia_005"
         for observed in observation["nodes"]:
             node = instance["nodes"][str(observed["id"])]
+            if volatile:
+                if node.get("completion") == "completed":
+                    continue
+                node.clear()
+                node.update(_node_from_observation(observed, area_key, ambiguous_hints))
+                continue
             if confirmed_position == node["id"] and resident_active(node):
                 complete_node(instance, node)
             current = _node_from_observation(observed, area_key, ambiguous_hints)
@@ -380,6 +388,8 @@ def merge_map_observation(
             instance["predictionDistanceMode"] = "remembrance"
         slot["instances"].append(instance)
         slot["activeInstanceId"] = instance_id
+    if observed_utopia in UTOPIA_IDS:
+        instance["utopiaId"] = observed_utopia
     if player_position is not None:
         set_player_position(instance, player_position)
     elif position_observation.get("status") == "recognized" and position_observation.get("nodeId"):
@@ -638,6 +648,8 @@ def _event_status(
 
 
 def rebuild_derived(state: dict[str, Any]) -> None:
+    from .resource_capacity import reconcile_carry_slots
+    reconcile_carry_slots(state)
     seed_acquisition_facts(state)
     ever_controller = controller_obtained(state)
     from .relic_presentation import runtime_status

@@ -13,6 +13,11 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
   const [pool, setPool] = useState(null), [panelHeight, setPanelHeight] = useState(540);
   const panelRef = useRef(null);
   useEffect(() => {
+    const dismiss = event => { if (!event.target.closest('.node-popover')) onClose(); };
+    document.addEventListener('pointerdown', dismiss);
+    return () => document.removeEventListener('pointerdown', dismiss);
+  }, [onClose]);
+  useEffect(() => {
     const observer = new ResizeObserver(() => setPanelHeight(panelRef.current.getBoundingClientRect().height));
     observer.observe(panelRef.current);
     return () => observer.disconnect();

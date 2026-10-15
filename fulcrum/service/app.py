@@ -575,6 +575,12 @@ def create_app(storage_root=None, *, allowed_origins=None, update_install=None):
             raise ValueError("map recognition is unresolved; review template or confirm resources only")
         if body.confirmMap and area_key not in AREA_SPECS:
             raise ValueError("choose an area key, including the treehole parent floor")
+        from ..playtime_state import UTOPIA_IDS
+        for command in body.commands:
+            if command.get("type") == "utopia" and command.get("areaKey") == area_key:
+                value = command.get("value")
+                if value in UTOPIA_IDS and "treehole" in (area_key or ""):
+                    observation.setdefault("layerObservation", {})["utopiaId"] = value
         if set(body.resourceFields) - RESOURCE_OBSERVATION_FIELDS:
             raise ValueError("unsupported resource observation field")
         resource = deepcopy(observation.get("resourceObservation") or {})

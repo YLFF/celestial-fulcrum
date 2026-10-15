@@ -9,6 +9,7 @@ import numpy as np
 
 from .vision_geometry import Circle
 from .vision_icons import IconMatcher, node_patch
+from .image_io import read_image
 
 ROOT = Path(__file__).resolve().parents[1]
 SAMPLES = ROOT / "assets/vision/dystopia"
@@ -16,19 +17,19 @@ SAMPLES = ROOT / "assets/vision/dystopia"
 
 @lru_cache(maxsize=1)
 def textures():
-    return [(path.stem.rsplit("_", 1)[0], cv2.imread(str(path), cv2.IMREAD_UNCHANGED))
+    return [(path.stem.rsplit("_", 1)[0], read_image(path, cv2.IMREAD_UNCHANGED))
             for path in sorted(SAMPLES.glob("*.png"))]
 
 
 @lru_cache(maxsize=1)
 def clean_textures():
-    return [(path.stem.rsplit("_", 1)[0], cv2.imread(str(path), cv2.IMREAD_UNCHANGED))
+    return [(path.stem.rsplit("_", 1)[0], read_image(path, cv2.IMREAD_UNCHANGED))
             for path in sorted((SAMPLES / "clean").glob("*.png"))]
 
 
 @lru_cache(maxsize=1)
 def soil_textures():
-    return [(path.stem.rsplit("_", 1)[0], cv2.imread(str(path), cv2.IMREAD_UNCHANGED))
+    return [(path.stem.rsplit("_", 1)[0], read_image(path, cv2.IMREAD_UNCHANGED))
             for path in sorted((SAMPLES / "soil").glob("*.png"))]
 
 
@@ -55,7 +56,7 @@ def recognize_header(image):
     patch = image[y0:y1, x0:x1]
     candidates = []
     for index in range(1, 11):
-        icon = cv2.imread(str(ROOT / f"assets/lubiao/dystopia/dystopia_{index:03}.png"))
+        icon = read_image(ROOT / f"assets/lubiao/dystopia/dystopia_{index:03}.png")
         if icon is None:
             continue
         best = (-1, None, None)
@@ -75,7 +76,7 @@ def recognize_header(image):
     policy_scores = []
     anchor = (center[0]+side*.56, center[1]+side*.68)
     for policy in range(11, 15):
-        icon = cv2.imread(str(ROOT / f"assets/lubiao/dystopia/dystopia_{policy:03}.png"))
+        icon = read_image(ROOT / f"assets/lubiao/dystopia/dystopia_{policy:03}.png")
         value = IconMatcher._score(image, anchor, side, icon,
                                   tuple(size*width/1280/max(icon.shape[:2]) for size in range(12, 29, 2)),
                                   search_fraction=.22, radius_fraction=.6)

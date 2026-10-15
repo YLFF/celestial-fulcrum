@@ -121,21 +121,23 @@ def main(argv=None):
     (folder / "START-HERE.txt").write_text(
         f"{PROJECT['name']}\n{PROJECT['englishName']}\n\n"
         f"完整解压后双击 {name}.exe。\n"
+        "也可使用同版本 setup.exe 安装包，无需手动解锁 ZIP 内的依赖文件。未签名安装包仍可能触发 Windows SmartScreen 提示。\n"
         "从 GitHub 下载后，先右键原 ZIP → 属性 → 解除锁定 → 应用，再完整解压。仅解锁确认来源可信的本项目程序包。\n"
         "Requires Windows 10/11 x64, .NET Framework 4.8 and Microsoft WebView2 Runtime.\n"
         f"存档、图片与日志：%LOCALAPPDATA%\\{PROJECT['dataDirectoryName']}；旧版 BlackFlow/Fulcrum 存档需手动导入，不自动迁移。\n"
         "Do not copy only the EXE: _internal contains offline OCR, game data and UI.\n"
-        "This is an unsigned development build. No Python or Node install is needed.\n",
+        "This is an unsigned build. No Python or Node install is needed.\n",
         encoding="utf-8")
     report = ROOT / "build/desktop-self-test.json"
+    report.unlink(missing_ok=True)
     run([folder / f"{name}.exe", "--self-test", "--data-dir",
          ROOT / "build/desktop-self-test-data", "--report", report], env=env)
     result = json.loads(report.read_text(encoding="utf-8"))
     if not result.get("ok"):
         raise RuntimeError(f"Frozen desktop self-test failed: {result}")
     verify_window(folder, name, env)
-    suffix = info["revision"][:8] + ("-dirty" if info["dirty"] else "")
-    output = ROOT / f"dist/{name}-{suffix}-win-x64.zip"
+    suffix = PROJECT["version"] + ("-dirty" if info["dirty"] else "")
+    output = ROOT / f"dist/CelestialFulcrum-{suffix}-win-x64.zip"
     with zipfile.ZipFile(output, "w", compression=zipfile.ZIP_DEFLATED, compresslevel=6) as archive:
         for path in sorted(folder.rglob("*")):
             if path.is_file():

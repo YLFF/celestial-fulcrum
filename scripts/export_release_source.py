@@ -13,6 +13,7 @@ EXTRA_FILES = (
     ".gitignore", ".github/workflows/desktop-release.yml",
     "docs/ROADMAP.md",
     "packaging/fulcrum.spec", "requirements-desktop-windows.txt",
+    "packaging/windows-installer.iss",
     "scripts/export_release_source.py", "scripts/new_run.py",
     "experiments/__init__.py", "experiments/node_prediction_beta.py",
     "tests/fixtures/arkrog_30.json",

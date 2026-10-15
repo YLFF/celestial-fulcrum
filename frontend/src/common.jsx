@@ -21,14 +21,14 @@ export function AssetImage({ assetId, ...props }) {
   return <EntryImage entry={{ imageUrl: `/api/images/${assetId}`, name: '截图候选' }} {...props} />;
 }
 
-export function Modal({ title, children, onClose, footer, wide = false }) {
+export function Modal({ title, children, onClose, footer, wide = false, dismissOutside = true }) {
   useEffect(() => {
     const handler = event => { if (event.key === 'Escape') onClose(); };
     document.addEventListener('keydown', handler);
     const old = document.body.style.overflow; document.body.style.overflow = 'hidden';
     return () => { document.removeEventListener('keydown', handler); document.body.style.overflow = old; };
   }, [onClose]);
-  return <div className="modal-backdrop" onMouseDown={event => { if (event.target === event.currentTarget) onClose(); }}>
+  return <div className="modal-backdrop" onClick={event => { if (dismissOutside && event.target === event.currentTarget) onClose(); }}>
     <section className={`modal ${wide ? 'wide' : ''}`} role="dialog" aria-modal="true" aria-label={title}>
       <header><h2>{title}</h2><IconButton icon={X} label="关闭" onClick={onClose} /></header>
       <div className="modal-body">{children}</div>{footer && <footer>{footer}</footer>}

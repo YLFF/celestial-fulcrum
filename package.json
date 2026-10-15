@@ -3,7 +3,7 @@
   "description": "Offline OCR runtime for Celestial Fulcrum",
   "private": true,
   "license": "GPL-3.0-only",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "dependencies": {
     "tesseract.js": "7.0.0"
   }

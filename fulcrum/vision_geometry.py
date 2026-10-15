@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 
 from .map_model import MapTemplate, TemplateMatch
+from .image_io import read_image
 
 
 WORKING_WIDTH = 1280
@@ -62,7 +63,7 @@ def detect_map_viewport(image: np.ndarray) -> tuple[int, int, int, int]:
 def _connector_templates() -> tuple[np.ndarray, ...]:
     templates = []
     for name in ("connector_dark.png", "connector_bright.png"):
-        template = cv2.imread(str(CONNECTOR_ASSETS / name), cv2.IMREAD_GRAYSCALE)
+        template = read_image(CONNECTOR_ASSETS / name, cv2.IMREAD_GRAYSCALE)
         if template is not None:
             templates.append(template)
     return tuple(templates)

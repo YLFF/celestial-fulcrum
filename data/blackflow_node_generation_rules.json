@@ -2194,6 +2194,7 @@
     },
     {
       "id": "floor-1-horizontal-fork",
+      "dangerPathEvidenceSlots": [[1, 2]],
       "sourceId": "F1-T03",
       "layerIndex": 0,
       "gridShape": [

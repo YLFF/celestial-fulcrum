@@ -85,8 +85,8 @@ def main(argv=None):
     binary = app / "Contents/MacOS" / name
     run([binary, "--self-test", "--data-dir", ROOT / "work/macos-self-test",
          "--report", ROOT / "work/macos-self-test.json"], env=env)
-    suffix = info["revision"][:8] + ("-dirty" if info.get("dirty") else "")
-    output = ROOT / "dist" / f"{name}-{suffix}-mac-arm64.zip"
+    suffix = PROJECT["version"] + ("-dirty" if info.get("dirty") else "")
+    output = ROOT / "dist" / f"CelestialFulcrum-{suffix}-mac-arm64.zip"
     run(["ditto", "-c", "-k", "--sequesterRsrc", "--keepParent", app, output])
     with output.open("rb") as stream:
         digest = hashlib.file_digest(stream, "sha256").hexdigest()

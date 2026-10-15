@@ -171,6 +171,13 @@ class OperatorRecognizer:
                                           round(x0 + .50 * w):round(x1 - .045 * w)], cv2.COLOR_BGR2GRAY)
                 crop = cv2.resize(255 - crop, None, fx=42 / crop.shape[0], fy=42 / crop.shape[0], interpolation=cv2.INTER_CUBIC)
                 crops[card["slot"] + f"|{variant}|gray"] = cv2.copyMakeBorder(crop, 12, 12, 20, 20, cv2.BORDER_CONSTANT, value=255), card["box"]
+            # Short, disconnected glyphs can be cut away by component-based cropping.
+            short = cv2.cvtColor(image[round(y1 - .24 * h):round(y1 - .025 * h),
+                                      round(x0 + .60 * w):round(x1 - .045 * w)], cv2.COLOR_BGR2GRAY)
+            for threshold in (170, 215):
+                crop = 255 - cv2.threshold(short, threshold, 255, cv2.THRESH_BINARY)[1]
+                crop = cv2.resize(crop, None, fx=42 / crop.shape[0], fy=42 / crop.shape[0], interpolation=cv2.INTER_CUBIC)
+                crops[card["slot"] + f"|short{threshold}|gray"] = cv2.copyMakeBorder(crop, 12, 12, 20, 20, cv2.BORDER_CONSTANT, value=255), card["box"]
         sheet, rows = make_label_sheet(crops)
         ocr = run_label_ocr(sheet, rows=rows, labels=[row["name"] for row in catalog.values()])
         retries = {row["key"]: row["tsv"] for row in ocr.get("lineResults", [])}
@@ -180,7 +187,8 @@ class OperatorRecognizer:
             if key not in rows:
                 continue
             choices = []
-            for variant in (key, key.replace("|gray", "|binary|gray"), key.replace("|gray", "|tight|gray"), key.replace("|gray", "|line|gray")):
+            for variant in (key, *[key.replace("|gray", f"|{name}|gray") for name in
+                                  ("binary", "tight", "line", "short170", "short215")]):
                 row = rows[variant]
                 choices.append(_tokens(ocr.get("tsv"), row["top"], row["bottom"]))
                 if variant in retries:

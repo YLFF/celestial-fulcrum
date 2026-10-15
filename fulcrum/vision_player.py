@@ -11,13 +11,14 @@ import numpy as np
 
 from .map_model import MapNode
 from .vision_geometry import working_image
+from .image_io import read_image
 
 
 @lru_cache(maxsize=1)
 def _avatar_templates() -> tuple[np.ndarray, ...]:
     root = Path(__file__).resolve().parents[1] / "assets" / "vision"
     return tuple(template for path in sorted(root.glob("player_avatar_*.png"))
-                 if (template := cv2.imread(str(path), cv2.IMREAD_GRAYSCALE)) is not None)
+                 if (template := read_image(path, cv2.IMREAD_GRAYSCALE)) is not None)
 
 
 def _avatar_score(white: np.ndarray, x: float, y: float, step: float) -> tuple[float, tuple[float, float] | None]:

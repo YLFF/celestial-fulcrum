@@ -77,8 +77,9 @@ def release_candidate(releases, current_version, target):
     if not newer:
         return None
     release = max(newer, key=lambda row: version_tuple(row["tag_name"]))
+    package_version = re.escape(release["tag_name"].lstrip("v"))
     packages = [asset for asset in release.get("assets", []) if re.fullmatch(
-        rf"CelestialFulcrum-[a-f0-9]{{8}}-{re.escape(target or 'unsupported')}.zip", asset.get("name", ""))]
+        rf"CelestialFulcrum-(?:{package_version}|[a-f0-9]{{8}})-{re.escape(target or 'unsupported')}.zip", asset.get("name", ""))]
     if len(packages) != 1:
         raise ValueError("最新版本尚无适合本机的唯一发行包，请稍后重试")
     asset = packages[0]
@@ -97,10 +98,16 @@ def release_candidate(releases, current_version, target):
 
 
 def unpack_package(archive, destination, version, target):
-    expected_root = "CelestialFulcrum" if target == "win-x64" else "CelestialFulcrum.app"
+    suffix = "" if target == "win-x64" else ".app"
+    allowed_roots = {name + suffix for name in ("CelestialFulcrum", PROJECT["executableName"])}
     destination = Path(destination).resolve()
     with zipfile.ZipFile(archive) as bundle:
         members = bundle.infolist()
+        roots = {PurePosixPath(member.filename).parts[0] for member in members if PurePosixPath(member.filename).parts}
+        application_roots = roots - {"__MACOSX"}
+        if len(application_roots) != 1 or not application_roots <= allowed_roots:
+            raise ValueError("发行包目录结构不符合要求")
+        expected_root = application_roots.pop()
         if len(members) > 80000 or sum(row.file_size for row in members) > MAX_EXTRACT_BYTES:
             raise ValueError("发行包展开大小异常")
         seen, links = set(), []
@@ -146,9 +153,10 @@ def unpack_package(archive, destination, version, target):
     expected = ("win32", "x64") if target == "win-x64" else ("darwin", "arm64")
     if (info.get("platform"), info.get("architecture")) != expected or info.get("project", {}).get("version") != version:
         raise ValueError("发行包版本或平台与更新信息不一致")
-    if info.get("project", {}).get("executableName") != "CelestialFulcrum" or info.get("dirty"):
+    name = info.get("project", {}).get("executableName")
+    if name not in {"CelestialFulcrum", PROJECT["executableName"]} or info.get("dirty"):
         raise ValueError("发行包不是已提交的正式应用构建")
-    executable = app / ("CelestialFulcrum.exe" if target == "win-x64" else "Contents/MacOS/CelestialFulcrum")
+    executable = app / (f"{name}.exe" if target == "win-x64" else f"Contents/MacOS/{name}")
     if not executable.is_file():
         raise ValueError("发行包缺少主程序")
     return app

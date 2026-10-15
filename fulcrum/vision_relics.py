@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 
 from .vision_geometry import working_image
+from .image_io import read_image
 
 ROOT = Path(__file__).resolve().parents[1]
 ASSETS = ROOT / "assets/vision/relics"
@@ -21,7 +22,7 @@ def relic_atlas():
     for entry in entries:
         if entry["category"] != "relic":
             continue
-        icon = cv2.imread(str(ROOT / entry["imagePath"]))
+        icon = read_image(ROOT / entry["imagePath"])
         if icon is not None:
             result.append((entry["id"], entry["name"], icon))
     return result
@@ -43,7 +44,7 @@ def scaled_atlas(label_width):
 
 
 def locate_label(image, filename, region, scale_hint=None):
-    reference = cv2.imread(str(ASSETS / filename), cv2.IMREAD_GRAYSCALE)
+    reference = read_image(ASSETS / filename, cv2.IMREAD_GRAYSCALE)
     if reference is None:
         raise FileNotFoundError(f"缺少收藏品栏定位素材：{filename}")
     x0, y0, x1, y1 = region
@@ -94,12 +95,15 @@ def rank_slot(image, center, label_width, right):
     box = [max(0, round(cx-half)), max(0, round(cy-half)),
            min(right, round(cx+half)), min(image.shape[0], round(cy+half))]
     visible = min(1.0, max(0.0, (right-(cx-half))/(2*half)))
-    return ranked[:5], box, visible
+    candidates = ranked[:5]
+    if candidates[0]["name"].endswith("新典训"):
+        candidates = [row for row in ranked if row["name"].endswith("新典训")]
+    return candidates, box, visible
 
 
 class RelicRecognizer:
     def recognize(self, path):
-        image = cv2.imread(str(path))
+        image = read_image(path)
         if image is None:
             raise ValueError("无法读取收藏品截图")
         return self.recognize_image(image)

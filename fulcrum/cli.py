@@ -7,6 +7,7 @@ from pathlib import Path
 import cv2
 
 from .vision_pipeline import MapRecognizer, render_overlay
+from .image_io import read_image
 
 
 def main() -> int:
@@ -27,7 +28,7 @@ def main() -> int:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(json.dumps(result.to_dict(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if args.overlay and result.success:
-        image = cv2.imread(str(args.screenshot))
+        image = read_image(args.screenshot)
         args.overlay.parent.mkdir(parents=True, exist_ok=True)
         if not cv2.imwrite(str(args.overlay), render_overlay(image, result)):
             raise OSError(f"could not write overlay: {args.overlay}")

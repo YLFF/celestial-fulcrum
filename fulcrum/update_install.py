@@ -23,7 +23,7 @@ try {
   Move-Item -LiteralPath $p.current -Destination $p.backup
   $moved = $true
   Move-Item -LiteralPath $p.prepared -Destination $p.current
-  $exe = Join-Path $p.current 'CelestialFulcrum.exe'
+  $exe = Join-Path $p.current $p.executable
   $testArgs = @('--self-test', '--data-dir', ('"' + $p.testData + '"'), '--report', ('"' + $p.report + '"'))
   $test = Start-Process -FilePath $exe -ArgumentList $testArgs -PassThru -WindowStyle Hidden
   if (-not $test.WaitForExit(120000)) { $test.Kill(); $test.WaitForExit(); throw 'New package self-test timed out' }
@@ -38,13 +38,14 @@ try {
   if ($moved) {
     if (Test-Path -LiteralPath $p.current) { Move-Item -LiteralPath $p.current -Destination $p.failed }
     Move-Item -LiteralPath $p.backup -Destination $p.current
-    Start-Process -FilePath (Join-Path $p.current 'CelestialFulcrum.exe') -ArgumentList @('--data-dir', ('"' + $p.data + '"')) -WindowStyle Hidden
+    Start-Process -FilePath (Join-Path $p.current $p.previousExecutable) -ArgumentList @('--data-dir', ('"' + $p.data + '"')) -WindowStyle Hidden
   }
 }
 '''
 
 MAC_HELPER = r'''
 parent=$1; current=$2; prepared=$3; backup=$4; failed=$5; data=$6; testData=$7; report=$8; log=$9
+executable=${10}; previousExecutable=${11}
 exec >> "$log" 2>&1
 i=0
 while kill -0 "$parent" 2>/dev/null; do
@@ -56,11 +57,11 @@ mv "$current" "$backup" || exit 1
 rollback() {
   [ ! -e "$current" ] || mv "$current" "$failed"
   mv "$backup" "$current" || exit 1
-  "$current/Contents/MacOS/CelestialFulcrum" --data-dir "$data" >/dev/null 2>&1 &
+  "$current/Contents/MacOS/$previousExecutable" --data-dir "$data" >/dev/null 2>&1 &
   exit 1
 }
 mv "$prepared" "$current" || rollback
-"$current/Contents/MacOS/CelestialFulcrum" --self-test --data-dir "$testData" --report "$report" &
+"$current/Contents/MacOS/$executable" --self-test --data-dir "$testData" --report "$report" &
 probe=$!
 i=0
 while kill -0 "$probe" 2>/dev/null; do
@@ -69,7 +70,7 @@ while kill -0 "$probe" 2>/dev/null; do
   sleep 1
 done
 wait "$probe" || rollback
-"$current/Contents/MacOS/CelestialFulcrum" --data-dir "$data" >/dev/null 2>&1 &
+"$current/Contents/MacOS/$executable" --data-dir "$data" >/dev/null 2>&1 &
 echo "Update succeeded; previous package retained at $backup"
 '''
 
@@ -97,7 +98,15 @@ def prepare_install(staged, data, updates, *, current=None):
         raise ValueError("无法在程序旁准备更新；请将程序移到可写文件夹，或手动安装发行包") from error
     attempt = updates / identifier
     attempt.mkdir(parents=True)
+    from .product import PROJECT
+    names = [PROJECT["executableName"], "CelestialFulcrum"]
+    def executable_name(folder):
+        return next((name for name in names if (folder / (f"{name}.exe" if sys.platform == "win32" else f"Contents/MacOS/{name}")).is_file()), "CelestialFulcrum")
+    executable = executable_name(staged)
+    previous_executable = executable_name(current)
     plan = {"parentPid": os.getpid(), "current": str(current), "prepared": str(prepared),
+            "executable": executable + (".exe" if sys.platform == "win32" else ""),
+            "previousExecutable": previous_executable + (".exe" if sys.platform == "win32" else ""),
             "backup": str(current.with_name(current.name + ".previous-" + identifier)),
             "failed": str(current.with_name(current.name + ".failed-" + identifier)), "data": str(data),
             "testData": str(attempt / "self-test-data"), "report": str(attempt / "self-test.json"),
@@ -120,7 +129,7 @@ def launch_install(plan_path):
                          stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, close_fds=True)
     elif sys.platform == "darwin":
         subprocess.Popen(["/bin/sh", "-c", MAC_HELPER, "cfara-update", str(plan["parentPid"]),
-                          *[plan[key] for key in ("current", "prepared", "backup", "failed", "data", "testData", "report", "log")]],
+                          *[plan[key] for key in ("current", "prepared", "backup", "failed", "data", "testData", "report", "log", "executable", "previousExecutable")]],
                          start_new_session=True, stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     else:
         raise ValueError("当前平台暂不支持重启更新")

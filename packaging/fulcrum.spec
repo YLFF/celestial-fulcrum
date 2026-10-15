@@ -15,7 +15,7 @@ version = tuple(int(part) for part in project["version"].split(".")) + (0,)
 version_resource = VSVersionInfo(ffi=FixedFileInfo(filevers=version, prodvers=version, fileType=1),
     kids=[StringFileInfo([StringTable("080404b0", [
         StringStruct("ProductName", project["name"]),
-        StringStruct("FileDescription", project["englishName"]),
+        StringStruct("FileDescription", project["executableName"]),
         StringStruct("FileVersion", project["version"]),
         StringStruct("ProductVersion", project["version"]),
         StringStruct("InternalName", project["executableName"]),

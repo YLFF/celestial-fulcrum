@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-test('product identity uses CFARA while retaining the Celestial Fulcrum executable', () => {
+test('product identity uses CFARA with the Chinese application process name', () => {
   const project = JSON.parse(readFileSync(new URL('../../data/project_info.json', import.meta.url), 'utf8'));
   const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
   const app = readFileSync(new URL('../src/App.jsx', import.meta.url), 'utf8');
@@ -12,7 +12,7 @@ test('product identity uses CFARA while retaining the Celestial Fulcrum executab
   assert.equal(project.englishShortName, 'CFARA');
   assert.equal(project.englishName, 'Celestial Fulcrum — Arknights Rogue Assistant');
   assert.equal(project.dataDirectoryName, 'CFARA');
-  assert.equal(project.executableName, 'CelestialFulcrum');
+  assert.equal(project.executableName, '天堂支点');
   assert.ok(!app.includes('BLACK FLOW'));
 });
 

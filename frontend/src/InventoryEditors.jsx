@@ -60,7 +60,7 @@ export function ComponentEditor({ state, catalog, entries, onSave, onClose, busy
       <button className="tree-break-button" disabled={busy || !trees} onClick={() => setConfirmTrees(true)}><TreeDeciduous size={14} />我树碎了？！</button></div>
     </div>
     {error && <div className="form-error" role="alert">{error}</div>}
-    {confirmTrees && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除霜晶树"><h3>移除全部霜晶树？</h3><p>将从零件箱移除 {trees} 件霜晶树。</p><div><button autoFocus onClick={() => setConfirmTrees(false)}>取消</button><button className="primary" onClick={() => { setBox({ ...box, items: box.items.filter(row => row.componentId !== 'component_006') }); setConfirmTrees(false); }}>确认移除</button></div></section></div>}
+    {confirmTrees && <div className="confirmation-overlay" onClick={e => { if (e.target === e.currentTarget) setConfirmTrees(false); }}><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除霜晶树"><h3>移除全部霜晶树？</h3><p>将从零件箱移除 {trees} 件霜晶树。</p><div><button autoFocus onClick={() => setConfirmTrees(false)}>取消</button><button className="primary" onClick={() => { setBox({ ...box, items: box.items.filter(row => row.componentId !== 'component_006') }); setConfirmTrees(false); }}>确认移除</button></div></section></div>}
     <div className="picker-layout component-layout"><CatalogPicker components autoFocus={adding} rows={catalog.component} onAdd={entry => {
       try { setBox(acquireDraft(box, entry, catalog)); setError(''); } catch (e) { setError(e.message); }
     }} />
@@ -111,7 +111,7 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
   if (bonusOperator) return <CombatBonusDialog loaded={loaded} areaKey={areaKey} entries={entries}
     operatorInstanceId={bonusOperator} onClose={() => setBonusOperator(null)} />;
   return <Modal title={`干员与编队 · ${items.length} 人`} onClose={onClose} wide footer={<SaveButton busy={busy || !!pendingDelete} onClick={save} />}>
-    {pendingDelete && <div className="confirmation-overlay"><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除干员">
+    {pendingDelete && <div className="confirmation-overlay" onClick={e => { if (e.target === e.currentTarget) setPendingDelete(null); }}><section className="tree-confirmation" role="alertdialog" aria-modal="true" aria-label="确认移除干员">
       <h3>移除 {pendingDelete.name}？</h3><p>该干员也将从当前编队移除，保存后生效。</p><div><button autoFocus onClick={() => setPendingDelete(null)}>取消</button>
       <button className="primary" onClick={() => { setItems(items.filter(row => row.instanceId !== pendingDelete.instanceId)); setSquad(squad.filter(id => id !== pendingDelete.instanceId)); setPendingDelete(null); }}>确认移除</button></div>
     </section></div>}

@@ -8,6 +8,7 @@ import cv2
 import numpy as np
 
 from .vision_geometry import Circle
+from .image_io import read_image
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -45,14 +46,14 @@ class IconMatcher:
         for node_id in self.node_labels:
             path = root / "assets" / "lubiao" / "node_type" / f"{node_id}.png"
             if path.exists():
-                image = cv2.imread(str(path))
+                image = read_image(path)
                 if image is not None:
                     self.node_templates.append((node_id, image))
         for path in sorted((root / "assets" / "vision").glob("*.png")):
             node_id = path.stem.rsplit("_", 1)[0]
             if node_id not in self.node_labels:
                 continue
-            image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+            image = read_image(path, cv2.IMREAD_UNCHANGED)
             if image is not None:
                 self.node_templates.append((node_id, image))
         self.mark_templates: list[tuple[str, np.ndarray]] = []
@@ -71,20 +72,20 @@ class IconMatcher:
         for mark_id in self.mark_labels:
             path = root / "assets" / "lubiao" / "node_mark" / f"{mark_id}.png"
             if path.exists():
-                image = cv2.imread(str(path))
+                image = read_image(path)
                 if image is not None:
                     self.mark_templates.append((mark_id, image))
         for path in sorted((root / "assets" / "vision").glob("node_mark_*_*.png")):
             mark_id = path.stem.rsplit("_", 1)[0]
             if mark_id in self.mark_labels:
-                image = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+                image = read_image(path, cv2.IMREAD_UNCHANGED)
                 if image is not None:
                     self.mark_templates.append((mark_id, image))
-        self.empty_template = cv2.imread(
-            str(root / "assets" / "vision" / "empty_connector.png"), cv2.IMREAD_GRAYSCALE
+        self.empty_template = read_image(
+            root / "assets" / "vision" / "empty_connector.png", cv2.IMREAD_GRAYSCALE
         )
         self.connector_templates = [template for filename in ("connector_dark.png", "connector_bright.png")
-                                    if (template := cv2.imread(str(root / "assets" / "vision" / filename), cv2.IMREAD_GRAYSCALE)) is not None]
+                                    if (template := read_image(root / "assets" / "vision" / filename, cv2.IMREAD_GRAYSCALE)) is not None]
 
     @staticmethod
     def _score(

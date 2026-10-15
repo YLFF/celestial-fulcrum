@@ -19,6 +19,7 @@ from .vision_player import recognize_player_position
 from .vision_resources import HudRecognizer
 from .vision_dystopia import recognize_header, connector_evidence, recognize_nodes
 from .diagnostics import public_error
+from .image_io import read_image
 
 
 FIXED_NODE_TYPES = {
@@ -64,7 +65,7 @@ class MapRecognizer:
         include_resources: bool = False,
         difficulty: int = 15,
     ) -> MapResult:
-        image = cv2.imread(str(screenshot))
+        image = read_image(screenshot)
         if image is None:
             raise ValueError(f"无法读取截图：{screenshot}")
         return self.recognize_image(

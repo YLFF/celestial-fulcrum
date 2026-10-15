@@ -72,6 +72,8 @@ class RunStore:
             if history is None:
                 history = self._legacy_history(run_id, state)
             self._validate_history(history)
+            from ..resource_capacity import reconcile_carry_slots
+            reconcile_carry_slots(state, history["past"])
             self.validate(state)
             seed_acquisition_facts(state, history["past"])
             rebuild_derived(state)

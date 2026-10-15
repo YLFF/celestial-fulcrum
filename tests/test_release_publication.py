@@ -61,6 +61,8 @@ class ReleasePublicationTests(unittest.TestCase):
         for path in (ROOT / "data/relic_effects").rglob("*.json"):
             self.assertIn(path.relative_to(ROOT).as_posix(), names)
         self.assertIn("packaging/fulcrum.spec", names)
+        self.assertIn("packaging/windows-installer.iss", names)
+        self.assertIn("scripts/build_windows_installer.py", names)
         self.assertIn("packaging/fulcrum-macos.spec", names)
         self.assertIn("tests/test_release_publication.py", names)
         self.assertIn("LICENSE", names)

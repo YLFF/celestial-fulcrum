@@ -8,7 +8,7 @@ import { AREA_NAMES, areaFromObservation } from './model';
 import MapView from './MapView';
 import { SpecialRegionFields } from './DystopiaEditor';
 import { dystopiaFromObservation, emptyDystopia } from './dystopia';
-import { recognitionChanges, recognitionReview, mergedRecognitionPreview, mergedResidentMarks, newRecognizedRelics } from './recognitionMerge';
+import { recognitionChanges, recognitionReview, mergedRecognitionPreview, mergedResidentMarks, newRecognizedRelics, volatileRecognition } from './recognitionMerge';
 import ManualMapDialog from './ManualMapDialog';
 
 const FIELDS = { life: '生命', shield: '护盾', level: '等级', experience: '经验', hope: '希望', originium_ingot: '源石锭', action_points: '行动力' };
@@ -52,7 +52,7 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
       setCompletions(Object.fromEntries(recognitionReview(result, old).filter(row => row.reason === 'clearing').map(row => [row.nodeId, true])));
       setEncounters({});
       setDystopia(dystopiaFromObservation(result, old?.templateId === result.templateId ? old.dystopia : null));
-      setUtopia(old?.templateId === result.templateId && !result.dystopiaObservation?.active ? old.utopiaId || null : null);
+      setUtopia(result.layerObservation?.utopiaId || (old?.templateId === result.templateId && !result.dystopiaObservation?.active ? old.utopiaId || null : null));
       setNodeChanges({});
       setMarkChoices(Object.fromEntries(result.nodes.map(row => [row.id, row.marks.map(mark => mark.id)])));
       setSelectedNodes([]);
@@ -88,7 +88,11 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
       }
       for (const [nodeId, marks] of Object.entries(markChoices)) {
         if (!marks.length || nodeChanges[nodeId]?.startsWith('unknown_')) continue;
-        const previous = !newInstance && oldMap?.templateId === observation.templateId ? oldMap.nodes[nodeId] : null;
+        let previous = !newInstance && oldMap?.templateId === observation.templateId ? oldMap.nodes[nodeId] : null;
+        if (utopiaId === 'utopia_005' || volatileRecognition(observation, oldMap)) {
+          if (previous?.completion === 'completed') continue;
+          previous = null;
+        }
         const observed = observation.nodes.find(row => row.id === nodeId);
         commands.push({ type: 'node', areaKey: chosen, nodeId, changes: { markIds: mergedResidentMarks(observed, previous, marks) } });
       }
@@ -108,16 +112,27 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
   const relicCandidates = newRecognizedRelics(observation, loaded.state.relics);
   const chosenArea = area || (observation && areaFromObservation(observation));
   const slot = loaded.state.areas[chosenArea], oldMap = slot?.instances.find(row => row.instanceId === slot.activeInstanceId);
-  const review = recognitionReview(observation && { ...observation, playerPositionObservation: { nodeId: position } }, oldMap, newInstance);
+  const reviewObservation = observation && { ...observation, layerObservation: { ...observation.layerObservation, utopiaId } };
+  const review = recognitionReview(reviewObservation && { ...reviewObservation, playerPositionObservation: { nodeId: position } }, oldMap, newInstance);
   const previewMap = mergedRecognitionPreview(observation, oldMap, { newInstance, position, completePosition,
     nodeChanges, completions, encounters, markChoices, dystopia, utopiaId });
-  const changes = recognitionChanges(observation, oldMap, newInstance);
+  const changes = recognitionChanges(reviewObservation, oldMap, newInstance);
   if (manual) return <ManualMapDialog loaded={loaded} catalog={catalog} entries={entries}
     initialArea={chosenArea || area} asset={asset} busy={busy} onCreate={onManualCreate} onClose={() => setManual(false)} />;
-  return <Modal title={candidate ? '确认识别结果' : '导入截图'} onClose={onClose} wide footer={candidate ?
+  return <Modal title={candidate ? '确认识别结果' : '导入截图'} onClose={onClose} dismissOutside={!candidate} wide footer={candidate ?
     <><button onClick={recognize} disabled={working}><RefreshCw size={15} />重新识别</button><SaveButton busy={busy || working} onClick={confirm}>确认入局</SaveButton></> :
     <SaveButton busy={working} onClick={recognize} disabled={working || !asset}><ScanLine size={16} />开始识别</SaveButton>}>
-    <div className="upload-config form-grid"><label className="field"><span>识别区域</span><select aria-label="识别区域" value={area} onChange={e => { setArea(e.target.value); setCandidate(null); }}>
+    <div className="upload-config form-grid"><label className="field"><span>识别区域</span><select aria-label="识别区域" disabled={working || busy} value={area} onChange={e => {
+      const next = e.target.value;
+      setArea(next);
+      if (observation?.success && observation.area === 'treehole' && observation.floor == null && next.endsWith('-treehole')) {
+        setCompletions({}); setEncounters({}); setNodeChanges({}); setNewInstance(false); setResetConfirmed(false);
+        const target = loaded.state.areas[next];
+        const old = target?.instances.find(row => row.instanceId === target.activeInstanceId);
+        setUtopia(observation.layerObservation?.utopiaId || old?.utopiaId || null);
+        setDystopia(dystopiaFromObservation(observation, old?.templateId === observation.templateId ? old.dystopia : null));
+      } else setCandidate(null);
+    }}>
       <option value="">自动判层</option>{Object.entries(AREA_NAMES).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
       <label className="field"><span>指定模板 ID（可选）</span><input value={template} onChange={e => { setTemplate(e.target.value); setCandidate(null); }} /></label>
       <label className="checkbox-field"><input type="checkbox" checked={includeRelics} disabled={working || busy}
@@ -136,13 +151,13 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
           const fresh = e.target.value === 'new'; setNewInstance(fresh); setResetConfirmed(false);
           setCompletions(Object.fromEntries(recognitionReview(observation, oldMap, fresh).filter(row => row.reason === 'clearing').map(row => [row.nodeId, true])));
           setEncounters({}); setDystopia(dystopiaFromObservation(observation, fresh ? null : oldMap.dystopia));
-          setUtopia(fresh || observation.dystopiaObservation?.active ? null : oldMap.utopiaId || null);
+          setUtopia(observation.layerObservation?.utopiaId || (fresh || observation.dystopiaObservation?.active ? null : oldMap.utopiaId || null));
         }}>
           <option value="merge">合并本层地图（保留已确认信息）</option><option value="new">重新建立本层地图</option></select>}</div>
       {confirmMap && newInstance && oldMap && <label className="checkbox-field form-error"><input type="checkbox" checked={resetConfirmed} onChange={e => setResetConfirmed(e.target.checked)} />确认换图：本次不沿用旧节点记录，旧实例仍保留</label>}
       {confirmMap && !newInstance && oldMap && oldMap.templateId !== observation.templateId && <div className="form-error">模板与本层记录不同，不能直接合并。请核对截图或明确选择重新建立。</div>}
       {confirmMap && oldMap?.templateId === observation.templateId && !newInstance && <section className="merge-summary">
-        <h3>本层合并预览</h3><p>保留原节点类别、事件与结局标记；流窜居民位置以新截图更新。</p>
+        <h3>本层合并预览</h3><p>{volatileRecognition(reviewObservation, oldMap) ? '全知者盲区：只保留已完成节点，其余节点以本次截图替换。' : '保留原节点类别、事件与结局标记；流窜居民位置以新截图更新。'}</p>
         {changes.map(row => <div key={`${row.nodeId}-${row.kind}`} className={row.kind === 'conflict' ? 'negative' : ''}>
           ({row.nodeId}) · {row.kind === 'completion' ? `可能已完成：${catalog.labels.nodeTypes[row.before] || '原类别待补充'}` :
             row.kind === 'residentArrival' ? '新出现流窜居民（原节点记录保留）' : row.kind === 'residentDeparture' ? '流窜居民已不在此处（移动或清理）' :
@@ -172,7 +187,7 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
         <div className="map-review-toolbar"><span>已选 {selectedNodes.length} 个节点</span><select aria-label="批量修正节点类别" value={batchCategory} onChange={e => setBatchCategory(e.target.value)}><option value="">节点类别</option>
           {Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start' && id !== 'node_type_021').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select>
           <button disabled={!batchCategory || !selectedNodes.some(id => id !== '0,0')} onClick={() => setNodeChanges({ ...nodeChanges, ...Object.fromEntries(selectedNodes.filter(id => id !== '0,0').map(id => [id, batchCategory])) })}>修正所选节点</button><button onClick={() => setSelectedNodes([])} disabled={!selectedNodes.length}>取消选择</button></div></>}
-      {previewMap && confirmMap && <SpecialRegionFields areaKey={chosenArea} utopiaId={utopiaId} onUtopiaChange={setUtopia}
+      {previewMap && confirmMap && <SpecialRegionFields areaKey={chosenArea} utopiaId={utopiaId} onUtopiaChange={value => { setUtopia(value); if (value === 'utopia_005') setCompletions({}); }}
         value={dystopia} onChange={setDystopia} nodes={previewMap.nodes} catalog={catalog} selectedIds={selectedNodes} />}
       <h3>资源候选</h3><div className="resource-candidates">{Object.entries(fields).filter(([id]) => FIELDS[id]).map(([id, row]) => <div key={id}>
         <label className="checkbox-field"><input type="checkbox" checked={!!selected[id]} onChange={e => setSelected({ ...selected, [id]: e.target.checked })} />{FIELDS[id]}</label>

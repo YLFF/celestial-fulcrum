@@ -84,8 +84,6 @@ def validate_application_state(state):
     known = {row["instanceId"] for row in state.get("operators", [])}
     if not isinstance(squad, list) or any(not isinstance(value, str) for value in squad) or len(squad) != len(set(squad)) or not set(squad) <= known:
         raise ValueError("squad must contain distinct current operator IDs")
-    if len(squad) > resources.get("carrySlots", 0):
-        raise ValueError("squad exceeds confirmed carry slots")
 
 
 def apply_commands(state, commands):
