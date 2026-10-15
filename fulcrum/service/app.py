@@ -88,6 +88,20 @@ class ConfirmRelics(RevisionRequest):
     relicIds: list[str] = Field(default_factory=list, max_length=100)
 
 
+class OperatorChoice(StrictModel):
+    slot: str
+    instanceId: str | None = None
+
+
+class UpdateAction(StrictModel):
+    action: Literal["check", "download", "install"]
+
+
+class ConfirmOperators(RevisionRequest):
+    jobId: str
+    choices: list[OperatorChoice] = Field(min_length=1, max_length=13)
+
+
 class PlanRequest(RevisionRequest):
     mode: Literal["global", "advice"] = "global"
     areaKey: str | None = None
@@ -136,7 +150,7 @@ class ExampleRequest(StrictModel):
     runId: str | None = None
 
 
-def create_app(storage_root=None, *, allowed_origins=None):
+def create_app(storage_root=None, *, allowed_origins=None, update_install=None):
     from ..compat import configured_app_data, LEGACY_TOKEN_HEADER
     root = Path(storage_root or configured_app_data() or ROOT / "work/app_data").resolve()
     store, assets = RunStore(root / "runs"), AssetStore(root / "images")
@@ -146,11 +160,14 @@ def create_app(storage_root=None, *, allowed_origins=None):
 
     @asynccontextmanager
     async def lifespan(app):
+        from ..app_updates import AppUpdater
         app.state.jobs = JobManager(root / "jobs", store, assets)
+        app.state.updater = AppUpdater(root / "updates", install=update_install)
         try:
             yield
         finally:
             app.state.jobs.close()
+            app.state.updater.close()
 
     from ..product import PROJECT
     app = FastAPI(title=PROJECT["name"], version=PROJECT["version"], lifespan=lifespan,
@@ -256,6 +273,18 @@ def create_app(storage_root=None, *, allowed_origins=None):
                 "imageUpload": True, "relicRecognition": True,
                 "exampleRun": (ROOT / "runs/true-run-001/playtime.json").is_file(),
                 "ocrReviewRequired": True, "screenshotIsIntermediate": True}
+
+    @app.get("/api/app-updates", dependencies=local_auth)
+    def app_update_status():
+        return app.state.updater.snapshot()
+
+    @app.post("/api/app-updates", dependencies=local_auth)
+    def app_update_action(body: UpdateAction):
+        if body.action == "install":
+            with app.state.jobs.lock:
+                if any(row["status"] in {"queued", "running"} for row in app.state.jobs.records.values()):
+                    raise ValueError("请先等待识别、评分或规划任务完成，再重启更新")
+        return app.state.updater.action(body.action)
 
     @app.get("/api/catalog", dependencies=auth)
     def catalog():
@@ -449,6 +478,24 @@ def create_app(storage_root=None, *, allowed_origins=None):
             raise ValueError("selected relic is not a recognition candidate")
 
         return store.update(run_id, body.expectedRevision, lambda draft: append_relics(draft, body.relicIds))
+
+    @app.post("/api/runs/{run_id}/jobs/recognize-operators", dependencies=auth, status_code=202)
+    def recognize_operators(run_id: str, body: RelicRecognizeRequest):
+        return app.state.jobs.submit("recognize-operators", loaded_at_revision(run_id, body.expectedRevision),
+                                     {"assetId": body.assetId})
+
+    @app.post("/api/runs/{run_id}/confirm-operators", dependencies=auth)
+    def confirm_operators(run_id: str, body: ConfirmOperators):
+        from ..operator_recognition import apply_operator_choices
+        job = app.state.jobs.get(body.jobId)
+        if job["runId"] != run_id or job["kind"] != "recognize-operators" or job["status"] != "completed":
+            raise ValueError("请选择本局已完成的编队识别任务")
+        if job["sourceRevision"] != body.expectedRevision or job["stale"]:
+            raise RevisionConflict("识别后对局已有变更，请重新识别编队")
+        if not job["result"].get("success"):
+            raise ValueError("未能定位编队卡片，请重新截图")
+        return store.update(run_id, body.expectedRevision, lambda draft: apply_operator_choices(
+            draft, job["result"], [row.model_dump() for row in body.choices]))
 
     def append_relics(draft, relic_ids):
         rows = deepcopy(draft["relics"])

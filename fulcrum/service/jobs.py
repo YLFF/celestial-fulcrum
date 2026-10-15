@@ -83,9 +83,9 @@ class JobManager:
         return row
 
     def submit(self, kind, loaded, options):
-        if kind not in {"recognize", "recognize-relics", "score", "plan"}:
+        if kind not in {"recognize", "recognize-relics", "recognize-operators", "score", "plan"}:
             raise ValueError("unsupported job kind")
-        if kind in {"recognize", "recognize-relics"}:
+        if kind in {"recognize", "recognize-relics", "recognize-operators"}:
             self.assets.load(options["assetId"])
         area_key = options.get("areaKey") or loaded["state"].get("currentAreaKey")
         if area_key is not None and area_key not in AREA_SPECS:
@@ -132,7 +132,13 @@ class JobManager:
                 row["status"] = "running"
                 self._save(row)
                 kind, options = row["kind"], row["options"]
-            if kind == "recognize-relics":
+            if kind == "recognize-operators":
+                from ..vision_operators import OperatorRecognizer
+                from ..operator_recognition import operator_changes
+                result = OperatorRecognizer().recognize(self.assets.path(options["assetId"]))
+                result["assetId"] = options["assetId"]
+                result["changes"] = operator_changes(result, state)
+            elif kind == "recognize-relics":
                 from ..vision_relics import RelicRecognizer
                 result = RelicRecognizer().recognize(self.assets.path(options["assetId"]))
                 result["assetId"] = options["assetId"]

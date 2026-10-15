@@ -6,7 +6,7 @@ on:
       release_tag:
         description: Release tag (new tag only; suffixes create prereleases)
         required: true
-        default: v0.1.0
+        default: v0.1.1
         type: string
 
 permissions:
@@ -65,6 +65,7 @@ jobs:
           python -m unittest tests.test_lookout_visibility tests.test_opening_technology
           tests.test_ending_prediction tests.test_node_prediction_beta tests.test_desktop
           tests.test_macos_packaging tests.test_release_publication
+          tests.test_operator_recognition tests.test_app_updates tests.test_node_text
           tests.test_scoring_profile tests.test_snapshot_scoring
           tests.test_arkrog_comparison tests.test_team_power tests.test_combat_bonuses
           tests.test_relic_presentation tests.test_relic_effect_model tests.test_manual_map
@@ -141,4 +142,4 @@ jobs:
           gh release create "$RELEASE_TAG" ./*.zip ./*.zip.sha256 \
             --target "$SOURCE_REVISION" "${release_flags[@]}" \
             --title "Celestial Fulcrum $RELEASE_TAG" \
-            --notes "Windows x64 / macOS Apple Silicon arm64。包含地图识别与手动建图、节点预测与路径规划、藏品加成汇总与附魔、对局导入导出及地图更新撤销重做。两个平台均通过离线识图和素材完整性自检，Windows 另通过 WebView2 窗口启动验证。主程序采用 sitting-dog 图标。Windows 包未签名；确认来源可信后，若系统阻止运行，请先在下载的 ZIP 属性中解除锁定再完整解压。Mac 包为本机临时签名、未公证。数据目录为 CFARA，旧版存档需手动导入。源码提交：$SOURCE_REVISION。"
+            --notes "Windows x64 / macOS Apple Silicon arm64。本次新增编队页面干员识别，支持截图导入、窗口截图及逐项确认，不自动删除未出镜干员或结算招募资源；新增手动检查整包更新、校验和重启安装入口。改进地图缩放与偏移匹配、实托邦及理想源、空地和节点标记识别；修复狭路相逢误识别，普通完整节点文字适度放宽，行商及未知类别保留严格检查。修复机械师奖励、薄行囊容量、笼控器获取历史、部分事件池和一层固定商店规则。两个平台通过离线识图和素材完整性自检，Windows 另通过 WebView2 窗口启动验证；Mac 重启更新尚未实机验证。更新入口读取公开 GitHub 发行资源，私有仓库请在登录 GitHub 后手动下载。Windows 包未签名；若系统阻止运行，请先核实来源和校验值，再在 ZIP 属性中解除锁定后完整解压。Mac 包为临时签名、未公证。存档目录仍为 CFARA。源码提交：$SOURCE_REVISION。"

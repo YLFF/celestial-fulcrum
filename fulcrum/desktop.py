@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 import socket
 import sys
-from threading import Thread
+from threading import Thread, Timer
 import time
 from urllib.request import urlopen, Request
 
@@ -115,7 +115,7 @@ def single_instance(directory):
 
 
 class LocalServer:
-    def __init__(self, directory, port=8767):
+    def __init__(self, directory, port=8767, *, update_install=None):
         import uvicorn
         from .service.app import create_app
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -127,7 +127,7 @@ class LocalServer:
             self.socket.bind(("127.0.0.1", 0))
         self.port = self.socket.getsockname()[1]
         self.url = f"http://127.0.0.1:{self.port}"
-        app = create_app(directory, allowed_origins=[self.url])
+        app = create_app(directory, allowed_origins=[self.url], update_install=update_install)
         config = uvicorn.Config(app, host="127.0.0.1", port=self.port,
                                 log_config=None, access_log=False)
         self.server = uvicorn.Server(config)
@@ -241,13 +241,20 @@ def main(argv=None):
     if args.window_test and not args.report:
         parser.error("--window-test requires --report")
     directory = data_directory(args.data_dir)
+    pending_update = []
     try:
         configure_logging(directory)
         with single_instance(directory):
             check_windows_bundle_trust()
             if not (ROOT / "frontend/dist/index.html").is_file():
                 raise RuntimeError("前端尚未构建，请先执行打包脚本。")
-            server = LocalServer(directory).start()
+            def install_update(staged):
+                from .update_install import prepare_install
+                plan = prepare_install(staged, directory, directory / "updates")
+                pending_update.append(plan)
+                Timer(.8, window.destroy).start()
+            updater_enabled = getattr(sys, "frozen", False) and not args.self_test and not args.window_test
+            server = LocalServer(directory, update_install=install_update if updater_enabled else None).start()
             try:
                 if args.self_test:
                     result = self_test(server)
@@ -275,6 +282,9 @@ def main(argv=None):
                     args.report.write_text(json.dumps(probe, indent=2), encoding="utf-8")
             finally:
                 server.close()
+        if pending_update:
+            from .update_install import launch_install
+            launch_install(pending_update[0])
         return 0
     except Exception as error:
         logging.exception("Desktop startup or shutdown failed")

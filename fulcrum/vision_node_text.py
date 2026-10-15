@@ -21,6 +21,9 @@ ROOT = Path(__file__).resolve().parents[1]
 MODEL = ROOT / "chi_sim.traineddata"
 SCRIPT = ROOT / "scripts/ocr_node_labels.mjs"
 MIN_CONFIDENCE = 75.0
+ORDINARY_LABEL_MIN_CONFIDENCE = 55.0
+STRICT_TEXT_CATEGORIES = {"unknown_mystery", "unknown_ferocity", "node_type_004", "node_type_013",
+                          "node_type_001", "node_type_002"}
 
 
 def normalize_label(text: str) -> str:
@@ -149,7 +152,9 @@ def decode_label_sheet(tsv, rows, labels):
         if (any(token[2] < 30 for token in tokens)
                 or (normalized == "作战" and rows[node_id].get("glyphAspect", 2) > 2.8)):
             category_id = None
-        minimum = 65. if exact and len(normalized) >= 3 and not (category_id or "").startswith("unknown_") else MIN_CONFIDENCE
+        minimum = MIN_CONFIDENCE
+        if exact and len(normalized) >= 3 and not (names.get(normalized) or "").startswith("unknown_"):
+            minimum = 65. if names[normalized] in STRICT_TEXT_CATEGORIES else ORDINARY_LABEL_MIN_CONFIDENCE
         accepted = category_id is not None and not approximate and not prefix and confidence >= minimum
         observations[node_id] = {"text": text, "confidence": round(confidence, 2),
                                  "categoryId": category_id if accepted else None,
@@ -159,6 +164,43 @@ def decode_label_sheet(tsv, rows, labels):
                                  "status": "recognized" if accepted else "unconfirmed",
                                  "pixelBox": rows[node_id]["box"]}
     return observations
+
+
+def corroborated_label_candidate(observation, labels):
+    """Recover a weak final glyph only as an icon-verification candidate."""
+    if not observation or observation.get("status") == "conflict" or observation.get("categoryId"):
+        return None
+    readings = observation.get("variants", [])
+    supported = {}
+    for category_id, label in labels.items():
+        name = normalize_label(label)
+        if category_id in STRICT_TEXT_CATEGORIES | {"start", "node_type_020"} or len(name) < 4:
+            continue
+        methods = set()
+        for reading in readings:
+            text = normalize_label(reading.get("text", ""))
+            confidence = reading.get("confidence", 0)
+            if (len(text) == len(name) and re.fullmatch(r"[\u4e00-\u9fff]+", text)
+                    and text[:-1] == name[:-1] and confidence >= (30 if text == name else 60)):
+                methods.add(reading.get("method"))
+        methods.discard(None)
+        if len(methods) >= 2:
+            supported[category_id] = methods
+    if len(supported) != 1:
+        return None
+    candidate = next(iter(supported))
+    if any((reading.get("lexicalCategoryId") or reading.get("candidateCategoryId")) not in {None, candidate}
+           and reading.get("confidence", 0) >= 50 for reading in readings):
+        return None
+    return candidate
+
+
+def repeated_complete_label(observation, label):
+    name = normalize_label(label)
+    methods = {reading.get("method") for reading in observation.get("variants", [])
+               if normalize_label(reading.get("text", "")) == name and reading.get("confidence", 0) >= 30}
+    methods.discard(None)
+    return len(methods) >= 2
 
 
 def run_label_ocr(sheet, *, mode="11", rows=None, labels=()):

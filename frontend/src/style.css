@@ -538,6 +538,26 @@ pre { overflow: auto; max-height: 220px; font-size: 10px; color: #728778; }
 .operator-edit-row { grid-template-columns: 47px minmax(120px, 1fr) 86px 60px 100px 125px 108px; }
 .operator-enchantments { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px; font-size: 11px; color: var(--accent, #184e3d); }
 .operator-enchantments .inventory-image { width: 26px; height: 26px; }
+.operator-scan-results { display: grid; gap: 6px; }
+.operator-scan-summary { padding: 12px 0; color: var(--accent); font-size: 13px; }
+.operator-scan-row { display: grid; grid-template-columns: minmax(140px, 230px) minmax(100px, 1fr) 72px; align-items: center; gap: 12px; padding: 8px 0; border-bottom: 1px solid var(--border, #dce5df); }
+.operator-scan-row > img { width: 100%; aspect-ratio: 3.05; object-fit: contain; }
+.operator-scan-row > div { min-width: 0; overflow-wrap: anywhere; }
+.operator-scan-row small { display: block; margin-top: 5px; color: var(--muted); }
+.operator-scan-row.review small { color: var(--accent); }
+.operator-scan-row select { width: 100%; margin-top: 6px; }
+.app-update-content { display: grid; gap: 12px; }
+.app-update-content p { margin: 0; }
+.app-update-status { display: flex; align-items: center; gap: 8px; color: var(--accent); }
+.app-update-content progress { width: 100%; }
+.release-notes { white-space: pre-wrap; overflow-wrap: anywhere; font: inherit; font-size: 12px; max-height: 260px; overflow: auto; }
+.app-update-confirm { padding-top: 16px; border-top: 1px solid var(--border, #dce5df); }
+.app-update-confirm p { margin: 8px 0 12px; }
+.app-update-confirm button { margin-right: 8px; }
+@media (max-width: 650px) {
+  .operator-scan-row { grid-template-columns: minmax(100px, 160px) minmax(80px, 1fr); gap: 8px; }
+  .operator-scan-row > label { grid-column: 2; }
+}
 :where([data-theme="dark"]) .relic-view-switch button.active { background: #284639; color: #ace1c8; }
 @media (max-width: 950px) {
   .operator-edit-row { grid-template-columns: 47px minmax(120px, 1fr) 90px 70px 108px; }

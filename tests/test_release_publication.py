@@ -9,6 +9,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class ReleasePublicationTests(unittest.TestCase):
+    def test_application_and_runtime_versions_are_consistent(self):
+        versions = [json.loads((ROOT / name).read_text(encoding="utf-8"))["version"]
+                    for name in ("data/project_info.json", "package.json", "frontend/package.json")]
+        self.assertEqual(len(set(versions)), 1)
+
     def test_data_allowlist_excludes_nested_local_caches(self):
         import sys
         sys.path.insert(0, str(ROOT / "scripts"))

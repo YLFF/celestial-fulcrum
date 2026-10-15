@@ -13,7 +13,7 @@ from .map_catalog import TemplateCatalog
 from .map_model import MapNode, MapResult, TemplateMatch
 from .vision_geometry import detect_circles, detect_map_viewport, match_templates, working_image, differing_edge_evidence, recover_layout
 from .vision_icons import IconMatch, IconMatcher
-from .vision_node_text import NodeLabelRecognizer
+from .vision_node_text import NodeLabelRecognizer, corroborated_label_candidate, repeated_complete_label
 from .vision_layer import recognize_layer, recognize_layer_title
 from .vision_player import recognize_player_position
 from .vision_resources import HudRecognizer
@@ -271,6 +271,20 @@ class MapRecognizer:
                         if confirmed:
                             text["confirmedByIcon"] = True
                             classified[slot] = confirmed, [confirmed] + [item for item in classified[slot][1] if item.id != confirmed.id]
+                    if text and not text.get("confirmedByIcon"):
+                        corroborated = corroborated_label_candidate(text, self.icons.node_labels)
+                        current = classified[slot][0]
+                        if corroborated and (current is None or current.id == corroborated or current.score < .65):
+                            confirmed = self.icons.confirm_text_candidate(work, local_pixels[slot], selected.grid_step,
+                                corroborated, minimum=.60)
+                            complete = repeated_complete_label(text, self.icons.node_labels[corroborated])
+                            if confirmed and (current is None or current.id == corroborated or confirmed.score >= current.score + .05
+                                              or complete and confirmed.score > current.score):
+                                text["corroboratedCategoryId"] = corroborated
+                                text["corroboratedCompleteLabel"] = complete
+                                text["confirmedByCorroboratedText"] = True
+                                text["confirmedByIcon"] = True
+                                classified[slot] = confirmed, [confirmed] + [item for item in classified[slot][1] if item.id != confirmed.id]
                     if classified[slot][0] is None and scale < .85 and (text or {}).get("status") != "conflict":
                         candidate_ids = [item.id for item in classified[slot][1]]
                         if text and text.get("candidateCategoryId"):

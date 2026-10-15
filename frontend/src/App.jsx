@@ -21,6 +21,8 @@ import DecisionAdvice from './DecisionAdvice';
 import { adviceMapRoute, filterAdvice } from './advicePresentation';
 import AreaTabs from './AreaTabs';
 import RelicRecognitionDialog from './RelicRecognitionDialog';
+import OperatorRecognitionDialog from './OperatorRecognitionDialog';
+import AppUpdateDialog from './AppUpdateDialog';
 import CombatBonusDialog from './CombatBonusDialog';
 import { ComponentEditor, OperatorEditor, RelicEditor } from './InventoryEditors';
 import { NewRunEditor, ResourceEditor, GoalEditor } from './RunEditors';
@@ -198,6 +200,14 @@ export default function App() {
       await openRun(value.runId, false); await listRuns(); notify('藏品已追加，原有藏品保留');
     } catch (error) { failed(error); } finally { setBusy(false); }
   }
+  async function confirmOperators(body) {
+    setBusy(true);
+    try {
+      const value = await api(`/api/runs/${modal.source.runId}/confirm-operators`, { method: 'POST', body });
+      setModal(null);
+      await openRun(value.runId, false); await listRuns(); notify('干员状态已更新，未出镜的干员保留');
+    } catch (error) { failed(error); } finally { setBusy(false); }
+  }
   async function createManualMap(body) {
     setBusy(true);
     try {
@@ -258,7 +268,7 @@ export default function App() {
 
   if (!catalog) return <main className="loading-page"><div className="brand"><Layers size={25} />天堂支点</div>{bootError ? <><div className="form-error">{bootError}</div><button onClick={initialize}>重新连接</button></> : <LoaderCircle className="spin" size={24} />}</main>;
 
-  return <div className="app" onDragEnter={e => { if (modal?.type === 'relicRecognition') return; if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); dragDepth.current++; setDragging(true); } }}
+  return <div className="app" onDragEnter={e => { if (['relicRecognition', 'operatorRecognition'].includes(modal?.type)) return; if ([...e.dataTransfer.types].includes('Files')) { e.preventDefault(); dragDepth.current++; setDragging(true); } }}
     onDragOver={e => { if ([...e.dataTransfer.types].includes('Files')) e.preventDefault(); }}
     onDragLeave={e => { if ([...e.dataTransfer.types].includes('Files')) { dragDepth.current--; if (dragDepth.current <= 0) setDragging(false); } }}
     onDrop={e => { e.preventDefault(); dragDepth.current = 0; setDragging(false); if (busy) return; const file = e.dataTransfer.files[0]; if (file?.name.toLowerCase().endsWith('.json')) restore(file); else selectFile(file); }}>
@@ -269,6 +279,7 @@ export default function App() {
         {runs.filter(row => row.valid).map(row => <option value={row.runId} key={row.runId}>{row.runId}</option>)}</select>
       {state && <div className="run-badges"><span>N{state.opening.difficulty}</span><span>{catalog.squads[state.opening.squadId] || '未选分队'}</span></div>}
       <div className="header-actions"><button className="primary start-exploration" onClick={() => edit('new')} disabled={busy}><Plus size={17} aria-hidden="true" />开始探索</button>
+        <IconButton icon={Download} label="检查应用更新" disabled={busy} onClick={() => edit('appUpdate')} />
         <IconButton icon={theme === 'dark' ? Sun : Moon} label={theme === 'dark' ? '切换到明亮模式' : '切换到黑暗模式'}
           aria-pressed={theme === 'dark'} onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')} />
         <IconButton icon={Upload} label="恢复 Playtime" onClick={() => importInput.current.click()} disabled={busy} />
@@ -315,6 +326,7 @@ export default function App() {
             <EntryImage entry={entries[row.componentId]} className="inventory-image" />{row.remainingUses != null && <span>{row.remainingUses}</span>}</button>)}</div></div>)}
         </InventoryStrip>
         <InventoryStrip title="干员与编队" subtitle={state ? `${state.operators.length} 人 · ${state.squad?.length || 0}/${state.resources.carrySlots}` : '—'} icon={Users}
+          actions={<IconButton icon={ScanLine} label="识别编队页面干员" disabled={!state || busy} onClick={() => edit('operatorRecognition')} />}
           onEdit={() => edit('operators')} onAdd={() => edit('operators', { adding: true })} disabled={!state || busy}>
           <div className="operator-strip">{state?.operators.map(row => <button key={row.instanceId} title={`${row.name} · ${SOURCES[row.source] || row.source}`} onClick={() => edit('operators')}>
             <span>{row.name}</span><small>{row.rarity || '?'}★ · {operatorProgressLabel(row.elite)}{row.remainingBattles ? ' · 助' : ''}</small></button>)}</div>
@@ -403,6 +415,9 @@ export default function App() {
     {modal?.type === 'relics' && <RelicEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'relicRecognition' && <RelicRecognitionDialog loaded={modal.source} entries={entries} assetInfo={modal.assetInfo} onAsset={setLastAsset}
       startJob={startJob} onConfirm={confirmRelics} onClose={close} busy={busy} notify={notify} />}
+    {modal?.type === 'operatorRecognition' && <OperatorRecognitionDialog loaded={modal.source} onAsset={setLastAsset} captureAvailable={caps.windowCapture}
+      startJob={startJob} onConfirm={confirmOperators} onClose={close} busy={busy} notify={notify} />}
+    {modal?.type === 'appUpdate' && <AppUpdateDialog onClose={close} notify={notify} />}
     {modal?.type === 'components' && <ComponentEditor adding={modal.adding} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'operators' && <OperatorEditor adding={modal.adding} loaded={modal.source} areaKey={area} state={modal.source.state} catalog={catalog} entries={entries} onSave={saveModal} onClose={close} busy={busy} />}
     {modal?.type === 'combatBonuses' && <CombatBonusDialog loaded={modal.source} areaKey={area} entries={entries} onClose={close} />}
