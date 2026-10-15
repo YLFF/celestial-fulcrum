@@ -1,5 +1,5 @@
 {
-  "sourceDigest": "e5eeaad1e9beddca9311919457e5b9865bca7069ba8749075031fa31788dd055",
+  "sourceDigest": "dd576d94dea2ac56d247ac970e0e0f0f44444e99be5b81590715a7ffbb51166f",
   "fileSHA256": {
     ".github/workflows/desktop-release.yml": "c461721ef2011213982e4206d051d9f1860433e5756c84e5cc0e604a1fd8287d",
     ".gitignore": "9434d3ea78f7eb3c4a37e8d37c72054a430ede840d9040bf572b60fa50dc2ea8",
@@ -720,8 +720,8 @@
     "scripts/sync_prts_operators.py": "203959f7f40feb4223e62e44139a3c019154614dd53569ff24f4f264ea43c3b0",
     "tests/fixtures/arkrog_30.json": "600c8e6f9d44dc784bfac444021f78bc9a4fd97314ef5cf46e1a0c23165a9a40",
     "tests/fixtures/n15_floor2_combat.json": "3f0781ad73a9f8f412f07b5f58af8eda789b771a8e8c31952044e16139e43f88",
-    "tests/test_app_icon.py": "c3e6e0562c61765714b62f8bd7b4370dca86cff210c5ca8c0479b901dbfcd8cf",
-    "tests/test_app_updates.py": "5b090368894cf3791c59e6735d31ee6ef046bb2e06dba2b3210e9da788c175f6",
+    "tests/test_app_icon.py": "a094c6711e37a7f30cab15577ecf6416c4a1a9fed6af4cf3fd66339617a2c94c",
+    "tests/test_app_updates.py": "263feb17814c9916f16347b0835d78d0747c80e4ae07927ade8e8fcd38e97439",
     "tests/test_appraisal_updates.py": "4d6a3eb7c086ab5a2d799a236d712ce8fd5265e5a268d731eaee167482cf7f8c",
     "tests/test_arkrog_comparison.py": "c2dd95a3c10db66d84a7b2c16a4fe77fa1e14e1038ba7fe688e2bb04f78e4a3b",
     "tests/test_battle_rewards.py": "ff3ec92742144822e5c435de8ef05b9e851d66546ca92ace726ab99c2661270e",

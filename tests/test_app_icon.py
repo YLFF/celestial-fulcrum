@@ -1,4 +1,5 @@
 from pathlib import Path
+import json
 import struct
 import sys
 import unittest
@@ -52,7 +53,8 @@ class AppIconTests(unittest.TestCase):
 
     def test_stable_tag_is_default_and_not_unconditionally_prerelease(self):
         workflow = (ROOT / ".github/workflows/desktop-release.yml").read_text(encoding="utf-8")
-        self.assertIn("default: v0.1.0\n", workflow)
+        version = json.loads((ROOT / "data/project_info.json").read_text(encoding="utf-8"))["version"]
+        self.assertIn(f"default: v{version}\n", workflow)
         self.assertIn('if [[ "$RELEASE_TAG" == *-* ]]', workflow)
         self.assertIn("release_flags+=(--prerelease)", workflow)
         self.assertIn("release_flags+=(--latest)", workflow)

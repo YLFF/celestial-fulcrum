@@ -132,7 +132,7 @@ class UpdateSafetyTests(unittest.TestCase):
             self.assertEqual((current / 'old').read_text(), 'old')
             self.assertEqual((data / 'save').read_text(), 'keep')
             self.assertTrue((Path(plan['prepared']) / 'new').is_file())
-            self.assertEqual(Path(plan['prepared']).parent, current.parent)
+            self.assertEqual(Path(plan['prepared']).parent.resolve(), current.parent.resolve())
             with self.assertRaises(ValueError):
                 prepare_install(staged, current / 'saves', updates, current=current)
 
