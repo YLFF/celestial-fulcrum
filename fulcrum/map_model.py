@@ -51,6 +51,7 @@ class TemplateMatch:
     point_explanation: float
     edge_score: float | None = None
     ranking_score: float | None = None
+    circle_coverage: float | None = None
 
     def pixel_at(self, slot: tuple[int, int]) -> tuple[float, float]:
         return self.origin_x + slot[0] * self.step_x, self.origin_y + slot[1] * self.step_y

@@ -567,6 +567,7 @@
     {
       "id": "encounter_020",
       "name": "和平守卫者",
+      "treeholeFloors": ["III", "IV", "V"],
       "floors": [
         "IV",
         "V"

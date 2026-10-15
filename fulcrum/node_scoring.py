@@ -439,11 +439,8 @@ class SnapshotScorer:
         allowed = {row["id"] for row in pool["candidates"]} if pool is not None else {
             key for key, row in self.definitions.items()
             if ROMAN[self.floor - 1] in row["floors"] and not row.get("specialMarkId")}
-        ever_controller = bool(self.options.get("controllerEverObtained")) or self.counts["component_012"] > 0
-        obtained_outcomes = {"obtained_controller", "controller_obtained", "获得笼控器", "笼控器已获得"}
-        ever_controller |= any(outcome in obtained_outcomes
-            for row in self.context.get("globalEncounterPool", []) if row["id"] == "encounter_008"
-            for outcome in row.get("outcomes", {}).values())
+        from .acquisition_facts import controller_obtained
+        ever_controller = bool(self.options.get("controllerEverObtained")) or controller_obtained(self.context)
         if not ever_controller:
             allowed.discard("encounter_010")
         rows = [{"eventId": key, "weight": row["weight"]} for key, row in weights.items()

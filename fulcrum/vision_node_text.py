@@ -27,32 +27,36 @@ def normalize_label(text: str) -> str:
     return re.sub(r"[\s“”‘’\"'，。！？、:：;；·]+", "", text)
 
 
-def label_crop(image, pixel, step, viewport, *, binarize=False):
+def label_crop(image, pixel, step, viewport, *, binarize=False, include_anchor=False, relaxed=False):
     x, y = pixel
     left, top, right, bottom = viewport
-    box = (max(left, round(x - .54 * step)), max(top, round(y + .12 * step)),
-           min(right, round(x + .54 * step)), min(bottom, round(y + .56 * step)))
+    box = (max(left, round(x - .54 * step)), max(top, round(y + (.08 if relaxed else .12) * step)),
+           min(right, round(x + .54 * step)), min(bottom, round(y + (.62 if relaxed else .56) * step)))
     x0, y0, x1, y1 = box
     if x1 <= x0 or y1 <= y0:
         return None
     crop = image[y0:y1, x0:x1]
     hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
-    mask = cv2.inRange(hsv, (0, 0, 85), (179, 75, 255))
+    mask = cv2.inRange(hsv, (0, 0, 50 if relaxed else 85), (179, 115 if relaxed else 75, 255))
     count, components, stats, _ = cv2.connectedComponentsWithStats(mask)
     useful = [index for index in range(1, count)
-              if max(5, .045 * step) <= stats[index, cv2.CC_STAT_HEIGHT] <= .20 * step
-              and stats[index, cv2.CC_STAT_AREA] >= max(6, .0003 * step * step)]
+              if max(3 if relaxed else 5, (.028 if relaxed else .045) * step) <= stats[index, cv2.CC_STAT_HEIGHT] <= .20 * step
+              and stats[index, cv2.CC_STAT_AREA] >= max(4 if relaxed else 6, (.00015 if relaxed else .0003) * step * step)]
     if len(useful) < 2:
         return None
     lines = []
     for index in sorted(useful, key=lambda index: stats[index, cv2.CC_STAT_TOP]):
         cy = stats[index, cv2.CC_STAT_TOP] + stats[index, cv2.CC_STAT_HEIGHT] / 2
-        group = next((line for line in lines if abs(line[0] - cy) <= .04 * step), None)
+        group = next((line for line in lines if abs(line[0] - cy) <= .04 * step or (relaxed and any(
+            min(stats[index, 1]+stats[index, 3], stats[other, 1]+stats[other, 3])-max(stats[index, 1], stats[other, 1])
+            >= min(stats[index, 3], stats[other, 3])*.4 for other in line[1]))), None)
         if group is None:
             lines.append((cy, [index]))
         else:
             group[1].append(index)
-    lines = [indices for cy, indices in lines if len(indices) >= 2 and y0 + cy >= y + .19 * step]
+    lines = [indices for _, indices in lines if len(indices) >= 2 and y0 + np.median([
+        stats[index, cv2.CC_STAT_TOP] + stats[index, cv2.CC_STAT_HEIGHT] / 2 for index in indices
+    ]) >= y + (.12 if relaxed else .19) * step]
     if not lines:
         return None
     useful = max(lines, key=lambda indices: sum(stats[index, cv2.CC_STAT_AREA] for index in indices))
@@ -65,7 +69,7 @@ def label_crop(image, pixel, step, viewport, *, binarize=False):
     line_mask = np.zeros_like(mask)
     line_mask[line_top:line_bottom, line_left:line_right] = mask[line_top:line_bottom, line_left:line_right]
     ys, xs = np.where(line_mask > 0)
-    if xs.max() - xs.min() < .10 * step:
+    if xs.max() - xs.min() < (.16 if relaxed else .10) * step:
         return None
     # Labels are centered under their own node; reject clipped or off-center neighboring text.
     center = x0 + (xs.min() + xs.max()) / 2
@@ -78,6 +82,8 @@ def label_crop(image, pixel, step, viewport, *, binarize=False):
     if binarize:
         binary = cv2.threshold(binary, 64, 255, cv2.THRESH_BINARY)[1]
     binary = cv2.copyMakeBorder(binary, 10, 10, 16, 16, cv2.BORDER_CONSTANT, value=255)
+    if include_anchor:
+        return binary, box, (center, y0 + (ys.min() + ys.max()) / 2)
     return binary, box
 
 
@@ -121,19 +127,41 @@ def decode_label_sheet(tsv, rows, labels):
         letters = sum(len(normalize_label(token[1])) for token in tokens)
         confidence = sum(len(normalize_label(token[1])) * token[2] for token in tokens) / letters if letters else 0.0
         category_id = names.get(normalized)
+        exact = category_id is not None
+        # The last rare glyph in these labels is often substituted by Chinese OCR.
+        if category_id is None and re.fullmatch(r"未知的[凶诡][\u4e00-\u9fff]", normalized):
+            category_id = "unknown_ferocity" if normalized[3] == "凶" else "unknown_mystery"
+            if category_id not in labels:
+                category_id = None
+        # Approximate words are candidates only. They require independent icon evidence.
+        approximate = False
+        prefix = False
+        if category_id is None and len(normalized) >= 3 and confidence >= 45:
+            nearby = [node_id for name, node_id in names.items() if len(name) == len(normalized)
+                      and sum(a != b for a, b in zip(name, normalized)) == 1]
+            if len(set(nearby)) == 1:
+                category_id, approximate = nearby[0], True
+        if category_id is None and len(normalized) >= 4 and confidence >= 50 and re.fullmatch(r"[\u4e00-\u9fff]+", normalized):
+            nearby = [node_id for name, node_id in names.items()
+                      if len(name) == len(normalized) and name[:2] == normalized[:2]]
+            if len(set(nearby)) == 1:
+                category_id, prefix = nearby[0], True
         if (any(token[2] < 30 for token in tokens)
                 or (normalized == "作战" and rows[node_id].get("glyphAspect", 2) > 2.8)):
             category_id = None
-        accepted = category_id is not None and confidence >= MIN_CONFIDENCE
+        minimum = 65. if exact and len(normalized) >= 3 and not (category_id or "").startswith("unknown_") else MIN_CONFIDENCE
+        accepted = category_id is not None and not approximate and not prefix and confidence >= minimum
         observations[node_id] = {"text": text, "confidence": round(confidence, 2),
                                  "categoryId": category_id if accepted else None,
                                  "candidateCategoryId": category_id,
+                                 "lexicalCategoryId": names.get(normalized),
+                                 "matchKind": "prefix" if prefix else "approximate" if approximate else "exact" if exact else "pattern",
                                  "status": "recognized" if accepted else "unconfirmed",
                                  "pixelBox": rows[node_id]["box"]}
     return observations
 
 
-def run_label_ocr(sheet):
+def run_label_ocr(sheet, *, mode="11", rows=None, labels=()):
     node, modules = node_runtime()
     with tempfile.TemporaryDirectory(prefix="fulcrum-node-labels-") as temp:
         path = Path(temp) / "labels.png"
@@ -141,7 +169,15 @@ def run_label_ocr(sheet):
             raise OSError("无法保存节点文字识别临时图")
         env = os.environ.copy()
         env["NODE_PATH"] = modules + os.pathsep + env.get("NODE_PATH", "")
-        completed = subprocess.run([node, str(SCRIPT)], input=json.dumps({"path": str(path)}),
+        request = {"path": str(path), "mode": mode, "labels": list(labels),
+                   "rows": {key: {**row, "sheetWidth": sheet.shape[1]} for key, row in (rows or {}).items()}}
+        for index, (key, row) in enumerate(request["rows"].items()):
+            if not key.endswith("|gray"):
+                continue
+            line_path = Path(temp) / f"line-{index}.png"
+            cv2.imwrite(str(line_path), sheet[row["top"]:row["bottom"]])
+            row["path"] = str(line_path)
+        completed = subprocess.run([node, str(SCRIPT)], input=json.dumps(request),
                                    text=True, encoding="utf-8", capture_output=True, cwd=ROOT, env=env,
                                    timeout=30, creationflags=subprocess.CREATE_NO_WINDOW if os.name == "nt" else 0)
     if completed.returncode:
@@ -160,6 +196,8 @@ class NodeLabelRecognizer:
         crops = {}
         for node_id, pixel in positions.items():
             crop = label_crop(image, pixel, step, viewport)
+            if crop is None:
+                crop = label_crop(image, pixel, step, viewport, relaxed=True)
             if crop is not None:
                 gray, box = crop
                 crops[f"{node_id}|gray"] = crop
@@ -169,14 +207,19 @@ class NodeLabelRecognizer:
                     "elapsedMs": round((perf_counter() - started) * 1000, 1)}
         sheet, rows = make_label_sheet(crops)
         try:
-            data = run_label_ocr(sheet)
+            data = run_label_ocr(sheet, rows=rows, labels=self.labels.values())
         except (OSError, RuntimeError, ValueError, subprocess.TimeoutExpired) as exc:
             return {"status": "unavailable", "observations": {}, "reason": public_error(exc),
                     "diagnosticDetail": str(exc), "elapsedMs": round((perf_counter() - started) * 1000, 1)}
         variants = decode_label_sheet(data.get("tsv"), rows, self.labels)
+        for retry in data.get("lineResults", []):
+            key = retry["key"]
+            row = rows[key]
+            decoded = decode_label_sheet(retry.get("tsv"), {key: {**row, "top": -1e9, "bottom": 1e9}}, self.labels)[key]
+            variants[key + "|line"] = decoded
         observations = {}
         for node_id in positions:
-            choices = [{**variants[key], "method": method} for method in ("gray", "binary")
+            choices = [{**variants[key], "method": method} for method in ("gray", "binary", "gray|line")
                        if (key := f"{node_id}|{method}") in variants]
             if not choices:
                 continue

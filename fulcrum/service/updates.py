@@ -91,6 +91,8 @@ def validate_application_state(state):
 def apply_commands(state, commands):
     if not isinstance(commands, list) or not 1 <= len(commands) <= 200:
         raise ValueError("submit between one and 200 snapshot commands")
+    from ..acquisition_facts import seed_acquisition_facts
+    seed_acquisition_facts(state)
     old_operator_ids = {row["instanceId"] for row in state.get("operators", [])}
     old_box = deepcopy(state["componentBox"])
     old_total = state["resources"].get("totalEstimatedValue")
@@ -172,6 +174,10 @@ def apply_commands(state, commands):
             keys(command, ("type", "items"))
             validate_relics(command["items"])
             from ..relic_presentation import preserve_bindings
+            old_count = next((row.get("count", 1) for row in state["relics"] if row["id"] == "relic_198"), 0)
+            new_count = next((row.get("count", 1) for row in command["items"] if row["id"] == "relic_198"), 0)
+            if new_count > old_count:
+                set_capacity(state["componentBox"], state["componentBox"]["capacity"] + 4 * (new_count - old_count))
             state["relics"] = preserve_bindings(state["relics"], command["items"])
             seed_owned_milestones(state)
         elif kind == "relicEnchant":
@@ -208,6 +214,7 @@ def apply_commands(state, commands):
             add(state["componentBox"], command["componentId"], instance_id=command.get("instanceId"),
                           estimated_value=command.get("estimatedValue"), remaining_uses=command.get("remainingUses"),
                           route_candidate=command.get("routeCandidate", True))
+            seed_acquisition_facts(state)
         elif kind == "componentAppraisal":
             keys(command, ("type", "event"), ("count",))
             apply_appraisal_event(state["componentBox"], command["event"], command.get("count", 1))
@@ -229,12 +236,14 @@ def apply_commands(state, commands):
                                withdrawn_ingots=command.get("withdrawnIngots", 0), record_only=command.get("recordOnly", False))
         elif kind == "operatorAdd":
             mapping = {"source": "source", "elite": "elite", "profession": "profession", "rarity": "rarity",
-                       "instanceId": "instance_id", "hopeCost": "hope_cost", "ingotCost": "ingot_cost", "recordOnly": "record_only"}
+                       "instanceId": "instance_id", "hopeCost": "hope_cost", "ingotCost": "ingot_cost", "recordOnly": "record_only",
+                       "settleRewards": "settle_rewards"}
             keys(command, ("type", "name"), mapping)
             add_operator(state, command["name"], **{new: command[old] for old, new in mapping.items() if old in command})
         elif kind == "operatorPromote":
-            keys(command, ("type", "instanceId"), ("hopeCost", "recordOnly"))
-            promote_operator(state, command["instanceId"], hope_cost=command.get("hopeCost"), record_only=command.get("recordOnly", False))
+            keys(command, ("type", "instanceId"), ("hopeCost", "recordOnly", "settleRewards"))
+            promote_operator(state, command["instanceId"], hope_cost=command.get("hopeCost"),
+                             record_only=command.get("recordOnly", False), settle_rewards=command.get("settleRewards"))
         elif kind == "operatorUpdate":
             keys(command, ("type", "instanceId", "changes"))
             keys(command["changes"], optional=("name", "profession", "rarity", "elite", "source", "remainingBattles", "initialRecruitment"))

@@ -46,6 +46,20 @@ class MapVisionTests(unittest.TestCase):
                 self.assertEqual(result[0]["id"], mark)
                 self.assertEqual(result[0]["status"], "candidate")
 
+    def test_borderline_badge_size_refinement_keeps_acceptance_threshold(self) -> None:
+        matcher = IconMatcher.__new__(IconMatcher)
+        icon = np.zeros((5, 5, 3), dtype=np.uint8)
+        matcher.mark_templates = [("node_mark_004", icon)]
+        matcher.mark_labels = {"node_mark_004": "光明之末"}
+        for refined, expected in ((.719, []), (.74, ["node_mark_004"])):
+            with self.subTest(refined=refined), patch.object(matcher, "_score", side_effect=[.70, refined]) as score:
+                marks = matcher.detect_marks(icon, (0, 0), 100, area="main", floor=3)
+                self.assertEqual([mark["id"] for mark in marks], expected)
+                self.assertGreater(len(score.call_args.args[4]), 7)
+        with patch.object(matcher, "_score", return_value=.68) as score:
+            self.assertFalse(matcher.detect_marks(icon, (0, 0), 100, area="main", floor=3))
+            score.assert_called_once()
+
     def test_treehole_same_occupancy_is_disambiguated_by_edges(self) -> None:
         templates = self.catalog.candidates("treehole", 3)
         for template_id in ("treehole-03", "treehole-09"):

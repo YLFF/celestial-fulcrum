@@ -1,0 +1,10 @@
+{
+  "coordinateSpace": "1280x720 working image",
+  "samples": [
+    {"file": "ideal_source_03.png", "sourceAssetId": "fbddb0f0a1ab43ed8b441ba887d8efb0", "center": [438, 394], "radius": 68, "innerMaskRadius": 29, "feature": "ideal-source cracks"},
+    {"file": "node_type_020_06.png", "sourceAssetId": "fbddb0f0a1ab43ed8b441ba887d8efb0", "center": [539, 194], "radius": 18, "feature": "distorted clearing"},
+    {"file": "soil/unknown_mystery_01.png", "sourceAssetId": "18ca1441906d4e2ea61bb841aada6af6", "center": [123, 345], "radius": 27, "feature": "soil echo"},
+    {"file": "soil/node_type_020_01.png", "sourceAssetId": "18ca1441906d4e2ea61bb841aada6af6", "center": [224, 244], "radius": 15, "feature": "soil echo"},
+    {"file": "soil/unknown_ferocity_01.png", "sourceAssetId": "18ca1441906d4e2ea61bb841aada6af6", "center": [324, 546], "radius": 27, "feature": "soil echo"}
+  ]
+}

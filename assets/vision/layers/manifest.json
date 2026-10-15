@@ -1,0 +1,256 @@
+{
+  "samples": [
+    {
+      "key": "treehole_0",
+      "source": "attachment_01.jpg",
+      "sha256": "7279a21cc795cee3adaeb57baf7ba3fc8fdb75c917602b144d25746bf69f7b0d",
+      "roi": [
+        1001,
+        56,
+        1040,
+        73
+      ],
+      "label": "treehole"
+    },
+    {
+      "key": "III_1",
+      "source": "attachment_02.jpg",
+      "sha256": "f0ff6c2643edc653bbe9d2e8bd2add8ddfc7c5dbbd64d376b6d452b041f2c4c9",
+      "roi": [
+        1000,
+        56,
+        1039,
+        75
+      ],
+      "label": "III"
+    },
+    {
+      "key": "treehole_2",
+      "source": "attachment_03.jpg",
+      "sha256": "5e15b304018ad7c9d7ecd5e78bc364c201dfd0a04c447f56117dbd532120be15",
+      "roi": [
+        1002,
+        56,
+        1040,
+        73
+      ],
+      "label": "treehole"
+    },
+    {
+      "key": "IV_3",
+      "source": "attachment_04.jpg",
+      "sha256": "3d6ea26f66e6ef852a471ed82449def13542e8626fe108e66e13d55fbc4a0408",
+      "roi": [
+        958,
+        56,
+        998,
+        75
+      ],
+      "label": "IV"
+    },
+    {
+      "key": "IV_4",
+      "source": "attachment_05.jpg",
+      "sha256": "55954bdd2aadc87f33c0bfe9be8423785d9a5debabf0fcf5b77a917cea518cd1",
+      "roi": [
+        996,
+        57,
+        1035,
+        75
+      ],
+      "label": "IV"
+    },
+    {
+      "key": "II_5",
+      "source": "attachment_06.jpg",
+      "sha256": "9a328623cf36e203263f021a816d84222f18d7d8e6c2ee52a62d9f213e0ee984",
+      "roi": [
+        963,
+        57,
+        994,
+        75
+      ],
+      "label": "II"
+    },
+    {
+      "key": "I_6",
+      "source": "attachment_07.jpg",
+      "sha256": "b7de075c98e280a2eb1b49f5f08f11c236f0836595dd7d7ae49a6025c3c4bfee",
+      "roi": [
+        943,
+        55,
+        966,
+        72
+      ],
+      "label": "I"
+    },
+    {
+      "key": "VI_7",
+      "source": "attachment_08.jpg",
+      "sha256": "7f532384856f6b36c8077d1e12e35a93c176df3c44725bfe715844cda487a5ef",
+      "roi": [
+        929,
+        58,
+        968,
+        74
+      ],
+      "label": "VI"
+    },
+    {
+      "key": "I_8",
+      "source": "bluestacks_floor_1.png",
+      "sha256": "97eb24135bf4ae94757c3a5469e9eb8d21ca73975eb6a25d1d12f5c78dad44c0",
+      "roi": [
+        1732,
+        124,
+        1785,
+        171
+      ],
+      "label": "I"
+    },
+    {
+      "key": "III_9",
+      "source": "bluestacks_floor_3.png",
+      "sha256": "0f374da0b6280026406362ddfe2e19b4d120fb372bd570f6c369775dec9e8945",
+      "roi": [
+        1776,
+        129,
+        1866,
+        178
+      ],
+      "label": "III"
+    },
+    {
+      "key": "I_10",
+      "source": "opening_shop_cats_pegasus.png",
+      "sha256": "8267a20b510acb4219e3d33b243a8f4e937fee38a3ac63b6f259441eaa2cbdf9",
+      "roi": [
+        1459,
+        85,
+        1494,
+        111
+      ],
+      "label": "I"
+    },
+    {
+      "key": "I_11",
+      "source": "desktop_native_3840.png",
+      "sha256": "faff03c1edebd1b5d61a3d02c7d3d069473ce73cd025ec032e83499f7f5480b1",
+      "roi": [
+        1751,
+        114,
+        1798,
+        154
+      ],
+      "label": "I"
+    },
+    {
+      "key": "I_12",
+      "source": "desktop_action_4.png",
+      "sha256": "23b513df2394466c35e2c0893af096f5a84efa752b682d54d1855ff7eb9f0f26",
+      "roi": [
+        1741,
+        108,
+        1787,
+        150
+      ],
+      "label": "I"
+    },
+    {
+      "key": "II_13",
+      "source": "desktop_action_5.png",
+      "sha256": "2bbcc8984e3c8d256b6b8cc1c17644f81220120e79b25d569add853dbefcd2f7",
+      "roi": [
+        1794,
+        116,
+        1858,
+        159
+      ],
+      "label": "II"
+    },
+    {
+      "key": "II_14",
+      "source": "desktop_floor2_yellow_shop.png",
+      "sha256": "84449afa60c69007d8d54ccaca40d642e216dca81d881cb8cbb9e5969411bf15",
+      "roi": [
+        1794,
+        116,
+        1858,
+        159
+      ],
+      "label": "II"
+    },
+    {
+      "key": "III_15",
+      "source": "desktop_floor3_dystopia.png",
+      "sha256": "787644b82c03c348abc5852ca53b81ede369e1b21df703c9cc1b3ebf0d2af383",
+      "roi": [
+        1869,
+        116,
+        1951,
+        161
+      ],
+      "label": "III"
+    },
+    {
+      "key": "I_16",
+      "source": "desktop_floor1_dystopia.png",
+      "sha256": "9c4a23028e87e4bedf8528dda09a2ec61ca24b10c9676f6ebadc39a3bee556d7",
+      "roi": [
+        1826,
+        110,
+        1874,
+        152
+      ],
+      "label": "I"
+    },
+    {
+      "key": "II_17",
+      "source": "desktop_floor2_lookout_revealed.png",
+      "sha256": "e6414351f4b5396dbcb0d33ecfa87c0431cb7d910168119ad55d19d87afca92c",
+      "roi": [
+        1195,
+        78,
+        1239,
+        106
+      ],
+      "label": "II"
+    },
+    {
+      "key": "IV_18",
+      "source": "desktop_floor4_two_exits.png",
+      "sha256": "dbaedbae0c5db0d226c77ea6c57d1b40e09875676a3292831f7f78bee4c9f374",
+      "roi": [
+        1188,
+        78,
+        1244,
+        106
+      ],
+      "label": "IV"
+    },
+    {
+      "key": "treehole_19",
+      "source": "desktop_treehole_single_row.png",
+      "sha256": "a608d2d7bfecbba993d185075e34fa30911d2250fd3ab885c0b59c9f050c8c5e",
+      "roi": [
+        1249,
+        76,
+        1302,
+        104
+      ],
+      "label": "treehole"
+    },
+    {
+      "key": "V_20",
+      "source": "18ca1441906d4e2ea61bb841aada6af6.png",
+      "sha256": "b70c156bc84235b793d5b48db281ae350b2f80ffecab4ae4890259ad1d3d29ec",
+      "roi": [
+        1868,
+        116,
+        1933,
+        159
+      ],
+      "label": "V"
+    }
+  ]
+}

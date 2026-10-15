@@ -10,6 +10,7 @@ from threading import RLock
 from uuid import uuid4
 
 from ..goals import new_goals
+from ..acquisition_facts import seed_acquisition_facts
 from ..playtime_state import new_playtime, rebuild_derived
 from ..playtime_view import replace_runtime_sections, render_standalone
 from .updates import validate_application_state, seed_owned_milestones
@@ -72,6 +73,7 @@ class RunStore:
                 history = self._legacy_history(run_id, state)
             self._validate_history(history)
             self.validate(state)
+            seed_acquisition_facts(state, history["past"])
             rebuild_derived(state)
             if state["runId"] != run_id:
                 raise ValueError("stored run ID does not match directory")
@@ -124,6 +126,7 @@ class RunStore:
             source_id = state.get("runId")
             run_id = safe_id(run_id or state.get("runId"))
             try:
+                seed_acquisition_facts(state, history["past"])
                 for snapshot in [state, *history["past"], *history["future"]]:
                     if snapshot.get("runId") != source_id:
                         raise ValueError("history run ID does not match imported snapshot")

@@ -116,6 +116,7 @@ def route_inputs(
             "goals": playtime.get("goals", {}), "relics": playtime.get("relics", []),
             "recruitmentTickets": playtime.get("recruitmentTickets", []), "componentBox": box,
             "prediction": instance["prediction"], "globalEncounterPool": playtime.get("globalEncounterPool", []),
+            "acquisitionFacts": playtime.get("acquisitionFacts", {}),
             "options": {**instance.get("strategy", {}).get("scoringOptions", {}),
                         "nodeWeights": instance.get("strategy", {}).get("nodeWeights", {}), "planningGoalIds": selected},
         })

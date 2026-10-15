@@ -170,7 +170,7 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
         </label>)}</div></section>}
       {previewMap && <><MapView preview instance={previewMap} catalog={catalog} entries={entries} busy={busy} selectedIds={selectedNodes} onSelectionChange={setSelectedNodes} />
         <div className="map-review-toolbar"><span>已选 {selectedNodes.length} 个节点</span><select aria-label="批量修正节点类别" value={batchCategory} onChange={e => setBatchCategory(e.target.value)}><option value="">节点类别</option>
-          {Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select>
+          {Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start' && id !== 'node_type_021').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select>
           <button disabled={!batchCategory || !selectedNodes.some(id => id !== '0,0')} onClick={() => setNodeChanges({ ...nodeChanges, ...Object.fromEntries(selectedNodes.filter(id => id !== '0,0').map(id => [id, batchCategory])) })}>修正所选节点</button><button onClick={() => setSelectedNodes([])} disabled={!selectedNodes.length}>取消选择</button></div></>}
       {previewMap && confirmMap && <SpecialRegionFields areaKey={chosenArea} utopiaId={utopiaId} onUtopiaChange={setUtopia}
         value={dystopia} onChange={setDystopia} nodes={previewMap.nodes} catalog={catalog} selectedIds={selectedNodes} />}
@@ -187,7 +187,7 @@ export function UploadDialog({ file, assetInfo, loaded, catalog, entries, startJ
         <label className="checkbox-field"><input type="checkbox" checked={completePosition} onChange={e => setCompletePosition(e.target.checked)} />当前位置已完成</label></div>
         <details><summary>节点候选与修正</summary><div className="node-review-list">{observation.nodes.map(n => <div key={n.id}><b>({n.id})</b>
           <span>{catalog.labels.nodeTypes[n.categoryId] || '待确认'}</span><select aria-label={`修正节点 ${n.id}`} value={nodeChanges[n.id] || ''} onChange={e => setNodeChanges({ ...nodeChanges, [n.id]: e.target.value })}>
-            <option value="">保留候选</option>{Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></div>)}</div></details>
+            <option value="">保留候选</option>{Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'start' && id !== 'node_type_021').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></div>)}</div></details>
         {observation.nodes.some(row => row.marks.length) && <details><summary>节点标记候选</summary><div className="mark-review-list">
           {observation.nodes.filter(row => row.marks.length).map(row => <div className="mark-review-row" key={row.id}><b>({row.id})</b>
             {row.marks.map(mark => <label className="checkbox-field" key={mark.id}><input type="checkbox" aria-label={`节点 ${row.id} ${catalog.labels.nodeMarks[mark.id]}`}

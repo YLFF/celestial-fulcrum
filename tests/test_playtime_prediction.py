@@ -112,10 +112,10 @@ class PlaytimePredictionTests(unittest.TestCase):
         state = new_playtime("run-1")
         self.assertEqual(len(state["areas"]), 10)
         self.assertEqual(state["areas"]["IV-remembrance"]["floor"], 4)
-        self.assertEqual(
-            {row["id"] for row in state["areas"]["III-treehole"]["encounterPool"]},
-            {row["id"] for row in state["areas"]["III"]["encounterPool"]},
-        )
+        treehole_pool = {row["id"] for row in state["areas"]["III-treehole"]["encounterPool"]}
+        self.assertIn("encounter_020", treehole_pool)
+        self.assertNotIn("encounter_022", treehole_pool)
+        self.assertNotIn("encounter_023", treehole_pool)
         self.assertEqual(len(state["globalEncounterPool"]), 23)
 
     def test_distance_frequency_is_not_renormalized_and_count_cap_updates(self) -> None:

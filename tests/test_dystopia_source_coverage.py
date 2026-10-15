@@ -2,9 +2,10 @@ import unittest
 from unittest.mock import patch
 
 import numpy as np
+import cv2
 
 from fulcrum.map_model import Coord, MapNode
-from fulcrum.vision_dystopia import recognize_nodes
+from fulcrum.vision_dystopia import recognize_nodes, crack_evidence
 
 
 class SourceCoverageTests(unittest.TestCase):
@@ -39,6 +40,28 @@ class SourceCoverageTests(unittest.TestCase):
         with patch("fulcrum.vision_dystopia.recognize_visual_nodes", return_value={"visual": True}) as original:
             self.assertEqual(recognize_nodes(self.image, self.nodes, 100, observation), {"visual": True})
             original.assert_called_once()
+
+    def test_unresolved_combat_category_enters_source_candidates_without_being_confirmed(self):
+        self.nodes[0].category_id = None
+        self.nodes[0].category_candidates = [{"id": "unknown_ferocity", "score": .7}]
+        with patch("fulcrum.vision_dystopia.source_score", return_value=.9):
+            result = recognize_nodes(self.image, self.nodes, 100, self.observation)
+        self.assertTrue(any(row['nodeId'] == self.nodes[0].coord.key for row in result['idealSourceCandidates']))
+        self.assertIsNone(result['idealSourceNodeId'])
+
+    def test_radial_cracks_are_distinguished_from_concentric_ripples(self):
+        rays = np.zeros((200, 200, 3), np.uint8)
+        rings = rays.copy()
+        for angle in np.linspace(0, 2*np.pi, 12, endpoint=False):
+            first = (round(100+35*np.cos(angle)), round(100+35*np.sin(angle)))
+            last = (round(100+66*np.cos(angle)), round(100+66*np.sin(angle)))
+            cv2.line(rays, first, last, (200, 200, 200), 2)
+        for radius in (38, 48, 58):
+            cv2.circle(rings, (100, 100), radius, (200, 200, 200), 2)
+        radial = crack_evidence(rays, (100, 100), 100)
+        ripple = crack_evidence(rings, (100, 100), 100)
+        self.assertGreater(radial['radialFraction'], .7)
+        self.assertLess(ripple['radialFraction'], .3)
 
 
 if __name__ == "__main__":

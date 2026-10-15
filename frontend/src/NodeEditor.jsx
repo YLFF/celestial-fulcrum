@@ -94,7 +94,7 @@ export default function NodeEditor({ node, instance, catalog, value, anchor, onC
         setVisibility(isUnknown(e.target.value) ? 'hidden' : 'revealed');
         if (isUnknown(e.target.value)) setCompletion('pending');
       }}>
-        <option value="" disabled>请选择节点类别</option>{Object.entries(catalog.labels.nodeTypes).map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
+        <option value="" disabled>请选择节点类别</option>{Object.entries(catalog.labels.nodeTypes).filter(([id]) => id !== 'node_type_021').map(([id, name]) => <option key={id} value={id}>{name}</option>)}</select></label>
       {residentActive(node) && <small className="full">流窜居民：未清理</small>}
       <label className="field"><span>完成状态</span><select aria-label="完成状态" value={completion} onChange={e => {
         setCompletion(e.target.value); setConfirmCompletion(e.target.value === 'completed');

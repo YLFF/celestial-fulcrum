@@ -14,6 +14,7 @@ from .goals import new_goals, validate_goals
 from .merchant_state import DEFAULT_INVESTMENT_BALANCE, SHOP_CATEGORIES, validate_viewed_shelves
 from .node_identity import contextual_mark_id
 from .residents import clear_outpost_residents, complete_node, merge_resident_marks, resident_active
+from .acquisition_facts import controller_obtained, seed_acquisition_facts
 from .opening import (
     SQUAD_NAMES, COCOON_NAMES, DEFAULT_TECHNOLOGY_COMBAT_BONUSES,
     build_opening, normalize_technology_combat_bonuses, opening_action_points,
@@ -55,6 +56,12 @@ def _events() -> list[dict[str, Any]]:
     return json.loads(EVENT_CATALOG.read_text(encoding="utf-8"))["eventPool"]
 
 
+def _event_in_area(event, area_key):
+    if "treehole" in area_key:
+        return not event.get("specialMarkId") and area_key.split("-")[0] in event.get("treeholeFloors", event["floors"])
+    return area_key.split("-")[0] in event["floors"]
+
+
 def new_playtime(
     run_id: str, *, difficulty: int = 15, squad_id: str | None = None,
     cocoons: dict[str, int] | None = None,
@@ -94,6 +101,10 @@ def new_playtime(
 
 
 def validate_playtime(state: dict[str, Any]) -> None:
+    facts = state.get("acquisitionFacts", {})
+    if (not isinstance(facts, dict) or set(facts) - {"controllerEverObtained"}
+            or any(type(value) is not bool for value in facts.values())):
+        raise ValueError("invalid permanent acquisition facts")
     if "goals" in state:
         validate_goals(state["goals"])
     if state.get("schemaVersion") != 1 or set(state.get("areas", {})) != set(AREA_SPECS):
@@ -300,7 +311,7 @@ def merge_map_observation(
         raise ValueError("invalid fifth-floor entry sandboxes")
     slot = state["areas"][area_key]
     hint_counts = Counter(node.get("templateHint") for node in observation["nodes"])
-    ambiguous_hints = {"rogue-trader"} if hint_counts["rogue-trader"] > 1 else set()
+    ambiguous_hints = {"rogue-trader"} if area_key != "I" and hint_counts["rogue-trader"] > 1 else set()
     existing = None if new_instance or slot["activeInstanceId"] is None else active_instance(state, area_key)
     position_observation = observation.get("playerPositionObservation") or {}
     confirmed_position = player_position or (
@@ -577,13 +588,12 @@ def update_node(
 
 def _event_status(
     event: dict[str, Any], area_key: str, completed: list[tuple[str, str, str]],
-    instance: dict[str, Any] | None,
+    instance: dict[str, Any] | None, *, ever_controller: bool = False,
 ) -> dict[str, Any]:
-    floor_roman = area_key.split("-")[0]
     local = [(key, instance_id, node_id) for key, instance_id, node_id in completed if key == area_key]
     all_count = len(completed)
     repeatability = event.get("repeatability", "unknown")
-    if floor_roman not in event["floors"]:
+    if not _event_in_area(event, area_key):
         eligibility = "outside_floor_pool"
     elif repeatability in {"once_per_run", "until_entered"} and all_count:
         eligibility = "entered"
@@ -597,6 +607,12 @@ def _event_status(
     }.get(event["id"])
     requirements = [node_requirement[0]] if node_requirement else []
     condition_status = "not_required"
+    if event["id"] == "encounter_010":
+        ever_controller |= bool((instance or {}).get("strategy", {}).get("scoringOptions", {}).get("controllerEverObtained"))
+        requirements.append("controller_ever_obtained")
+        condition_status = "confirmed" if ever_controller else "not_met"
+        if not ever_controller and eligibility == "possible":
+            eligibility = "condition_not_met"
     if node_requirement:
         _, category_id, prediction_type = node_requirement
         if instance is None:
@@ -622,6 +638,8 @@ def _event_status(
 
 
 def rebuild_derived(state: dict[str, Any]) -> None:
+    seed_acquisition_facts(state)
+    ever_controller = controller_obtained(state)
     from .relic_presentation import runtime_status
     state["relicRuntime"] = {row["id"]: runtime_status(state, row) for row in state.get("relics", [])}
     events = _events()
@@ -629,6 +647,11 @@ def rebuild_derived(state: dict[str, Any]) -> None:
     outcomes: dict[str, dict[str, str]] = {event["id"]: {} for event in events}
     for key, slot in state["areas"].items():
         for instance in slot["instances"]:
+            if key == "I":
+                for node in instance["nodes"].values():
+                    if (node.get("templateHint") == "rogue-trader" and node.get("resolvedCategoryId") is None
+                            and node.get("observedCategoryId") in UNKNOWN_CATEGORIES):
+                        node["resolvedCategoryId"] = "node_type_004"
             clear_outpost_residents(instance)
             for node in instance["nodes"].values():
                 event_id = node["encounterId"]
@@ -668,8 +691,8 @@ def rebuild_derived(state: dict[str, Any]) -> None:
             instance["prediction"] = prediction
             instance["nodePool"] = prediction["nodePool"]
             statuses = [
-                _event_status(event, key, completions[event["id"]], instance)
-                for event in events if key.split("-")[0] in event["floors"]
+                _event_status(event, key, completions[event["id"]], instance, ever_controller=ever_controller)
+                for event in events if _event_in_area(event, key)
             ]
             update_encounter_prediction(prediction, instance, statuses)
             from .ending_prediction import attach_ending_prediction
@@ -678,8 +701,8 @@ def rebuild_derived(state: dict[str, Any]) -> None:
             attach_node_posterior(instance, prediction)
         current = next((instance for instance in slot["instances"] if instance["instanceId"] == slot["activeInstanceId"]), None)
         slot["encounterPool"] = [
-            _event_status(event, key, completions[event["id"]], current)
-            for event in events if key.split("-")[0] in event["floors"]
+            _event_status(event, key, completions[event["id"]], current, ever_controller=ever_controller)
+            for event in events if _event_in_area(event, key)
         ]
         if current:
             marked = {row["id"]: row for row in current["prediction"].get("encounterPool", {}).get("markedEvents", [])}

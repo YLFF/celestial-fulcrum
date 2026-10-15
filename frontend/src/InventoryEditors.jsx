@@ -95,11 +95,12 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
       const changes = { name: row.name, profession: row.profession || null, rarity: row.rarity ?? null, elite: row.elite,
         source, remainingBattles: support ? (row.remainingBattles || 1) : null, initialRecruitment: !!row.initialRecruitment };
       if (!old.has(row.instanceId)) commands.push({ type: 'operatorAdd', name: row.name, source, elite: row.elite, profession: row.profession || null,
-        rarity: row.rarity ?? null, instanceId: row.instanceId, recordOnly: !settle, ...(settle && row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
+        rarity: row.rarity ?? null, instanceId: row.instanceId, recordOnly: !settle, settleRewards: true, ...(settle && row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
       else {
         const trainingPromotion = manualTrainingPromotion(old.get(row.instanceId), row, state.relics, assignments, entries);
-        if ((settle || trainingPromotion) && old.get(row.instanceId).elite === 1 && row.elite === 2 && !support) commands.push({ type: 'operatorPromote', instanceId: row.instanceId,
-          ...(trainingPromotion ? { hopeCost: 0 } : row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
+        if (old.get(row.instanceId).elite === 1 && row.elite === 2 && !support) commands.push({ type: 'operatorPromote', instanceId: row.instanceId,
+          recordOnly: !settle && !trainingPromotion, settleRewards: true,
+          ...(trainingPromotion ? { hopeCost: 0 } : settle && row.hopeCost != null ? { hopeCost: row.hopeCost } : {}) });
         commands.push({ type: 'operatorUpdate', instanceId: row.instanceId, changes });
       }
     }
@@ -115,7 +116,7 @@ export function OperatorEditor({ state, catalog, entries, onSave, onClose, busy,
       <button className="primary" onClick={() => { setItems(items.filter(row => row.instanceId !== pendingDelete.instanceId)); setSquad(squad.filter(id => id !== pendingDelete.instanceId)); setPendingDelete(null); }}>确认移除</button></div>
     </section></div>}
     <div className="editor-toolbar">
-      <label className="checkbox-field"><input type="checkbox" checked={settle} onChange={e => setSettle(e.target.checked)} />结算新招募 / 进阶</label>
+      <label className="checkbox-field"><input type="checkbox" checked={settle} onChange={e => setSettle(e.target.checked)} />扣除新招募 / 进阶的希望费用</label>
       <span>编队 {squad.length}/{state.resources.carrySlots}</span></div>
     <div className="picker-layout"><CatalogPicker rows={catalog.operators} operators autoFocus={adding} selectedIds={items.filter(row => !row.remainingBattles && !catalog.operators.find(entry => entry.name === row.name)?.repeatable).map(row => row.operatorId || catalog.operators.find(entry => entry.name === row.name)?.id)} onAdd={entry => setItems([...(entry.repeatable ? items : items.filter(row => row.name !== entry.name || !row.remainingBattles)), { instanceId: uid('op'), operatorId: entry.id, name: entry.name, source: 'normal', profession: entry.profession, elite: entry.rarity >= 3 ? 1 : 0, rarity: entry.rarity, remainingBattles: null }])} />
     <div className="operator-editor">{items.map(row => <section className="operator-edit-row" key={row.instanceId}>

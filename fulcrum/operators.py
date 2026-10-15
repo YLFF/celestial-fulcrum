@@ -80,6 +80,7 @@ def add_operator(
     profession: str | None = None, rarity: int | None = None,
     instance_id: str | None = None, initial: bool = False,
     hope_cost: int | None = None, ingot_cost: int = 0, record_only: bool = False,
+    settle_rewards: bool | None = None,
 ) -> dict[str, Any]:
     if not isinstance(source, str) or source not in SOURCE_LABELS or type(initial) is not bool:
         raise ValueError("invalid recruitment source or initial flag")
@@ -95,6 +96,8 @@ def add_operator(
         raise ValueError("operator instance ID must be a nonempty string")
     if type(record_only) is not bool or (record_only and (hope_cost not in (None, 0) or ingot_cost != 0)):
         raise ValueError("record-only updates cannot settle costs")
+    if settle_rewards is not None and type(settle_rewards) is not bool:
+        raise ValueError("settle_rewards must be boolean or null")
     draft = _draft(state)
     existing_ids = {row["instanceId"] for row in draft["operators"]}
     # Departed operators may still own a saved enchantment or granted effect.
@@ -140,17 +143,22 @@ def add_operator(
             hope_cost = mechanist_hope_cost(state, initial=initial) if name == "机械师" and source == "normal" and not record_only else 0
     _pay(draft, "hope", hope_cost)
     _pay(draft, "originiumIngot", ingot_cost)
-    if name == "机械师" and source in PERMANENT_SOURCES and not record_only:
+    if name == "机械师" and source in PERMANENT_SOURCES and (settle_rewards if settle_rewards is not None else not record_only):
         set_capacity(draft["componentBox"], draft["componentBox"]["capacity"] + 2)
+        if elite == 2:
+            acquire_component(draft["componentBox"], "component_023")
     state.update(draft)
     return operator
 
 
 def promote_operator(
     state: dict[str, Any], instance_id: str, *, hope_cost: int | None = None, record_only: bool = False,
+    settle_rewards: bool | None = None,
 ) -> dict[str, Any]:
     if type(record_only) is not bool or (record_only and hope_cost not in (None, 0)):
         raise ValueError("record-only updates cannot settle costs")
+    if settle_rewards is not None and type(settle_rewards) is not bool:
+        raise ValueError("settle_rewards must be boolean or null")
     draft = _draft(state)
     operator = next((row for row in draft["operators"] if row["instanceId"] == instance_id), None)
     if operator is None:
@@ -173,7 +181,7 @@ def promote_operator(
         hope_cost = hope_price(entry, squad_id=opening.get("squadId"), promotion=True, source=operator.get("source")) if entry and not record_only else 0
     _pay(draft, "hope", hope_cost)
     operator["elite"] = 2
-    if operator["name"] == "机械师" and operator.get("source") in PERMANENT_SOURCES and not record_only:
+    if operator["name"] == "机械师" and operator.get("source") in PERMANENT_SOURCES and (settle_rewards if settle_rewards is not None else not record_only):
         acquire_component(draft["componentBox"], "component_023")
     state.update(draft)
     return operator
